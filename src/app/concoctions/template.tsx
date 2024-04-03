@@ -13,7 +13,7 @@ const ConcoctionsTemplate = ({ children }: { children: ReactNode }) => {
   return (
     <section className='flex flex-col w-full grow'>
       <h1 className='self-center'>{active?.title}</h1>
-      <div className='flex w-full grow justify-center'>
+      <div className='flex w-full h-full justify-center'>
         {children}
       </div>
     </section>

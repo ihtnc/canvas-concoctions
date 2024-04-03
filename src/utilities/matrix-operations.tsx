@@ -1,13 +1,18 @@
-export type MatrixValue = number[][];
+import { deepCopy } from "./misc-operations";
+
+export type MatrixValue<T> = T[][];
+type InferType<C extends MatrixValue<any>> = C extends MatrixValue<infer T> ? T : unknown;
+
 export type MatrixCoordinate = {
   row: number,
   col: number
 }
-export type MatrixOperationFunction = (value: MatrixValue) => MatrixValue;
+export type MatrixOperationFunction = <T>(value: MatrixValue<T>) => MatrixValue<T>;
 
-export const matrixPipeline = (operations: Array<MatrixOperationFunction>) => {
+type MatrixPipelineFunction = (operations: Array<MatrixOperationFunction>) => { run: MatrixOperationFunction }
+export const matrixPipeline:MatrixPipelineFunction = (operations) => {
   return {
-    run: (value: MatrixValue) => {
+    run: (value) => {
       let lastValue = value;
       for (let i = 0; i < operations.length; i++) {
         lastValue = operations[i](lastValue);
@@ -25,13 +30,13 @@ export enum VResizeDirection {
   Up, Down, Both
 };
 
-type MatrixInitialiseFunction = (row: number, col: number, defaultValue?: number) => MatrixValue;
-export const initialise: MatrixInitialiseFunction = (row, col, defaultValue = 0) => {
-  const matrix: MatrixValue = [];
+type MatrixInitialiseFunction = <T>(row: number, col: number, defaultValue: T) => MatrixValue<T>;
+export const initialise: MatrixInitialiseFunction = (row, col, defaultValue) => {
+  const matrix: MatrixValue<typeof defaultValue> = [];
   for(let i = 0; i < row; i++) {
     matrix[i] = [];
     for(let j = 0; j < col; j++) {
-      matrix[i][j] = defaultValue;
+      matrix[i][j] = deepCopy(defaultValue);
     }
   }
 
@@ -76,9 +81,9 @@ const calculateHOffset = (col: number, newCol: number, hDirection: HResizeDirect
   return colOffset;
 };
 
-type MatrixResizeFunction = (matrix: MatrixValue, newRow: number, newCol: number, vDirection?: VResizeDirection, hDirection?: HResizeDirection, defaultValue?: number) => MatrixValue;
-export const resize: MatrixResizeFunction = (matrix, newRow, newCol, vDirection = VResizeDirection.Both, hDirection = HResizeDirection.Both, defaultValue = 0) => {
-  const newMatrix: MatrixValue = [];
+type MatrixResizeFunction = <T>(matrix: MatrixValue<T>, newRow: number, newCol: number, defaultValue: T, vDirection?: VResizeDirection, hDirection?: HResizeDirection) => MatrixValue<T>;
+export const resize: MatrixResizeFunction = (matrix, newRow, newCol, defaultValue, vDirection = VResizeDirection.Both, hDirection = HResizeDirection.Both) => {
+  const newMatrix: typeof matrix = [];
 
   const row = matrix.length;
   const rowOffset = calculateVOffset(row, newRow, vDirection);
@@ -89,7 +94,7 @@ export const resize: MatrixResizeFunction = (matrix, newRow, newCol, vDirection 
   for(let i = 0; i < newRow; i++) {
     newMatrix[i] = [];
     for(let j = 0; j < newCol; j++) {
-      let newValue: number;
+      let newValue: typeof defaultValue;
 
       const isRowOutside: boolean = (i + rowOffset < 0) || (i + rowOffset >= row);
       const isColOutside: boolean = (j + colOffset < 0) || (j + colOffset >= col);
@@ -100,7 +105,7 @@ export const resize: MatrixResizeFunction = (matrix, newRow, newCol, vDirection 
         newValue = matrix[i + rowOffset][j + colOffset];
       }
 
-      newMatrix[i][j] = newValue;
+      newMatrix[i][j] = deepCopy(newValue);
     }
   }
 
@@ -113,7 +118,7 @@ export enum PeekDirection {
   LowerLeft, Down, LowerRight
 };
 
-type MatrixPeekFunction = (matrix: MatrixValue, start: MatrixCoordinate, direction: PeekDirection) => number | undefined
+type MatrixPeekFunction = <T>(matrix: MatrixValue<T>, start: MatrixCoordinate, direction: PeekDirection) => T | undefined
 export const peek: MatrixPeekFunction = (matrix, start, direction) => {
   const { row, col } = start;
   if (row < 0 || row >= matrix.length) { return undefined; }
@@ -156,20 +161,20 @@ export const peek: MatrixPeekFunction = (matrix, start, direction) => {
 };
 
 export const copy: MatrixOperationFunction = (value) => {
-  const matrixCopy: MatrixValue = [];
+  const matrixCopy: typeof value = [];
 
   for (let i = 0; i < value.length; i++) {
     matrixCopy[i] = [];
     for (let j = 0; j < value[i].length; j++) {
-      matrixCopy[i][j] = value[i][j];
+      matrixCopy[i][j] = deepCopy(value[i][j]);
     }
   }
 
   return matrixCopy;
 };
 
-type MatrixResetFunction = (matrix: MatrixValue, initialValue?: number) => MatrixValue;
-export const reset: MatrixResetFunction = (matrix, initialValue = 0) => {
+type MatrixResetFunction = <T>(matrix: MatrixValue<T>, initialValue: T) => MatrixValue<T>;
+export const reset: MatrixResetFunction = (matrix, initialValue) => {
   for (let i = 0; i < matrix.length; i++) {
     for (let j = 0; j < matrix[i].length; j++) {
       matrix[i][j] = initialValue;
@@ -179,11 +184,11 @@ export const reset: MatrixResetFunction = (matrix, initialValue = 0) => {
   return matrix;
 }
 
-type MatrixDiffFunction = (source: MatrixValue, target: MatrixValue) => MatrixValue;
+type MatrixDiffFunction = (source: MatrixValue<number>, target: MatrixValue<number>) => MatrixValue<number>;
 export const diff: MatrixDiffFunction = (source, target) => {
   if (source.length !== target.length) { return copy(target); }
 
-  const diffValue: MatrixValue = [];
+  const diffValue: typeof source = [];
   for (let i = 0; i < source.length; i++) {
     if (source[i].length !== target[i].length) { return copy(target); }
 
@@ -196,8 +201,8 @@ export const diff: MatrixDiffFunction = (source, target) => {
   return diffValue;
 }
 
-type MatrixApplyChangesFunction = (original: MatrixValue, changes: MatrixValue, ignoreValue?: number) => MatrixValue;
-export const applyChanges: MatrixApplyChangesFunction = (original, changes, ignoreValue = 0) => {
+type MatrixApplyChangesFunction = <T>(original: MatrixValue<T>, changes: MatrixValue<T>, ignoreValue: T) => MatrixValue<T>;
+export const applyChanges: MatrixApplyChangesFunction = (original, changes, ignoreValue) => {
   if (original.length !== changes.length) { return original; }
 
   for (let i = 0; i < original.length; i++) {
@@ -205,7 +210,7 @@ export const applyChanges: MatrixApplyChangesFunction = (original, changes, igno
     for (let j = 0; j < original[i].length; j++) {
       if (changes[i][j] === ignoreValue) { continue; }
 
-      original[i][j] = changes[i][j];
+      original[i][j] = deepCopy(changes[i][j]);
     }
   }
 

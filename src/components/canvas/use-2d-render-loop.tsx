@@ -33,6 +33,8 @@ const use2DRenderLoop = (options: Use2DRenderLoopOptions=DEFAULT_OPTIONS): RefOb
     const canvas = canvasRef.current;
     if (canvas === null) { return; }
 
+    canvas.style.touchAction = "none";
+
     const context = canvas.getContext('2d');
     const { devicePixelRatio=1 } = window;
     let animationFrameId: number;

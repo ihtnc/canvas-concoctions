@@ -18,7 +18,7 @@ describe('matrix-operations', () => {
 
   describe('initialise function', () => {
     test('should return a matrix', () => {
-      const matrix = initialise(1, 1);
+      const matrix = initialise(1, 1, 0);
 
       expect(matrix).toBeDefined();
       expect(matrix).not.toBeNull();
@@ -28,19 +28,10 @@ describe('matrix-operations', () => {
       const row = 4;
       const col = 5;
 
-      const matrix = initialise(row, col);
+      const matrix = initialise(row, col, 0);
 
       expect(matrix.length).toBe(row);
       matrix.forEach(row => expect(row.length).toBe(col));
-    });
-
-    test('should populate matrix with a default value', () => {
-      const row = 4;
-      const col = 5;
-
-      const matrix = initialise(row, col);
-
-      matrix.forEach(row => row.forEach(col => expect(col).toBe(0)));
     });
 
     test('should populate matrix with a specified value', () => {
@@ -55,7 +46,7 @@ describe('matrix-operations', () => {
   });
 
   describe('resize function', () => {
-    let matrix: MatrixValue;
+    let matrix: MatrixValue<number>;
     let initialRow: number, initialCol: number, initialValue: number;
 
     beforeEach(() => {
@@ -66,7 +57,7 @@ describe('matrix-operations', () => {
     });
 
     test('should return a new matrix', () => {
-      const resized = resize(matrix, initialRow + 2, initialCol + 2);
+      const resized = resize(matrix, initialRow + 2, initialCol + 2, 0);
 
       expect(resized).toBeDefined();
       expect(resized).not.toBeNull();
@@ -77,7 +68,7 @@ describe('matrix-operations', () => {
       const row = initialRow + 2;
       const col = initialCol + 2;
 
-      const resized = resize(matrix, row, col);
+      const resized = resize(matrix, row, col, 0);
 
       expect(resized.length).toBe(row);
       resized.forEach(row => expect(row.length).toBe(col));
@@ -87,21 +78,21 @@ describe('matrix-operations', () => {
       const row = initialRow - 1;
       const col = initialCol - 1;
 
-      const resized = resize(matrix, row, col);
+      const resized = resize(matrix, row, col, 0);
 
       expect(resized.length).toBe(row);
       resized.forEach(row => expect(row.length).toBe(col));
     });
 
     test('should not resize matrix if dimensions did not change', () => {
-      const resized = resize(matrix, initialRow, initialCol);
+      const resized = resize(matrix, initialRow, initialCol, 0);
 
       expect(resized.length).toBe(initialRow);
       resized.forEach(row => expect(row.length).toBe(initialCol));
     });
 
     test('should keep existing matrix values', () => {
-      const resized = resize(matrix, initialRow, initialCol);
+      const resized = resize(matrix, initialRow, initialCol, 0);
 
       expect(resized.length).not.toBe(0);
       resized.forEach(row => {
@@ -118,7 +109,7 @@ describe('matrix-operations', () => {
     ({ additionalRow, direction }: { additionalRow: number, direction: HResizeDirection }) => {
       const newRow = initialRow + additionalRow;
 
-      const resized = resize(matrix, newRow, initialCol, VResizeDirection.Up, direction);
+      const resized = resize(matrix, newRow, initialCol, 0, VResizeDirection.Up, direction);
 
       let expectedValue: number;
       expect(resized.length).not.toBe(0);
@@ -150,7 +141,7 @@ describe('matrix-operations', () => {
         }
       }
 
-      const resized = resize(matrix, newRow, initialCol, VResizeDirection.Up, direction);
+      const resized = resize(matrix, newRow, initialCol, 0, VResizeDirection.Up, direction);
 
       expect(resized.length).not.toBe(0);
       for(let row = 0; row < resized.length; row++) {
@@ -169,7 +160,7 @@ describe('matrix-operations', () => {
     ({ additionalRow, direction }: { additionalRow: number, direction: HResizeDirection }) => {
       const newRow = initialRow + additionalRow;
 
-      const resized = resize(matrix, newRow, initialCol, VResizeDirection.Down, direction);
+      const resized = resize(matrix, newRow, initialCol, 0, VResizeDirection.Down, direction);
 
       let expectedValue: number;
       expect(resized.length).not.toBe(0);
@@ -201,7 +192,7 @@ describe('matrix-operations', () => {
         }
       }
 
-      const resized = resize(matrix, newRow, initialCol, VResizeDirection.Down, direction);
+      const resized = resize(matrix, newRow, initialCol, 0, VResizeDirection.Down, direction);
 
       expect(resized.length).not.toBe(0);
       for(let row = 0; row < resized.length; row++) {
@@ -220,7 +211,7 @@ describe('matrix-operations', () => {
     ({ additionalRow, direction }: { additionalRow: number, direction: HResizeDirection }) => {
       const newRow = initialRow + additionalRow;
 
-      const resized = resize(matrix, newRow, initialCol, VResizeDirection.Both, direction);
+      const resized = resize(matrix, newRow, initialCol, 0, VResizeDirection.Both, direction);
 
       let expectedValue: number;
       expect(resized.length).not.toBe(0);
@@ -260,7 +251,7 @@ describe('matrix-operations', () => {
         }
       }
 
-      const resized = resize(matrix, newRow, initialCol, VResizeDirection.Both, direction);
+      const resized = resize(matrix, newRow, initialCol, 0, VResizeDirection.Both, direction);
 
       expect(resized.length).not.toBe(0);
       for(let row = 0; row < resized.length; row++) {
@@ -272,7 +263,7 @@ describe('matrix-operations', () => {
     });
 
     test('should return an empty array if new row is 0', () => {
-      const resized = resize(matrix, 0, initialCol);
+      const resized = resize(matrix, 0, initialCol, 0);
       expect(resized.length).toBe(0);
     });
 
@@ -284,7 +275,7 @@ describe('matrix-operations', () => {
     ({ additionalCol, direction }: { additionalCol: number, direction: VResizeDirection }) => {
       const newCol = initialCol + additionalCol;
 
-      const resized = resize(matrix, initialRow, newCol, direction, HResizeDirection.Right);
+      const resized = resize(matrix, initialRow, newCol, 0, direction, HResizeDirection.Right);
 
       let expectedValue: number;
       expect(resized.length).not.toBe(0);
@@ -315,7 +306,7 @@ describe('matrix-operations', () => {
         }
       }
 
-      const resized = resize(matrix, initialRow, newCol, direction, HResizeDirection.Right);
+      const resized = resize(matrix, initialRow, newCol, 0, direction, HResizeDirection.Right);
 
       expect(resized.length).not.toBe(0);
       for(let row = 0; row < resized.length; row++) {
@@ -334,7 +325,7 @@ describe('matrix-operations', () => {
     ({ additionalCol, direction }: { additionalCol: number, direction: VResizeDirection }) => {
       const newCol = initialCol + additionalCol;
 
-      const resized = resize(matrix, initialRow, newCol, direction, HResizeDirection.Left);
+      const resized = resize(matrix, initialRow, newCol, 0, direction, HResizeDirection.Left);
 
       let expectedValue: number;
       expect(resized.length).not.toBe(0);
@@ -365,7 +356,7 @@ describe('matrix-operations', () => {
         }
       }
 
-      const resized = resize(matrix, initialRow, newCol, direction, HResizeDirection.Left);
+      const resized = resize(matrix, initialRow, newCol, 0, direction, HResizeDirection.Left);
 
       expect(resized.length).not.toBe(0);
       for(let row = 0; row < resized.length; row++) {
@@ -384,7 +375,7 @@ describe('matrix-operations', () => {
     ({ additionalCol, direction }: { additionalCol: number, direction: VResizeDirection }) => {
       const newCol = initialCol + additionalCol;
 
-      const resized = resize(matrix, initialRow, newCol, direction, HResizeDirection.Both);
+      const resized = resize(matrix, initialRow, newCol, 0, direction, HResizeDirection.Both);
 
       let expectedValue: number;
       expect(resized.length).not.toBe(0);
@@ -422,7 +413,7 @@ describe('matrix-operations', () => {
         }
       }
 
-      const resized = resize(matrix, initialRow, newCol, direction, HResizeDirection.Both);
+      const resized = resize(matrix, initialRow, newCol, 0, direction, HResizeDirection.Both);
 
       expect(resized.length).not.toBe(0);
       for(let row = 0; row < resized.length; row++) {
@@ -434,7 +425,7 @@ describe('matrix-operations', () => {
     });
 
     test('should return an array of empty arrays if new column is 0', () => {
-      const resized = resize(matrix, initialRow, 0);
+      const resized = resize(matrix, initialRow, 0, 0);
 
       expect(resized.length).toBe(initialRow);
       resized.forEach(col => expect(col.length).toBe(0));
@@ -463,10 +454,10 @@ describe('matrix-operations', () => {
     });
 
     test('should call functions sequentially when run is called', () => {
-      const initialValue: MatrixValue = [[1]];
-      const fn1Return: MatrixValue = [[2]];
-      const fn2Return: MatrixValue = [[3]];
-      const fn3Return: MatrixValue = [[4]];
+      const initialValue: MatrixValue<number> = [[1]];
+      const fn1Return: MatrixValue<number> = [[2]];
+      const fn2Return: MatrixValue<number> = [[3]];
+      const fn3Return: MatrixValue<number> = [[4]];
 
       const fn1 = vi.fn().mockReturnValue(fn1Return);
       const fn2 = vi.fn().mockReturnValue(fn2Return);
@@ -484,7 +475,7 @@ describe('matrix-operations', () => {
     });
 
     test('should return response from last function', () => {
-      const fn3Return: MatrixValue = [[1]];
+      const fn3Return: MatrixValue<number> = [[1]];
 
       const fn1 = vi.fn();
       const fn2 = vi.fn();
@@ -501,7 +492,7 @@ describe('matrix-operations', () => {
   });
 
   describe('peek function', () => {
-    let matrix: MatrixValue;
+    let matrix: MatrixValue<number>;
 
     beforeEach(() => {
       matrix = [
@@ -633,7 +624,7 @@ describe('matrix-operations', () => {
   });
 
   describe('copy function', () => {
-    let matrix: MatrixValue;
+    let matrix: MatrixValue<number>;
 
     beforeEach(() => {
       matrix = [
@@ -664,7 +655,7 @@ describe('matrix-operations', () => {
   });
 
   describe('reset function', () => {
-    let matrix: MatrixValue;
+    let matrix: MatrixValue<number>;
 
     beforeEach(() => {
       matrix = [
@@ -676,22 +667,9 @@ describe('matrix-operations', () => {
 
     test('should return same object', () => {
       const sameMatrix = matrix;
-      const resetMatrix = reset(matrix);
+      const resetMatrix = reset(matrix, 0);
       expect(sameMatrix).toBe(matrix);
       expect(resetMatrix).toBe(matrix);
-    });
-
-    test('should reset each value with default value', () => {
-      const resetMatrix = reset(matrix);
-      const defaultValue = 0;
-
-      expect(resetMatrix.length).toBe(matrix.length);
-      for (let i = 0; i < resetMatrix.length; i++) {
-        expect(resetMatrix[i].length).toBe(matrix[i].length);
-        for (let j = 0; j < resetMatrix[i].length; j++) {
-          expect(resetMatrix[i][j]).toBe(defaultValue);
-        }
-      }
     });
 
     test('should reset each value', () => {
@@ -709,7 +687,7 @@ describe('matrix-operations', () => {
   });
 
   describe('diff function', () => {
-    let matrix: MatrixValue;
+    let matrix: MatrixValue<number>;
 
     beforeEach(() => {
       matrix = [
@@ -739,7 +717,10 @@ describe('matrix-operations', () => {
     });
 
     test('should return a matrix with same values when calculating diff between matrix and a matrix with 0s', () => {
-      const emptyMatrix = matrixPipeline([copy, reset]).run(matrix);
+      const emptyMatrix = matrixPipeline([
+        copy,
+        (value) => reset(value as MatrixValue<number>, 0) as typeof value
+      ]).run(matrix);
       const diffMatrix = diff(emptyMatrix, matrix);
 
       expect(diffMatrix.length).toBe(matrix.length);
@@ -752,7 +733,10 @@ describe('matrix-operations', () => {
     });
 
     test('should return a matrix with negative values when calculating diff between a matrix with 0s and a matrix', () => {
-      const emptyMatrix = matrixPipeline([copy, reset]).run(matrix);
+      const emptyMatrix = matrixPipeline([
+        copy,
+        (value) => reset(value as MatrixValue<number>, 0) as typeof value
+      ]).run(matrix);
       const diffMatrix = diff(matrix, emptyMatrix);
 
       expect(diffMatrix.length).toBe(matrix.length);
@@ -765,7 +749,7 @@ describe('matrix-operations', () => {
     });
 
     test('should return a copy of target matrix when matrix and target have different matrix lengths', () => {
-      const otherMatrix: MatrixValue = [];
+      const otherMatrix: MatrixValue<number> = [];
       for (let i = 0; i < matrix.length + 1; i++) {
         otherMatrix[i] = [];
         for (let j = 0; i < matrix.length && j < matrix[i].length; j++) {
@@ -786,7 +770,7 @@ describe('matrix-operations', () => {
     });
 
     test('should return a copy of target matrix when matrix and target have different matrix[].lengths', () => {
-      const otherMatrix: MatrixValue = [];
+      const otherMatrix: MatrixValue<number> = [];
       for (let i = 0; i < matrix.length; i++) {
         otherMatrix[i] = [];
         for (let j = 0; j < matrix[i].length + 1; j++) {
@@ -831,7 +815,7 @@ describe('matrix-operations', () => {
   });
 
   describe('applyChanges function', () => {
-    let matrix: MatrixValue;
+    let matrix: MatrixValue<number>;
 
     beforeEach(() => {
       matrix = [
@@ -844,13 +828,13 @@ describe('matrix-operations', () => {
     test('should return original object', () => {
       const sameMatrix = matrix;
       const copyMatrix = copy(matrix);
-      const applyMatrix = applyChanges(matrix, copyMatrix);
+      const applyMatrix = applyChanges(matrix, copyMatrix, 0);
       expect(sameMatrix).toBe(matrix);
       expect(applyMatrix).toBe(matrix);
     });
 
     test('should not apply any changes when the two matrices have different matrix lengths', () => {
-      const changes: MatrixValue = [];
+      const changes: MatrixValue<number> = [];
       for (let i = 0; i < matrix.length + 1; i++) {
         changes[i] = [];
         for (let j = 0; i < matrix.length && j < matrix[i].length; j++) {
@@ -859,7 +843,7 @@ describe('matrix-operations', () => {
       }
 
       const copyMatrix = copy(matrix);
-      const applyMatrix = applyChanges(matrix, changes);
+      const applyMatrix = applyChanges(matrix, changes, 0);
 
       for (let i = 0; i < applyMatrix.length; i++) {
         for (let j = 0; j < applyMatrix[i].length; j++) {
@@ -869,7 +853,7 @@ describe('matrix-operations', () => {
     });
 
     test('should not apply any changes when the two matrices have different matrix[].lengths', () => {
-      const changes: MatrixValue = [];
+      const changes: MatrixValue<number> = [];
       for (let i = 0; i < matrix.length; i++) {
         changes[i] = [];
         for (let j = 0; j < matrix[i].length + 1; j++) {
@@ -878,7 +862,7 @@ describe('matrix-operations', () => {
       }
 
       const copyMatrix = copy(matrix);
-      const applyMatrix = applyChanges(matrix, changes);
+      const applyMatrix = applyChanges(matrix, changes, 0);
 
       for (let i = 0; i < applyMatrix.length; i++) {
         for (let j = 0; j < applyMatrix[i].length; j++) {
@@ -887,29 +871,13 @@ describe('matrix-operations', () => {
       }
     });
 
-    test('should apply changes using default ignore value', () => {
-      const changes = matrixPipeline([copy, reset]).run(matrix);
-      const changeRow = matrix.length - 1;
-      const changeCol = 0;
-      const newValue = 10;
-      changes[changeRow][changeCol] = newValue;
-
-      const applyMatrix = applyChanges(matrix, changes);
-
-      for (let i = 0; i < applyMatrix.length; i++) {
-        for (let j = 0; j < applyMatrix[i].length; j++) {
-          let expected: number = (i === changeRow && j === changeCol)
-            ? newValue
-            : matrix[i][j];
-
-          expect(applyMatrix[i][j]).toBe(expected);
-        }
-      }
-    });
-
     test('should apply changes using specific ignore value', () => {
       const ignoreValue = 10;
-      const changes = matrixPipeline([copy, reset]).run(matrix);
+      const changes  = matrixPipeline([
+        copy,
+        (value) => reset(value as MatrixValue<number>, 0) as typeof value
+      ]).run(matrix);
+
       for (let i = 0; i < changes.length; i++) {
         for (let j = 0; j < changes[i].length; j++) {
           changes[i][j] = ignoreValue;

@@ -10,7 +10,11 @@ import type {
   OnResizeHandler,
   DebugLayerRendererValue
 } from "./types";
-import { type MouseEventHandler, useRef } from "react";
+import {
+  type MouseEventHandler,
+  type PointerEventHandler,
+  useRef
+} from "react";
 import { useDebounceCallback, useResizeObserver } from "usehooks-ts";
 
 type CanvasOptions = {
@@ -26,11 +30,11 @@ type CanvasProps = {
   postdraw?: PostDrawHandler,
   onResize?: OnResizeHandler,
   onClick?: MouseEventHandler<HTMLCanvasElement>,
-  onMouseDown?: MouseEventHandler<HTMLCanvasElement>,
-  onMouseUp?: MouseEventHandler<HTMLCanvasElement>,
-  onMouseMove?: MouseEventHandler<HTMLCanvasElement>,
-  onMouseLeave?: MouseEventHandler<HTMLCanvasElement>,
-  onMouseEnter?: MouseEventHandler<HTMLCanvasElement>,
+  onPointerDown?: PointerEventHandler<HTMLCanvasElement>,
+  onPointerUp?: PointerEventHandler<HTMLCanvasElement>,
+  onPointerMove?: PointerEventHandler<HTMLCanvasElement>,
+  onPointerOut?: PointerEventHandler<HTMLCanvasElement>,
+  onPointerEnter?: PointerEventHandler<HTMLCanvasElement>,
   options?: CanvasOptions,
   debugLayerRenderer?: DebugLayerRendererValue,
   className?: string
@@ -44,8 +48,8 @@ const DEFAULT_OPTIONS: CanvasOptions = {
 const Canvas = (props: CanvasProps) => {
   const {
     init, shouldRedraw, draw, predraw, postdraw,
-    onResize,
-    onClick, onMouseDown, onMouseUp, onMouseMove, onMouseLeave, onMouseEnter,
+    onResize, onClick,
+    onPointerDown, onPointerUp, onPointerMove, onPointerOut, onPointerEnter,
     options=DEFAULT_OPTIONS,
     debugLayerRenderer,
     ...rest
@@ -83,11 +87,11 @@ const Canvas = (props: CanvasProps) => {
     <div ref={divRef} {...rest}>
       <canvas ref={ref}
         onClick={onClick}
-        onMouseDown={onMouseDown}
-        onMouseUp={onMouseUp}
-        onMouseMove={onMouseMove}
-        onMouseLeave={onMouseLeave}
-        onMouseEnter={onMouseEnter}
+        onPointerDown={onPointerDown}
+        onPointerUp={onPointerUp}
+        onPointerMove={onPointerMove}
+        onPointerOut={onPointerOut}
+        onPointerEnter={onPointerEnter}
       />
     </div>
   );
