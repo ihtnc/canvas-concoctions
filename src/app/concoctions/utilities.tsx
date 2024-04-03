@@ -1,3 +1,4 @@
+import { NavigationDetails as sandboxNav } from './sand-box';
 export type ConcoctionNavigation = {
   linkTitle: string,
   linkUrl: string,
@@ -7,5 +8,6 @@ export type ConcoctionNavigation = {
 type GetConcoctionsResponse = Array<ConcoctionNavigation>;
 export const getConcoctions = (): GetConcoctionsResponse => {
   return [
+    sandboxNav,
   ];
 };
