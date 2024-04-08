@@ -12,14 +12,12 @@ import {
 } from "@/utilities/matrix-operations";
 import { hexToHSL } from "@/utilities/drawing-operations";
 import {
-  RenderLocation,
   type PreDrawHandler,
   type DrawHandler,
   type InitRenderHandler,
   type OnResizeHandler
 } from "@/components/canvas/types";
 import Canvas from "@/components/canvas";
-import { renderDebugLayer } from "./debug";
 import {
   type ParticleValue,
   initialiseParticleMap,
@@ -103,7 +101,7 @@ const SandSim = ({
       context,
       { map: particleMap.current, width: grainSize, height: grainSize },
       [],
-      [renderDebugLayer]
+      []
     );
   };
 
@@ -155,7 +153,6 @@ const SandSim = ({
       onPointerUp={stopNewParticles}
       onPointerOut={stopNewParticles}
       onPointerMove={updateNewParticleCoordinate}
-      debugLayerRenderer={RenderLocation.TopCenter}
       className={className}
     />
     <button className="flex self-center" onClick={resetConcoction}>Reset</button>
