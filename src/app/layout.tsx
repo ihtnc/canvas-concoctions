@@ -7,7 +7,7 @@ const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "Canvas Concoctions",
-  description: "Various concoctions using the canvas HTML element",
+  description: "Playground for various ideas using the canvas HTML element",
 };
 
 export default function RootLayout({
