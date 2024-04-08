@@ -4,11 +4,11 @@ import { type DrawHandler } from "@/components/canvas/types";
 import { type ConcoctionNavigation } from "@/app/concoctions/utilities";
 import Canvas from "@/components/canvas";
 
-type SandboxProps = {
+type TagVisualiserProps = {
   className?: string
 };
 
-const Sandbox = ({ className }: SandboxProps) => {
+const TagVisualiser = ({ className }: TagVisualiserProps) => {
   let frameCount = 0;
   const drawFn: DrawHandler = (context) => {
     context.fillStyle = '#000000';
@@ -21,9 +21,9 @@ const Sandbox = ({ className }: SandboxProps) => {
 };
 
 export const NavigationDetails: ConcoctionNavigation = {
-  linkTitle: 'Sandbox',
-  linkUrl: 'sand-box',
-  title: 'Sandbox'
+  linkTitle: 'Tag Visualiser',
+  linkUrl: 'tag-visualiser',
+  title: 'Tag Visualiser'
 };
 
-export default Sandbox;
+export default TagVisualiser;

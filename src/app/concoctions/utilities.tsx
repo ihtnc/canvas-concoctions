@@ -1,5 +1,5 @@
-import { NavigationDetails as sandboxNav } from './sand-box';
 import { NavigationDetails as sandSimNav } from './sand-sim';
+import { NavigationDetails as tagVisualiserNav } from './tag-visualiser';
 
 export type ConcoctionNavigation = {
   linkTitle: string,
@@ -10,7 +10,7 @@ export type ConcoctionNavigation = {
 type GetConcoctionsResponse = Array<ConcoctionNavigation>;
 export const getConcoctions = (): GetConcoctionsResponse => {
   return [
-    sandboxNav,
-    sandSimNav
+    sandSimNav,
+    tagVisualiserNav
   ];
 };
