@@ -1,8 +1,8 @@
 'use client';
 
-import { getConcoctions } from './concoctions/utilities';
-import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { getConcoctions } from '@/app/concoctions/utilities';
+import NavItem from './nav-item';
 
 const Navigation = () => {
   const links = getConcoctions();
@@ -15,19 +15,19 @@ const Navigation = () => {
     <nav>
       <ul className='flex flex-row gap-2'>
         <li key='/' className='flex'>
-          <Link
+          <NavItem
             href='/'
-            className={`link ${isHomeActive ? 'active' : ''}`}>
-            Home
-          </Link>
+            title='Home'
+            isActive={isHomeActive} />
         </li>
         {links.map((value) => (
           <li key={value.linkUrl} className='flex'>
-            <Link
+            <NavItem
               href={`/concoctions/${value.linkUrl}`}
-              className={`link ${value.linkUrl === activeLink?.linkUrl ? 'active' : ''}`}>
-              {value.linkTitle}
-            </Link>
+              title={value.linkTitle}
+              previewHref={value.previewUrl ? value.previewUrl : undefined}
+              isActive={value.linkUrl === activeLink?.linkUrl}
+            />
           </li>
         ))}
       </ul>

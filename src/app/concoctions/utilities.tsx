@@ -5,7 +5,8 @@ import { NavigationDetails as gameOfLifeNav } from './game-of-life';
 export type ConcoctionNavigation = {
   linkTitle: string,
   linkUrl: string,
-  title: string
+  title: string,
+  previewUrl?: string
 };
 
 type GetConcoctionsResponse = Array<ConcoctionNavigation>;

@@ -162,7 +162,8 @@ const SandSim = ({
 export const NavigationDetails: ConcoctionNavigation = {
   linkTitle: 'Sand Sim',
   linkUrl: 'sand-sim',
-  title: 'Sand Simulation'
+  title: 'Sand Simulation',
+  previewUrl: '/previews/sand-sim.gif'
 };
 
 export default SandSim;
