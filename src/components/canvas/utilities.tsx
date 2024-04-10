@@ -1,14 +1,14 @@
 import {
   RenderLocation,
-  type DebugLayerDrawHandler,
-  type DebugLayerOptions,
-  type DebugLayerRendererValue,
+  type RenderEnvironmentLayerDrawHandler,
+  type RenderEnvironmentLayerOptions,
+  type RenderEnvironmentLayerRendererValue,
   type Use2DRenderLoopOptions,
   type Coordinates,
-  type DebugLayerValue,
+  type RenderEnvironmentValue,
 } from "./types";
 
-export const DEFAULT_DEBUG_LAYER_OPTIONS: DebugLayerOptions = {
+export const DEFAULT_RENDER_ENVIRONMENT_LAYER_OPTIONS: RenderEnvironmentLayerOptions = {
   location: RenderLocation.TopLeft,
   renderFps: true,
   renderSize: true,
@@ -17,13 +17,15 @@ export const DEFAULT_DEBUG_LAYER_OPTIONS: DebugLayerOptions = {
 };
 
 export const DEFAULT_OPTIONS: Use2DRenderLoopOptions = {
+  autoStart: true,
   clearEachFrame: true,
-  debugLayerRenderer: false
+  enableDebug: false,
+  renderEnvironmentLayerRenderer: false
 };
 
-export const getDebugLayerRenderer: (value?: DebugLayerRendererValue) => DebugLayerDrawHandler | null = (value) => {
-  let options: DebugLayerOptions;
-  options = DEFAULT_DEBUG_LAYER_OPTIONS;
+export const getRenderEnvironmentLayerRenderer: (value?: RenderEnvironmentLayerRendererValue) => RenderEnvironmentLayerDrawHandler | null = (value) => {
+  let options: RenderEnvironmentLayerOptions;
+  options = DEFAULT_RENDER_ENVIRONMENT_LAYER_OPTIONS;
 
   if (value === undefined || value === false) {
     return null;
@@ -45,7 +47,7 @@ export const getDebugLayerRenderer: (value?: DebugLayerRendererValue) => DebugLa
       renderSize,
       renderClientSize,
       renderPixelRatio
-    } = value as DebugLayerOptions;
+    } = value as RenderEnvironmentLayerOptions;
 
     if (location !== undefined) { options.location = location; }
     if (renderFps !== undefined) { options.renderFps = renderFps; }
@@ -54,12 +56,12 @@ export const getDebugLayerRenderer: (value?: DebugLayerRendererValue) => DebugLa
     if (renderPixelRatio !== undefined) { options.renderPixelRatio = renderPixelRatio; }
   }
 
-  let renderer: DebugLayerDrawHandler;
+  let renderer: RenderEnvironmentLayerDrawHandler;
   if(typeof value === "function") {
     renderer = value;
   }
 
-  const getCoordinates: (value: string, debugValue: DebugLayerValue, context: CanvasRenderingContext2D) => Coordinates = (value, debugValue, context) => {
+  const getCoordinates: (value: string, debugValue: RenderEnvironmentValue, context: CanvasRenderingContext2D) => Coordinates = (value, debugValue, context) => {
     let { x, y } = options.location as Coordinates;
     if (x !== undefined && y !== undefined) { return {x, y}; }
 

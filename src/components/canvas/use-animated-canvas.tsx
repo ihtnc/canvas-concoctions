@@ -8,66 +8,87 @@ import type {
   PostDrawHandler,
   InitRenderHandler,
   OnResizeHandler,
-  DebugLayerRendererValue
+  RenderEnvironmentLayerRendererValue,
+  RenderDebugHandler,
+  RenderDebugConditionalHandler
 } from "./types";
 import {
   type MouseEventHandler,
   type PointerEventHandler,
+  type JSXElementConstructor,
   useRef
 } from "react";
 import { useDebounceCallback, useResizeObserver } from "usehooks-ts";
 
-type CanvasOptions = {
+type UseAnimatedCanvasOptions = {
+  autoStart?: boolean,
+  enableDebug?: boolean,
   resizeDelayMs?: number,
   clearEachFrame?: boolean
 }
 
-type CanvasProps = {
+type UseAnimatedCanvasProps = {
   init?: InitRenderHandler,
   shouldRedraw?: ShouldRedrawHandler,
   draw: DrawHandler,
   predraw?: PreDrawHandler,
   postdraw?: PostDrawHandler,
   onResize?: OnResizeHandler,
+  options?: UseAnimatedCanvasOptions,
+  renderEnvironmentLayerRenderer?: RenderEnvironmentLayerRendererValue
+}
+
+type UseAnimatedCanvasResponse = {
+  Canvas: JSXElementConstructor<AnimatedCanvasProps>,
+  renderBreak: RenderDebugHandler,
+  renderBreakWhen: RenderDebugConditionalHandler,
+  renderContinue: RenderDebugHandler,
+  renderStep: RenderDebugHandler,
+}
+
+type AnimatedCanvasProps = {
+  className?: string,
   onClick?: MouseEventHandler<HTMLCanvasElement>,
   onPointerDown?: PointerEventHandler<HTMLCanvasElement>,
   onPointerUp?: PointerEventHandler<HTMLCanvasElement>,
   onPointerMove?: PointerEventHandler<HTMLCanvasElement>,
   onPointerOut?: PointerEventHandler<HTMLCanvasElement>,
   onPointerEnter?: PointerEventHandler<HTMLCanvasElement>,
-  options?: CanvasOptions,
-  debugLayerRenderer?: DebugLayerRendererValue,
-  className?: string
-}
+};
 
-const DEFAULT_OPTIONS: CanvasOptions = {
+const DEFAULT_OPTIONS: UseAnimatedCanvasOptions = {
+  autoStart: true,
+  enableDebug: false,
   clearEachFrame: true,
   resizeDelayMs: 200
 };
 
-const Canvas = (props: CanvasProps) => {
+const useAnimatedCanvas: (props: UseAnimatedCanvasProps) => UseAnimatedCanvasResponse = (props) => {
   const {
     init, shouldRedraw, draw, predraw, postdraw,
-    onResize, onClick,
-    onPointerDown, onPointerUp, onPointerMove, onPointerOut, onPointerEnter,
-    options=DEFAULT_OPTIONS,
-    debugLayerRenderer,
-    ...rest
+    onResize,
+    options,
+    renderEnvironmentLayerRenderer
   } = props;
 
-  const { clearEachFrame, resizeDelayMs } = options;
+  const canvasOptions = Object.assign({}, DEFAULT_OPTIONS, options);
+  const { autoStart, enableDebug, clearEachFrame, resizeDelayMs } = canvasOptions;
 
   const divRef = useRef<HTMLDivElement>(null);
 
-  const ref = use2DRenderLoop({
+  const { ref, debug } = use2DRenderLoop({
+    autoStart,
+    enableDebug,
     clearEachFrame,
     onInit: init,
     onPreDraw: predraw,
     onDraw: draw,
     onPostDraw: postdraw,
     onShouldRedraw: shouldRedraw,
-    debugLayerRenderer: debugLayerRenderer
+    renderEnvironmentLayerRenderer
   });
+
+  const { renderBreak, renderContinue, renderStep, renderBreakWhen } = debug;
 
   const resizeCallback: (size: { width?: number, height?: number }) => void = (size) => {
     const { width, height } = size;
@@ -83,18 +104,24 @@ const Canvas = (props: CanvasProps) => {
   const debouncedOnResize = useDebounceCallback(resizeCallback, resizeDelayMs);
   useResizeObserver({ ref: divRef, onResize: debouncedOnResize });
 
-  return (
-    <div ref={divRef} {...rest}>
-      <canvas ref={ref}
-        onClick={onClick}
-        onPointerDown={onPointerDown}
-        onPointerUp={onPointerUp}
-        onPointerMove={onPointerMove}
-        onPointerOut={onPointerOut}
-        onPointerEnter={onPointerEnter}
-      />
-    </div>
-  );
+  const canvasElement: JSXElementConstructor<AnimatedCanvasProps> = ({ className, ...rest }) => {
+    return (
+      <div ref={divRef} className={className}>
+        <canvas
+          ref={ref}
+          {...rest}
+        />
+      </div>
+    )
+  };
+
+  return {
+    Canvas: canvasElement,
+    renderBreak,
+    renderContinue,
+    renderStep,
+    renderBreakWhen
+  };
 };
 
-export default Canvas;
+export default useAnimatedCanvas;

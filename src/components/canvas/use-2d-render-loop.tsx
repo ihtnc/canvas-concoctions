@@ -1,14 +1,21 @@
 import { useRef, useEffect, RefObject } from "react";
 import { clearFrame } from "@/utilities/canvas-operations";
-import { type Use2DRenderLoopOptions } from "./types";
-import { DEFAULT_OPTIONS, getDebugLayerRenderer } from "./utilities";
+import {
+  type Use2DRenderLoopResponse,
+  type Use2DRenderLoopOptions,
+  type RenderDebugHandler,
+  type RenderDebugConditionalHandler
+} from "./types";
+import { DEFAULT_OPTIONS, getRenderEnvironmentLayerRenderer } from "./utilities";
 
 type FpsCounter = { frameCount: number, fps: number, reference: number };
 
-const use2DRenderLoop = (options: Use2DRenderLoopOptions=DEFAULT_OPTIONS): RefObject<HTMLCanvasElement> => {
+const use2DRenderLoop = (options: Use2DRenderLoopOptions): Use2DRenderLoopResponse => {
+  options = Object.assign({}, DEFAULT_OPTIONS, options);
+
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const { onInit, onPreDraw, onDraw, onPostDraw, onShouldRedraw, debugLayerRenderer } = options;
-  const debugLayerHandler = getDebugLayerRenderer(debugLayerRenderer);
+  const { onInit, onPreDraw, onDraw, onPostDraw, onShouldRedraw, renderEnvironmentLayerRenderer } = options;
+  const renderEnvironmentLayerHandler = getRenderEnvironmentLayerRenderer(renderEnvironmentLayerRenderer);
 
   const fpsCounter = useRef<FpsCounter>({
     frameCount: 0,
@@ -29,6 +36,35 @@ const use2DRenderLoop = (options: Use2DRenderLoopOptions=DEFAULT_OPTIONS): RefOb
     return fpsCounter.current.frameCount;
   };
 
+  let request: boolean | null = null;
+  let requestOnce: boolean | null = null;
+
+  const renderBreak: RenderDebugHandler = () => {
+    if (options.enableDebug !== true) { return; }
+    request = false;
+    requestOnce = false;
+  };
+
+  const renderBreakWhen: RenderDebugConditionalHandler = (condition) => {
+    if (options.enableDebug !== true) { return; }
+    if (condition() !== true) { return; }
+    request = false;
+    requestOnce = false;
+  };
+
+  const renderContinue: RenderDebugHandler = () => {
+    if (options.enableDebug !== true) { return; }
+
+    request = true;
+    requestOnce = false;
+  };
+
+  const renderStep: RenderDebugHandler = () => {
+    if (options.enableDebug !== true) { return; }
+    requestOnce = true;
+    request = false;
+  };
+
   useEffect(() => {
     const canvas = canvasRef.current;
     if (canvas === null) { return; }
@@ -39,10 +75,18 @@ const use2DRenderLoop = (options: Use2DRenderLoopOptions=DEFAULT_OPTIONS): RefOb
     const { devicePixelRatio=1 } = window;
     let animationFrameId: number;
 
-    if (onInit) { onInit(canvas); }
+    if (onInit) { onInit(canvas, { devicePixelRatio }); }
+
+    const needsNewFrame: () => boolean = () => {
+      if (options.autoStart === true && request === null && requestOnce === null) { return true; }
+      if (options.autoStart === false && request === null && requestOnce === null) { return false; }
+      if (options.enableDebug && request === false && requestOnce === false) { return false; }
+      if (options.enableDebug && requestOnce) { requestOnce = false; }
+      return true;
+    };
 
     const render = () => {
-      if (!context) {
+      if (!context || needsNewFrame() == false) {
         animationFrameId = window.requestAnimationFrame(render);
         return;
       }
@@ -50,9 +94,9 @@ const use2DRenderLoop = (options: Use2DRenderLoopOptions=DEFAULT_OPTIONS): RefOb
       if (onPreDraw) { onPreDraw(canvas, context); }
       if (options.clearEachFrame) { clearFrame(canvas); }
 
-      if (debugLayerHandler) {
+      if (renderEnvironmentLayerHandler) {
         updateFpsCounter();
-        debugLayerHandler({
+        renderEnvironmentLayerHandler({
           fps: fpsCounter.current.fps,
           width: canvas.width,
           height: canvas.height,
@@ -76,7 +120,12 @@ const use2DRenderLoop = (options: Use2DRenderLoopOptions=DEFAULT_OPTIONS): RefOb
     }
   }, [options]);
 
-  return canvasRef;
+  return {
+    ref: canvasRef,
+    debug: {
+      renderBreak, renderBreakWhen, renderContinue, renderStep
+    }
+  };
 };
 
 export default use2DRenderLoop;

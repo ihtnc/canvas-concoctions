@@ -4,7 +4,10 @@ import {
 } from "@/utilities/misc-operations";
 import {
   type HSL,
-  compareHSL
+  type RenderFunction,
+  type BorderRadii,
+  compareHSL,
+  runRenderPipeline
 } from "@/utilities/drawing-operations";
 import {
   VResizeDirection,
@@ -21,8 +24,6 @@ import {
 } from "@/utilities/matrix-operations";
 
 export type ParticleValue = { color?: HSL, value: number };
-
-type BorderRadii = { tl: number, tr: number, bl: number, br: number };
 
 type EngineData = {
   EmptyParticle: ParticleValue,
@@ -197,13 +198,6 @@ export const runParticleMapPipeline: RunParticleMapPipelineFunction = (value, co
   return newValue;
 }
 
-type RenderPipelineData = {
-  map: MatrixValue<ParticleValue>,
-  width: number,
-  height: number,
-};
-export type RenderFunction = (context: CanvasRenderingContext2D, data: RenderPipelineData) => void;
-
 type ParticleColorMap = { color: HSL, particles: Array<MatrixCoordinate> };
 const getColorMap = (value: MatrixValue<ParticleValue>): Array<ParticleColorMap> => {
   const sorted: Array<ParticleColorMap> = [];
@@ -225,7 +219,17 @@ const getColorMap = (value: MatrixValue<ParticleValue>): Array<ParticleColorMap>
   return sorted;
 };
 
-const renderParticleLayer: RenderFunction = (context, data) => {
+export type RenderPipelineData = {
+  map: MatrixValue<ParticleValue>,
+  width: number,
+  height: number,
+};
+
+export interface ParticleRenderFunction extends RenderFunction {
+  (context: CanvasRenderingContext2D, data: RenderPipelineData): void;
+}
+
+const renderParticleLayer: ParticleRenderFunction = (context: CanvasRenderingContext2D, data: RenderPipelineData) => {
   const { map, width, height } = data;
   let shape: BorderRadii = { tl: 0, tr: 0, bl: 0, br: 0 };
 
@@ -262,7 +266,7 @@ const renderParticleLayer: RenderFunction = (context, data) => {
         shape.br = 0;
       }
 
-      const particleRadius = [shape.tl, shape.tr, shape.bl, shape.br];
+      const particleRadius = [shape.tl, shape.tr, shape.br, shape.bl];
       context.roundRect(col * width, row * height, width, height, particleRadius);
     }
 
@@ -274,22 +278,7 @@ const renderParticleLayer: RenderFunction = (context, data) => {
   context.strokeStyle = originalStrokeStyle;
 };
 
-const renderPipeline = (pipeline: Array<RenderFunction>) => {
-  return {
-    run: (context: CanvasRenderingContext2D, data: RenderPipelineData) => {
-      for (let i = 0; i < pipeline.length; i++) {
-        pipeline[i](context, data);
-      }
-    }
-  };
-};
-
-type RunRenderPipelineFunction = (context: CanvasRenderingContext2D, data: RenderPipelineData, pre?: Array<RenderFunction>, post?: Array<RenderFunction>) => void;
-export const runRenderPipeline: RunRenderPipelineFunction = (context, data, pre, post) => {
-  const pipeline: Array<RenderFunction> = [];
-  if (pre) { pipeline.push(...pre); }
-  pipeline.push(renderParticleLayer);
-  if (post) { pipeline.push(...post); }
-
-  renderPipeline(pipeline).run(context, data);
+type RunParticleRenderPipelineFunction = (context: CanvasRenderingContext2D, data: RenderPipelineData, pre?: Array<RenderFunction>, post?: Array<RenderFunction>) => void;
+export const runParticleRenderPipeline: RunParticleRenderPipelineFunction = (context, data, pre, post) => {
+  runRenderPipeline(context, data, renderParticleLayer, pre, post);
 };

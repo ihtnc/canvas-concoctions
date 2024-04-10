@@ -2,7 +2,7 @@
 
 import { type DrawHandler } from "@/components/canvas/types";
 import { type ConcoctionNavigation } from "@/app/concoctions/utilities";
-import Canvas from "@/components/canvas";
+import useAnimatedCanvas from "@/components/canvas/use-animated-canvas";
 
 type TagVisualiserProps = {
   className?: string
@@ -17,7 +17,11 @@ const TagVisualiser = ({ className }: TagVisualiserProps) => {
     context.fill();
     frameCount++;
   }
-  return <Canvas draw={drawFn} className={className} />
+  const { Canvas } = useAnimatedCanvas({
+    draw: drawFn
+  });
+
+  return <Canvas className={className} />
 };
 
 export const NavigationDetails: ConcoctionNavigation = {

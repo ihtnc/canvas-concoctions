@@ -2,9 +2,10 @@ import {
   type MatrixValue
 } from "@/utilities/matrix-operations";
 import {
-  type RenderFunction,
   type ParticleValue,
-  type ParticleOperationFunction
+  type RenderPipelineData,
+  type ParticleOperationFunction,
+  type ParticleRenderFunction
 } from "./engine";
 
 export const setMatrixValue: ParticleOperationFunction = (value: MatrixValue<ParticleValue>) => {
@@ -18,7 +19,7 @@ export const setMatrixValue: ParticleOperationFunction = (value: MatrixValue<Par
   return value;
 };
 
-export const renderDebugLayer: RenderFunction = (context, data) => {
+export const renderDebugLayer: ParticleRenderFunction = (context: CanvasRenderingContext2D, data: RenderPipelineData) => {
   const { map, width, height } = data;
   const rowCount = map.length;
   const colCount = map[0].length;

@@ -1,5 +1,6 @@
 export type RGB = { r: number, g: number, b: number };
 export type HSL = { h: number, s: number, l: number };
+export type BorderRadii = { tl: number, tr: number, bl: number, br: number };
 
 export const hexToRGB: (hexColor: string) => RGB | undefined  = (hexColor) => {
   if (!/\#[0-9A-F]{6}/gi.test(hexColor)) { return undefined; }
@@ -41,4 +42,27 @@ export const compareHSL: (color1: HSL, color2: HSL) => boolean = (color1, color2
   return (color1.h === color2.h
     && color1.s === color2.s
     && color1.l === color2.l);
+};
+
+export type RenderFunction = <T>(context: CanvasRenderingContext2D, data: T) => void;
+
+type RenderPipelinFunction = (pipeline: Array<RenderFunction>) => { run: RenderFunction };
+const renderPipeline:RenderPipelinFunction = (pipeline) => {
+  return {
+    run: (context, data) => {
+      for (let i = 0; i < pipeline.length; i++) {
+        pipeline[i](context, data);
+      }
+    }
+  };
+};
+
+type RunRenderPipelineFunction = <T>(context: CanvasRenderingContext2D, data: T, render: RenderFunction, pre?: Array<RenderFunction>, post?: Array<RenderFunction>) => void;
+export const runRenderPipeline: RunRenderPipelineFunction = (context, data, render, pre, post) => {
+  const pipeline: Array<RenderFunction> = [];
+  if (pre) { pipeline.push(...pre); }
+  pipeline.push(render);
+  if (post) { pipeline.push(...post); }
+
+  renderPipeline(pipeline).run(context, data);
 };

@@ -17,14 +17,14 @@ import {
   type InitRenderHandler,
   type OnResizeHandler
 } from "@/components/canvas/types";
-import Canvas from "@/components/canvas";
+import useAnimatedCanvas from "@/components/canvas/use-animated-canvas";
 import {
   type ParticleValue,
   initialiseParticleMap,
   resetParticleMap,
   resizeParticleMap,
   runParticleMapPipeline,
-  runRenderPipeline
+  runParticleRenderPipeline
 } from "./engine";
 
 type SandboxProps = {
@@ -97,7 +97,7 @@ const SandSim = ({
   const drawFn: DrawHandler = (context) => {
     if (particleMap?.current === null) { return; }
 
-    runRenderPipeline(
+    runParticleRenderPipeline(
       context,
       { map: particleMap.current, width: grainSize, height: grainSize },
       [],
@@ -143,17 +143,20 @@ const SandSim = ({
     currentHSL.h = (currentHSL.h + DEFAULT_DATA.ColorIncrement) % 360;
   }
 
+  const { Canvas } = useAnimatedCanvas({
+    init: initFn,
+    predraw: predrawFn,
+    draw: drawFn,
+    onResize: onResizeFn
+  });
+
   return <div className="flex flex-col w-full h-full gap-2">
     <Canvas
-      init={initFn}
-      predraw={predrawFn}
-      draw={drawFn}
-      onResize={onResizeFn}
+      className={className}
       onPointerDown={startNewParticles}
       onPointerUp={stopNewParticles}
       onPointerOut={stopNewParticles}
       onPointerMove={updateNewParticleCoordinate}
-      className={className}
     />
     <button className="flex self-center" onClick={resetConcoction}>Reset</button>
   </div>
