@@ -1,41 +1,264 @@
 'use client';
 
 import { type ConcoctionNavigation } from "@/app/concoctions/utilities";
-import { type DrawHandler } from "@/components/canvas/types";
+import {
+  type InitRenderHandler,
+  type DrawHandler,
+  type OnResizeHandler,
+  type PreDrawHandler,
+  type PostDrawHandler,
+  RenderLocation
+} from "@/components/canvas/types";
 import useAnimatedCanvas from "@/components/canvas/use-animated-canvas";
+import { type MatrixCoordinate, type MatrixValue } from "@/utilities/matrix-operations";
+import { hexToHSL } from "@/utilities/drawing-operations";
+import { type PointerEventHandler, useRef } from "react";
+import {
+  type CellValue,
+  CycleState,
+  initialiseCellMap,
+  resizeCellMap,
+  resetCellMap,
+  runCellMapPipeline,
+  runCellRenderPipeline,
+  getNextCycle,
+  isEndPhase
+} from "./engine";
+import { getRenderDebugLayer, setMatrixValue } from "./debug";
+import ControlPanel, { type ControlItem } from "@/components/control-panel";
+import PlayIcon from "@/components/icons/play-icon";
+import PauseIcon from "@/components/icons/pause-icon";
+import ForwardIcon from "@/components/icons/forward-icon";
+import TrashIcon from "@/components/icons/trash-icon";
 
 type GameOfLifeProps = {
-  className?: string
+  className?: string,
+  cellSize?: number,
+  autoStart?: boolean,
+  aliveColor?: string,
+  dyingColor?: string,
+  growingColor?: string
+};
+type DefaultData = {
+  MinCellSize: number,
+  MaxCellSize: number,
+  DefaultCellSize: number,
+  DefaultAutoStart: boolean,
+  DefaultAliveColor: string,
+  DefaultDyingColor: string,
+  DefaultGrowingColor: string
+}
+enum ButtonType {
+  Start,
+  Pause,
+  Step,
+  Reset
+}
+
+const DEFAULT_DATA: DefaultData = {
+  MinCellSize: 10,
+  MaxCellSize: 30,
+  DefaultCellSize: 10,
+  DefaultAutoStart: true,
+  DefaultAliveColor: '#09AB00',
+  DefaultDyingColor: '#FA6227',
+  DefaultGrowingColor: '#0BD100',
+}
+
+const GameOfLife = ({
+  className,
+  cellSize=DEFAULT_DATA.DefaultCellSize,
+  autoStart=DEFAULT_DATA.DefaultAutoStart,
+  aliveColor=DEFAULT_DATA.DefaultAliveColor,
+  dyingColor=DEFAULT_DATA.DefaultDyingColor,
+  growingColor=DEFAULT_DATA.DefaultGrowingColor
+}: GameOfLifeProps) => {
+  const cellMap = useRef<MatrixValue<CellValue> | null>(null);
+  const newCellCoordinate: MatrixCoordinate = { row: 0, col: 0 };
+
+  let canGenerateCell: boolean = false;
+  let newCellInitiated: boolean = false;
+
+  let cycleState: CycleState = autoStart ? CycleState.Start : CycleState.Stop;
+  let lastButtonClicked: ButtonType = autoStart ? ButtonType.Start : ButtonType.Pause;
+
+  if (cellSize < DEFAULT_DATA.MinCellSize) { cellSize = DEFAULT_DATA.MinCellSize; }
+  else if (cellSize > DEFAULT_DATA.MaxCellSize) { cellSize = DEFAULT_DATA.MaxCellSize; }
+
+  const aliveHSLProp = hexToHSL(aliveColor);
+  const aliveHSL = aliveHSLProp === undefined
+    ? hexToHSL(DEFAULT_DATA.DefaultAliveColor)!
+    : aliveHSLProp!;
+
+  const dyingHSLProp = hexToHSL(dyingColor);
+  const dyingHSL = dyingHSLProp === undefined
+    ? hexToHSL(DEFAULT_DATA.DefaultDyingColor)!
+    : dyingHSLProp!;
+
+  const growingHSLProp = hexToHSL(growingColor);
+  const growingHSL = growingHSLProp === undefined
+    ? hexToHSL(DEFAULT_DATA.DefaultGrowingColor)!
+    : growingHSLProp!;
+
+  let cycleIndex: number = 0;
+
+  const initFn: InitRenderHandler = (canvas) => {
+    const row = Math.floor(canvas.height / cellSize);
+    const col = Math.floor(canvas.width / cellSize);
+    const map = initialiseCellMap(row, col);
+    const debugMap = setMatrixValue(map);
+    cellMap.current = debugMap;
   };
 
-const GameOfLife = ({ className }: GameOfLifeProps) => {
-  let frameCount = 0;
+  const onResizeFn: OnResizeHandler = (canvas, width, height) => {
+    if (cellMap?.current === null) { return; }
+
+    const newRow = Math.floor(height / cellSize);
+    const newCol = Math.floor(width / cellSize);
+
+    const newSize = resizeCellMap(cellMap.current, newRow, newCol);
+    cellMap.current = newSize;
+  };
+
+  const startNewCells: PointerEventHandler<HTMLCanvasElement> = (event) => {
+    canGenerateCell = true;
+    updateNewCellCoordinate(event);
+
+    if (lastButtonClicked === ButtonType.Start) {
+      cycleState = CycleState.Stop;
+    }
+
+    newCellInitiated = true;
+  }
+
+  const stopNewCells: PointerEventHandler<HTMLCanvasElement> = (event) => {
+    canGenerateCell = false;
+
+    if (newCellInitiated && lastButtonClicked === ButtonType.Start) {
+      cycleState = CycleState.Start;
+    }
+
+    newCellInitiated = false;
+  }
+
+  const updateNewCellCoordinate: PointerEventHandler<HTMLCanvasElement> = (event) => {
+    const canvas = event.currentTarget;
+    const rect = canvas.getBoundingClientRect();
+    const x = event.clientX - rect.left;
+    const y = event.clientY - rect.top;
+    const col = Math.floor(x / cellSize);
+    const row = Math.floor(y / cellSize);
+
+    newCellCoordinate.row = row;
+    newCellCoordinate.col = col;
+  }
+
+  const predrawFn: PreDrawHandler = (canvas, context) => {
+    if (cellMap.current === null) { return; }
+
+    const map = cellMap.current;
+    const newMap = runCellMapPipeline(map, cycleIndex, canGenerateCell ? newCellCoordinate : undefined);
+    cellMap.current = newMap;
+  };
+
   const drawFn: DrawHandler = (context) => {
-    context.fillStyle = '#000000';
-    context.beginPath();
-    context.arc(50, 50, 20*Math.sin(frameCount*0.05)**2, 0, 2*Math.PI);
-    context.fill();
-    frameCount++;
+    if (cellMap?.current === null) { return; }
+
+    runCellRenderPipeline(
+      context,
+      {
+        map: cellMap.current,
+        width: cellSize, height: cellSize,
+        aliveColor: aliveHSL, dyingColor: dyingHSL, growingColor: growingHSL,
+        cycleIndex
+      },
+      [],
+      [getRenderDebugLayer({ buttonState: ButtonType[lastButtonClicked], cycleState })]
+    );
   };
 
-  const { Canvas, renderBreak, renderContinue, renderStep } = useAnimatedCanvas({
+  const postDrawFn: PostDrawHandler = () => {
+    if (lastButtonClicked === ButtonType.Step && isEndPhase(cycleIndex)) {
+      cycleState = CycleState.Stop;
+    }
+    cycleIndex = getNextCycle(cycleIndex, cycleState);
+  };
+
+  const startCycle = () => {
+    lastButtonClicked = ButtonType.Start;
+    cycleState = CycleState.Start;
+  }
+
+  const pauseCycle = () => {
+    lastButtonClicked = ButtonType.Pause;
+    cycleState = CycleState.Stop;
+  }
+
+  const stepCycle = () => {
+    lastButtonClicked = ButtonType.Step;
+    cycleState = CycleState.Start;
+  }
+
+  const resetConcoction = () => {
+    lastButtonClicked = ButtonType.Reset;
+
+    if (cellMap?.current === null) { return; }
+
+    canGenerateCell = false;
+    resetCellMap(cellMap.current);
+  }
+
+  const { Canvas } = useAnimatedCanvas({
+    init: initFn,
+    predraw: predrawFn,
     draw: drawFn,
-    options: {
-      autoStart: false,
-      enableDebug: true,
-    },
-    renderEnvironmentLayerRenderer: true
+    postdraw: postDrawFn,
+    onResize: onResizeFn,
+    renderEnvironmentLayerRenderer: RenderLocation.BottomCenter
   });
+
+  const hidePlayIcon = (): boolean => {
+    return lastButtonClicked === ButtonType.Start;
+  };
+
+  const hidePauseIcon = (): boolean => {
+    const showNormal = lastButtonClicked === ButtonType.Start;
+    return !showNormal;
+  }
+
+  const controls: Array<ControlItem> = [{
+    key: ButtonType.Start,
+    onClickHandler: startCycle,
+    component: (<PlayIcon />),
+    title: "Start cycle",
+    hidden: hidePlayIcon
+  }, {
+    key: ButtonType.Pause,
+    onClickHandler: pauseCycle,
+    component: (<PauseIcon />),
+    title: "Pause cycle",
+    hidden: hidePauseIcon
+  }, {
+    key: ButtonType.Step,
+    onClickHandler: stepCycle,
+    component: (<ForwardIcon />),
+    title: "Forward 1 cycle"
+  }, {
+    key: ButtonType.Reset,
+    onClickHandler: resetConcoction,
+    component: (<TrashIcon />),
+    title: "Reset canvas"
+  }];
 
   return <div className="flex flex-col w-full h-full gap-2">
     <Canvas
       className={className}
+      onPointerDown={startNewCells}
+      onPointerUp={stopNewCells}
+      onPointerOut={stopNewCells}
+      onPointerMove={updateNewCellCoordinate}
     />
-    <div className="flex self-center gap-2">
-      <button className="flex" onClick={renderContinue}>Start</button>
-      <button className="flex" onClick={renderBreak}>Stop</button>
-      <button className="flex" onClick={renderStep}>Step</button>
-    </div>
+    <ControlPanel controls={controls} />
   </div>
 };
 

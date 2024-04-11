@@ -2,7 +2,6 @@
 
 import {
   type PointerEventHandler,
-  type MouseEventHandler,
   useRef
 } from "react";
 import { type ConcoctionNavigation } from "@/app/concoctions/utilities";
@@ -26,6 +25,8 @@ import {
   runParticleMapPipeline,
   runParticleRenderPipeline
 } from "./engine";
+import TrashIcon from "@/components/icons/trash-icon";
+import ControlPanel, { type ControlItem } from "@/components/control-panel";
 
 type SandboxProps = {
   className?: string,
@@ -131,7 +132,7 @@ const SandSim = ({
     newParticleCoordinate.col = col;
   }
 
-  const resetConcoction: MouseEventHandler<HTMLButtonElement> = (event) => {
+  const resetConcoction = () => {
     if (particleMap?.current === null) { return; }
 
     canGenerateParticle = false;
@@ -150,6 +151,12 @@ const SandSim = ({
     onResize: onResizeFn
   });
 
+  const controls: Array<ControlItem> = [{
+    onClickHandler: resetConcoction,
+    component: (<TrashIcon />),
+    title: "Reset canvas"
+  }];
+
   return <div className="flex flex-col w-full h-full gap-2">
     <Canvas
       className={className}
@@ -158,7 +165,7 @@ const SandSim = ({
       onPointerOut={stopNewParticles}
       onPointerMove={updateNewParticleCoordinate}
     />
-    <button className="flex self-center" onClick={resetConcoction}>Reset</button>
+    <ControlPanel controls={controls} />
   </div>
 };
 

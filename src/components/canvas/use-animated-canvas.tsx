@@ -9,8 +9,7 @@ import type {
   InitRenderHandler,
   OnResizeHandler,
   RenderEnvironmentLayerRendererValue,
-  RenderDebugHandler,
-  RenderDebugConditionalHandler
+  DebugObject
 } from "./types";
 import {
   type MouseEventHandler,
@@ -40,10 +39,7 @@ type UseAnimatedCanvasProps = {
 
 type UseAnimatedCanvasResponse = {
   Canvas: JSXElementConstructor<AnimatedCanvasProps>,
-  renderBreak: RenderDebugHandler,
-  renderBreakWhen: RenderDebugConditionalHandler,
-  renderContinue: RenderDebugHandler,
-  renderStep: RenderDebugHandler,
+  debug: DebugObject
 }
 
 type AnimatedCanvasProps = {
@@ -88,8 +84,6 @@ const useAnimatedCanvas: (props: UseAnimatedCanvasProps) => UseAnimatedCanvasRes
     renderEnvironmentLayerRenderer
   });
 
-  const { renderBreak, renderContinue, renderStep, renderBreakWhen } = debug;
-
   const resizeCallback: (size: { width?: number, height?: number }) => void = (size) => {
     const { width, height } = size;
     if (ref.current && width && height) {
@@ -117,10 +111,7 @@ const useAnimatedCanvas: (props: UseAnimatedCanvasProps) => UseAnimatedCanvasRes
 
   return {
     Canvas: canvasElement,
-    renderBreak,
-    renderContinue,
-    renderStep,
-    renderBreakWhen
+    debug
   };
 };
 
