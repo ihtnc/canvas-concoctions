@@ -6,8 +6,7 @@ import {
   type DrawHandler,
   type OnResizeHandler,
   type PreDrawHandler,
-  type PostDrawHandler,
-  RenderLocation
+  type PostDrawHandler
 } from "@/components/canvas/types";
 import useAnimatedCanvas from "@/components/canvas/use-animated-canvas";
 import { type MatrixCoordinate, type MatrixValue } from "@/utilities/matrix-operations";
@@ -24,7 +23,6 @@ import {
   getNextCycle,
   isEndPhase
 } from "./engine";
-import { getRenderDebugLayer, setMatrixValue } from "./debug";
 import ControlPanel, { type ControlItem } from "@/components/control-panel";
 import PlayIcon from "@/components/icons/play-icon";
 import PauseIcon from "@/components/icons/pause-icon";
@@ -106,8 +104,7 @@ const GameOfLife = ({
     const row = Math.floor(canvas.height / cellSize);
     const col = Math.floor(canvas.width / cellSize);
     const map = initialiseCellMap(row, col);
-    const debugMap = setMatrixValue(map);
-    cellMap.current = debugMap;
+    cellMap.current = map;
   };
 
   const onResizeFn: OnResizeHandler = (canvas, width, height) => {
@@ -173,7 +170,7 @@ const GameOfLife = ({
         cycleIndex
       },
       [],
-      [getRenderDebugLayer({ buttonState: ButtonType[lastButtonClicked], cycleState })]
+      []
     );
   };
 
@@ -213,8 +210,7 @@ const GameOfLife = ({
     predraw: predrawFn,
     draw: drawFn,
     postdraw: postDrawFn,
-    onResize: onResizeFn,
-    renderEnvironmentLayerRenderer: RenderLocation.BottomCenter
+    onResize: onResizeFn
   });
 
   const hidePlayIcon = (): boolean => {
@@ -265,7 +261,8 @@ const GameOfLife = ({
 export const NavigationDetails: ConcoctionNavigation = {
   linkTitle: 'Game of Life',
   linkUrl: 'game-of-life',
-  title: 'Game of Life'
+  title: 'Game of Life',
+  previewUrl: '/previews/game-of-life.gif'
 };
 
 export default GameOfLife;

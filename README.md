@@ -9,6 +9,12 @@ Simulates falling sand on the canvas.
 
 <img alt="Sand Simulation Preview" src="/public/previews/sand-sim.gif?raw=true" width="500px" />
 
+### Game of Life
+
+Implementation of Conway's Game of Life.
+
+<img alt="Game of Life Preview" src="/public/previews/game-of-life.gif?raw=true" width="500px" />
+
 ## Usage
     \canvas-concoctions> npm install
     \canvas-concoctions> npm run build
