@@ -2,9 +2,14 @@ import { RefObject } from "react";
 
 type InitData = { devicePixelRatio: number };
 export type InitRenderHandler = (canvas: HTMLCanvasElement, data: InitData) => void;
-export type ShouldRedrawHandler = (canvas: HTMLCanvasElement, context: CanvasRenderingContext2D) => boolean;
-export type DrawHandler = (context: CanvasRenderingContext2D) => void;
-export type PreDrawHandler = (canvas: HTMLCanvasElement, context: CanvasRenderingContext2D) => void;
+
+export type DrawData = {
+  context: CanvasRenderingContext2D,
+  frame: number
+};
+export type ShouldRedrawHandler = (canvas: HTMLCanvasElement, data: DrawData) => boolean;
+export type DrawHandler = (data: DrawData) => void;
+export type PreDrawHandler = (canvas: HTMLCanvasElement, data: DrawData) => void;
 export type PostDrawHandler = () => void;
 export type RenderEnvironmentLayerDrawHandler = (value: RenderEnvironmentValue, context: CanvasRenderingContext2D) => void;
 
@@ -20,7 +25,8 @@ export type RenderEnvironmentLayerOptions = {
   renderFps: boolean,
   renderSize: boolean,
   renderClientSize: boolean,
-  renderPixelRatio: boolean
+  renderPixelRatio: boolean,
+  renderFrameNumber: boolean
 };
 
 export type RenderEnvironmentValue = {
@@ -29,7 +35,8 @@ export type RenderEnvironmentValue = {
   height: number,
   clientWidth: number,
   clientHeight: number,
-  pixelRatio: number
+  pixelRatio: number,
+  frame: number
 }
 
 export type RenderEnvironmentLayerRendererValue = boolean | RenderLocation | Coordinates | RenderEnvironmentLayerOptions | RenderEnvironmentLayerDrawHandler;
@@ -43,7 +50,8 @@ export type Use2DRenderLoopOptions = {
   onPreDraw?: PreDrawHandler,
   onPostDraw?: PostDrawHandler,
   onShouldRedraw?: ShouldRedrawHandler,
-  renderEnvironmentLayerRenderer?: RenderEnvironmentLayerRendererValue
+  renderEnvironmentLayerRenderer?: RenderEnvironmentLayerRendererValue,
+  maxFrame?: number
 }
 
 export type RenderDebugHandler = () => void;

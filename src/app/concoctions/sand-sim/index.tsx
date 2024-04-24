@@ -87,7 +87,7 @@ const SandSim = ({
     particleMap.current = newSize;
   };
 
-  const predrawFn: PreDrawHandler = (canvas, context) => {
+  const predrawFn: PreDrawHandler = (canvas, data) => {
     if (particleMap.current === null) { return; }
 
     const map = particleMap.current;
@@ -95,7 +95,7 @@ const SandSim = ({
     particleMap.current = newMap;
   };
 
-  const drawFn: DrawHandler = (context) => {
+  const drawFn: DrawHandler = ({ context }) => {
     if (particleMap?.current === null) { return; }
 
     runParticleRenderPipeline(

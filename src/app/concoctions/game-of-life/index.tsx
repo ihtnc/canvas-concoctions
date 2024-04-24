@@ -59,7 +59,7 @@ const DEFAULT_DATA: DefaultData = {
   DefaultCellSize: 10,
   DefaultAutoStart: true,
   DefaultAliveColor: '#09AB00',
-  DefaultDyingColor: '#FA6227',
+  DefaultDyingColor: '#C0C0C0',
   DefaultGrowingColor: '#0BD100',
 }
 
@@ -150,7 +150,7 @@ const GameOfLife = ({
     newCellCoordinate.col = col;
   }
 
-  const predrawFn: PreDrawHandler = (canvas, context) => {
+  const predrawFn: PreDrawHandler = (canvas, data) => {
     if (cellMap.current === null) { return; }
 
     const map = cellMap.current;
@@ -158,7 +158,7 @@ const GameOfLife = ({
     cellMap.current = newMap;
   };
 
-  const drawFn: DrawHandler = (context) => {
+  const drawFn: DrawHandler = ({ context }) => {
     if (cellMap?.current === null) { return; }
 
     runCellRenderPipeline(

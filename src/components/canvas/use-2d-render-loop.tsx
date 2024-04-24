@@ -4,7 +4,8 @@ import {
   type Use2DRenderLoopResponse,
   type Use2DRenderLoopOptions,
   type RenderDebugHandler,
-  type RenderDebugConditionalHandler
+  type RenderDebugConditionalHandler,
+  type DrawData
 } from "./types";
 import { DEFAULT_OPTIONS, getRenderEnvironmentLayerRenderer } from "./utilities";
 
@@ -36,6 +37,7 @@ const use2DRenderLoop = (options: Use2DRenderLoopOptions): Use2DRenderLoopRespon
     return fpsCounter.current.frameCount;
   };
 
+  let frame: number = 0;
   let request: boolean | null = null;
   let requestOnce: boolean | null = null;
 
@@ -91,7 +93,9 @@ const use2DRenderLoop = (options: Use2DRenderLoopOptions): Use2DRenderLoopRespon
         return;
       }
 
-      if (onPreDraw) { onPreDraw(canvas, context); }
+      const renderData: DrawData = { context, frame };
+
+      if (onPreDraw) { onPreDraw(canvas, renderData); }
       if (options.clearEachFrame) { clearFrame(canvas); }
 
       if (renderEnvironmentLayerHandler) {
@@ -102,14 +106,16 @@ const use2DRenderLoop = (options: Use2DRenderLoopOptions): Use2DRenderLoopRespon
           height: canvas.height,
           clientWidth: canvas.clientWidth,
           clientHeight: canvas.clientHeight,
-          pixelRatio: devicePixelRatio
+          pixelRatio: devicePixelRatio,
+          frame
         }, context);
       }
 
-      const shouldRedraw = !onShouldRedraw || onShouldRedraw(canvas, context);
-      if (shouldRedraw && onDraw) { onDraw(context); }
+      const shouldRedraw = !onShouldRedraw || onShouldRedraw(canvas, renderData);
+      if (shouldRedraw && onDraw) { onDraw(renderData); }
       if (onPostDraw) { onPostDraw(); }
 
+      frame = (frame + 1 <= options.maxFrame!) ? frame + 1: 0;
       animationFrameId = window.requestAnimationFrame(render);
     };
 

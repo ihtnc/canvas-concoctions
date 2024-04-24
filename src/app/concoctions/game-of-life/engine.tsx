@@ -44,8 +44,8 @@ const ENGINE_DATA: EngineData = {
   DeadCell: { state: CellState.Dead },
   AliveCell: { state: CellState.Alive },
   CellShape: { tl: 10, tr: 10, bl: 10, br: 10 },
-  CycleLength: 20,
-  StateTransitionLength: 5
+  CycleLength: 16,
+  StateTransitionLength: 12
 };
 
 const isCellUndefinedOrTechnicallyAlive = (cell: CellValue | undefined): boolean => {

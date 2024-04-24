@@ -13,14 +13,16 @@ export const DEFAULT_RENDER_ENVIRONMENT_LAYER_OPTIONS: RenderEnvironmentLayerOpt
   renderFps: true,
   renderSize: true,
   renderClientSize: true,
-  renderPixelRatio: true
+  renderPixelRatio: true,
+  renderFrameNumber: true
 };
 
 export const DEFAULT_OPTIONS: Use2DRenderLoopOptions = {
   autoStart: true,
   clearEachFrame: true,
   enableDebug: false,
-  renderEnvironmentLayerRenderer: false
+  renderEnvironmentLayerRenderer: false,
+  maxFrame: Number.MAX_SAFE_INTEGER
 };
 
 export const getRenderEnvironmentLayerRenderer: (value?: RenderEnvironmentLayerRendererValue) => RenderEnvironmentLayerDrawHandler | null = (value) => {
@@ -121,7 +123,8 @@ export const getRenderEnvironmentLayerRenderer: (value?: RenderEnvironmentLayerR
     const sizeText = options.renderSize ? `size: ${value.width}x${value.height}; ` : '';
     const clientText = options.renderClientSize ? `client: ${value.clientWidth}x${value.clientHeight}; ` : '';
     const ratioText = options.renderPixelRatio ? `ratio: ${value.pixelRatio}; ` : '';
-    const debugText = `${fpsText}${sizeText}${clientText}${ratioText}`.trim();
+    const frameText = options.renderFrameNumber ? `frame: ${value.frame};` : '';
+    const debugText = `${fpsText}${sizeText}${clientText}${ratioText}${frameText}`.trim();
     const { x, y } = getCoordinates(debugText, value, context);
     const originalFillStyle = context.fillStyle;
     context.fillStyle = "#000000";

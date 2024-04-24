@@ -1,11 +1,12 @@
-import { describe, expect, test } from "vitest";
+import { afterEach, describe, expect, test, vi } from "vitest";
 import {
   type HSL,
   type RGB,
   compareHSL,
   hexToRGB,
   rgbToHSL,
-  hexToHSL
+  hexToHSL,
+  runRenderPipeline
 } from "./drawing-operations";
 
 describe('drawing operations', () => {
@@ -169,6 +170,75 @@ describe('drawing operations', () => {
 
       const result = compareHSL(mainHSL, otherHSL);
       expect(result).toBe(expected);
+    });
+  });
+
+  describe('runRenderPipeline function', () => {
+    afterEach(() => {
+      vi.resetAllMocks();
+    });
+
+    test('should call render function', () => {
+      const fn = vi.fn();
+      const data = 1;
+      const context: CanvasRenderingContext2D = {} as CanvasRenderingContext2D;
+
+      runRenderPipeline(context, data, fn);
+
+      expect(fn).toHaveBeenCalledWith(context, data);
+    });
+
+    test('should call pre functions before render function', () => {
+      let callCount = 0;
+      const fn1 = vi.fn(() => expect(++callCount).toBe(1));
+      const fn2 = vi.fn(() => expect(++callCount).toBe(2));
+      const fn3 = vi.fn(() => expect(++callCount).toBe(3));
+      const render = vi.fn(() => expect(++callCount).toBe(4));
+      const data = 1;
+      const context: CanvasRenderingContext2D = {} as CanvasRenderingContext2D;
+
+      runRenderPipeline(context, data, render, [fn1, fn2, fn3]);
+
+      expect(fn1).toHaveBeenCalledWith(context, data);
+      expect(fn2).toHaveBeenCalledWith(context, data);
+      expect(fn3).toHaveBeenCalledWith(context, data);
+      expect(render).toHaveBeenCalledWith(context, data);
+    });
+
+    test('should call post functions after render function', () => {
+      let callCount = 0;
+      const render = vi.fn(() => expect(++callCount).toBe(1));
+      const fn1 = vi.fn(() => expect(++callCount).toBe(2));
+      const fn2 = vi.fn(() => expect(++callCount).toBe(3));
+      const fn3 = vi.fn(() => expect(++callCount).toBe(4));
+      const data = 1;
+      const context: CanvasRenderingContext2D = {} as CanvasRenderingContext2D;
+
+      runRenderPipeline(context, data, render, [], [fn1, fn2, fn3]);
+
+      expect(render).toHaveBeenCalledWith(context, data);
+      expect(fn1).toHaveBeenCalledWith(context, data);
+      expect(fn2).toHaveBeenCalledWith(context, data);
+      expect(fn3).toHaveBeenCalledWith(context, data);
+    });
+
+    test('should call functions in order', () => {
+      let callCount = 0;
+      const pre1 = vi.fn(() => expect(++callCount).toBe(1));
+      const pre2 = vi.fn(() => expect(++callCount).toBe(2));
+      const render = vi.fn(() => expect(++callCount).toBe(3));
+      const post1 = vi.fn(() => expect(++callCount).toBe(4));
+      const post2 = vi.fn(() => expect(++callCount).toBe(5));
+      const data = 1;
+      const context: CanvasRenderingContext2D = {} as CanvasRenderingContext2D;
+
+      runRenderPipeline(context, data, render, [pre1, pre2], [post1, post2]);
+
+      expect(pre1).toHaveBeenCalledWith(context, data);
+      expect(pre2).toHaveBeenCalledWith(context, data);
+      expect(render).toHaveBeenCalledWith(context, data);
+      expect(post1).toHaveBeenCalledWith(context, data);
+      expect(post2).toHaveBeenCalledWith(context, data);
     });
   });
 });

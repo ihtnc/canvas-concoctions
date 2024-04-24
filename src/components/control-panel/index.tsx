@@ -27,7 +27,7 @@ const ControlPanel = ({ className, controls }: ControlPanelProps) => {
     {controls.map(c => {
       return (getValue(c.hidden) === false && <button key={c.key ?? controlCount++}
         onClick={() => {
-          setLastRerender(new Date());
+          setLastRerender(new Date()); // force a rerender
           c.onClickHandler();
         }}
         title={c.title}

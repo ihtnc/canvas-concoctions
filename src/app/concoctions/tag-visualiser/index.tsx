@@ -10,7 +10,7 @@ type TagVisualiserProps = {
 
 const TagVisualiser = ({ className }: TagVisualiserProps) => {
   let frameCount = 0;
-  const drawFn: DrawHandler = (context) => {
+  const drawFn: DrawHandler = ({ context }) => {
     context.fillStyle = '#000000';
     context.beginPath();
     context.arc(50, 50, 20*Math.sin(frameCount*0.05)**2, 0, 2*Math.PI);
@@ -18,7 +18,8 @@ const TagVisualiser = ({ className }: TagVisualiserProps) => {
     frameCount++;
   }
   const { Canvas } = useAnimatedCanvas({
-    draw: drawFn
+    draw: drawFn,
+    renderEnvironmentLayerRenderer: true
   });
 
   return <Canvas className={className} />
