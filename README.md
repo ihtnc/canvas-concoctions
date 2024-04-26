@@ -2,6 +2,8 @@
 
 This is a repository for various small, interactive applications / animations that served as a playground for ideas using the canvas HTML element.
 
+Icons provided by https://heroicons.com/.
+
 ## Concoctions
 ### Sand Simulation
 

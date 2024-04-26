@@ -49,8 +49,7 @@ type DefaultData = {
 enum ButtonType {
   Start,
   Pause,
-  Step,
-  Reset
+  Step
 }
 
 const DEFAULT_DATA: DefaultData = {
@@ -197,8 +196,6 @@ const GameOfLife = ({
   }
 
   const resetConcoction = () => {
-    lastButtonClicked = ButtonType.Reset;
-
     if (cellMap?.current === null) { return; }
 
     canGenerateCell = false;
@@ -223,27 +220,28 @@ const GameOfLife = ({
   }
 
   const controls: Array<ControlItem> = [{
-    key: ButtonType.Start,
+    type: "button",
     onClickHandler: startCycle,
-    component: (<PlayIcon />),
+    content: (<PlayIcon />),
     title: "Start cycle",
     hidden: hidePlayIcon
   }, {
-    key: ButtonType.Pause,
+    type: "button",
     onClickHandler: pauseCycle,
-    component: (<PauseIcon />),
+    content: (<PauseIcon />),
     title: "Pause cycle",
     hidden: hidePauseIcon
   }, {
-    key: ButtonType.Step,
+    type: "button",
     onClickHandler: stepCycle,
-    component: (<ForwardIcon />),
+    content: (<ForwardIcon />),
     title: "Forward 1 cycle"
   }, {
-    key: ButtonType.Reset,
+    type: "button",
     onClickHandler: resetConcoction,
-    component: (<TrashIcon />),
-    title: "Reset canvas"
+    content: (<TrashIcon />),
+    title: "Reset canvas",
+    className: "ml-auto"
   }];
 
   return <div className="flex flex-col w-full h-full gap-2">
@@ -254,7 +252,7 @@ const GameOfLife = ({
       onPointerOut={stopNewCells}
       onPointerMove={updateNewCellCoordinate}
     />
-    <ControlPanel controls={controls} />
+    <ControlPanel controls={controls} className="w-full" />
   </div>
 };
 

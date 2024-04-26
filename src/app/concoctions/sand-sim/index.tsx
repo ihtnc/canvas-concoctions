@@ -152,9 +152,11 @@ const SandSim = ({
   });
 
   const controls: Array<ControlItem> = [{
+    type: "button",
     onClickHandler: resetConcoction,
-    component: (<TrashIcon />),
-    title: "Reset canvas"
+    content: (<TrashIcon />),
+    title: "Reset canvas",
+    className: "ml-auto"
   }];
 
   return <div className="flex flex-col w-full h-full gap-2">
@@ -165,7 +167,7 @@ const SandSim = ({
       onPointerOut={stopNewParticles}
       onPointerMove={updateNewParticleCoordinate}
     />
-    <ControlPanel controls={controls} />
+    <ControlPanel controls={controls} className="w-full" />
   </div>
 };
 

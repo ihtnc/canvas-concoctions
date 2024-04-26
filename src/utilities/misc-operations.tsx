@@ -26,3 +26,18 @@ export const deepCopy: <T>(value: T) => T = (value) => {
 
   return value;
 };
+
+export type OperationFunction = <T>(data: T) => T;
+
+type OperationPipelineFunction = (operations: Array<OperationFunction>) => { run: OperationFunction }
+export const operationPipeline:OperationPipelineFunction = (operations) => {
+  return {
+    run: (value) => {
+      let lastValue = value;
+      for (let i = 0; i < operations.length; i++) {
+        lastValue = operations[i](lastValue);
+      }
+      return lastValue;
+    }
+  };
+};

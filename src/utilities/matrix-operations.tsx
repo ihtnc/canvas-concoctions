@@ -1,4 +1,4 @@
-import { deepCopy } from "./misc-operations";
+import { type OperationFunction, deepCopy, operationPipeline } from "./misc-operations";
 
 export type MatrixValue<T> = T[][];
 type InferType<C extends MatrixValue<any>> = C extends MatrixValue<infer T> ? T : unknown;
@@ -7,19 +7,12 @@ export type MatrixCoordinate = {
   row: number,
   col: number
 }
+
 export type MatrixOperationFunction = <T>(value: MatrixValue<T>) => MatrixValue<T>;
 
-type MatrixPipelineFunction = (operations: Array<MatrixOperationFunction>) => { run: MatrixOperationFunction }
-export const matrixPipeline:MatrixPipelineFunction = (operations) => {
-  return {
-    run: (value) => {
-      let lastValue = value;
-      for (let i = 0; i < operations.length; i++) {
-        lastValue = operations[i](lastValue);
-      }
-      return lastValue;
-    }
-  };
+type MatrixPipelineFunction = (operations: Array<MatrixOperationFunction>) => { run: MatrixOperationFunction };
+export const matrixPipeline:MatrixPipelineFunction = (operations: Array<MatrixOperationFunction>): { run: MatrixOperationFunction } => {
+  return operationPipeline(operations as OperationFunction[]);
 };
 
 export enum HResizeDirection {

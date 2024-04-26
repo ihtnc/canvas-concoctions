@@ -1,41 +1,105 @@
-import { type ReactNode, type Key, useState } from "react";
+import { type ReactNode, useState } from "react";
 
-export type ControlItem = {
-  key?: Key | null,
-  onClickHandler: () => void,
-  hidden?: boolean | (() => boolean),
-  disabled?: boolean | (() => boolean),
-  title?: string,
-  className?: string,
-  component: ReactNode
+type ControlPropValue<T extends string | number | boolean | object> = T | (() => T);
+
+type BaseControlItem = {
+  type: "button" | "text" | "label",
+  hidden?: ControlPropValue<boolean>,
+  disabled?: ControlPropValue<boolean>,
+  title?: ControlPropValue<string>,
+  className?: ControlPropValue<string>
 };
+
+interface ButtonControlItem extends BaseControlItem {
+  type: "button",
+  onClickHandler: OnClickHandler,
+  content: ReactNode,
+  name?: string
+};
+
+interface TextInputControlItem extends BaseControlItem {
+  type: "text"
+  name: string,
+  onChangeHandler: OnChangeHandler,
+  placeholder?: ControlPropValue<string>,
+  value?: ControlPropValue<string>
+};
+
+interface LabelControlItem extends BaseControlItem {
+  type: "label",
+  content: ReactNode,
+  for?: string,
+}
+
+export type OnClickHandler = () => void;
+export type OnChangeHandler = (value: string) => void;
+export type ControlItem = ButtonControlItem | TextInputControlItem | LabelControlItem;
 
 type ControlPanelProps = {
   className?: string,
   controls: Array<ControlItem>
 };
 
+type GetPropValueFunction = <T extends string | number | boolean | object>(value?: ControlPropValue<T>, defaultValue?: T) => T | undefined;
+
 const ControlPanel = ({ className, controls }: ControlPanelProps) => {
-  const getValue = (value: boolean | (() => boolean) | undefined, defaultValue: boolean = false): boolean => {
-    if (value === undefined) { return defaultValue; }
-    else if (typeof value === "boolean") { return value; }
-    else return value();
-  };
-  const [_, setLastRerender] = useState<Date>(new Date());
+  const [_, setLastRenderDate] = useState<Date>(new Date());
   let controlCount = 0;
-  return <div className={`flex self-center gap-4 ${className}`}>
-    {controls.map(c => {
-      return (getValue(c.hidden) === false && <button key={c.key ?? controlCount++}
+
+  const forceRerender = () => setLastRenderDate(new Date());
+
+  const getPropValue: GetPropValueFunction = (value, defaultValue) => {
+    if (typeof value === 'function') { return value(); }
+    else if (value !== undefined) { return value; }
+    else return defaultValue;
+  };
+
+  const getControl = (c: ControlItem) => {
+    if (getPropValue(c.hidden, false)) { return undefined; }
+
+    if (c.type === "button") {
+      const btn = c as ButtonControlItem;
+      return (<button key={btn.name ?? `button${controlCount++}`}
         onClick={() => {
-          setLastRerender(new Date()); // force a rerender
-          c.onClickHandler();
+          forceRerender();
+          btn.onClickHandler();
         }}
-        title={c.title}
-        disabled={getValue(c.disabled)}
-        className={`flex ${c.className}`}>
-        {c.component}
+        name={btn.name}
+        title={getPropValue(btn.title)}
+        disabled={getPropValue(btn.disabled, false)}
+        className={`flex ${getPropValue(btn.className)}`}>
+        {btn.content}
       </button>);
-    })}
+    }
+
+    if (c.type === "text") {
+      const txt = c as TextInputControlItem;
+      return (<input key={txt.name} type='text' name={txt.name}
+        value={getPropValue(txt.value, '')}
+        onChange={(e) => {
+          txt.onChangeHandler(e.target.value);
+          forceRerender();
+        }}
+        title={getPropValue(txt.title)}
+        placeholder={getPropValue(txt.placeholder)}
+        disabled={getPropValue(txt.disabled, false)}
+        className={`flex ${getPropValue(txt.className)}`}
+      />);
+    }
+
+    if (c.type === "label") {
+      const lbl = c as LabelControlItem;
+      return (<label key={`label${controlCount++}`}
+        htmlFor={lbl.for}
+        title={getPropValue(lbl.title)}
+        className={`flex ${getPropValue(lbl.className)}`}>
+          {lbl.content}
+      </label>);
+    }
+  }
+
+  return <div className={`flex self-center gap-4 justify-center ${className}`}>
+    {controls.map(getControl)}
   </div>;
 };
 

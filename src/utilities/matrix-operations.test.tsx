@@ -13,6 +13,7 @@ import {
   diff,
   applyChanges
 } from "./matrix-operations";
+import * as miscOperations from './misc-operations';
 
 describe('matrix-operations', () => {
 
@@ -433,11 +434,17 @@ describe('matrix-operations', () => {
   });
 
   describe('matrixPipeline function', () => {
+    let operationPipeline: any;
+
     afterEach(() => {
-      vi.resetAllMocks();
+      vi.restoreAllMocks();
     });
 
-    test('should not immediately call functions', () => {
+    beforeEach(() => {
+      operationPipeline = vi.spyOn(miscOperations, 'operationPipeline');
+    });
+
+    test('should call operationPipeline', () => {
       const fn1 = vi.fn();
       const fn2 = vi.fn();
       const fn3 = vi.fn();
@@ -448,46 +455,7 @@ describe('matrix-operations', () => {
         fn3
       ]);
 
-      expect(fn1).not.toHaveBeenCalled();
-      expect(fn2).not.toHaveBeenCalled();
-      expect(fn3).not.toHaveBeenCalled();
-    });
-
-    test('should call functions sequentially when run is called', () => {
-      const initialValue: MatrixValue<number> = [[1]];
-      const fn1Return: MatrixValue<number> = [[2]];
-      const fn2Return: MatrixValue<number> = [[3]];
-      const fn3Return: MatrixValue<number> = [[4]];
-
-      const fn1 = vi.fn().mockReturnValue(fn1Return);
-      const fn2 = vi.fn().mockReturnValue(fn2Return);
-      const fn3 = vi.fn().mockReturnValue(fn3Return);
-
-      matrixPipeline([
-        fn1,
-        fn2,
-        fn3
-      ]).run(initialValue);
-
-      expect(fn1).toHaveBeenCalledWith(initialValue);
-      expect(fn2).toHaveBeenCalledWith(fn1Return);
-      expect(fn3).toHaveBeenCalledWith(fn2Return);
-    });
-
-    test('should return response from last function', () => {
-      const fn3Return: MatrixValue<number> = [[1]];
-
-      const fn1 = vi.fn();
-      const fn2 = vi.fn();
-      const fn3 = vi.fn().mockReturnValue(fn3Return);
-
-      const finalValue = matrixPipeline([
-        fn1,
-        fn2,
-        fn3
-      ]).run([]);
-
-      expect(finalValue).toBe(fn3Return);
+      expect(operationPipeline).toHaveBeenCalledWith([fn1, fn2, fn3]);
     });
   });
 
