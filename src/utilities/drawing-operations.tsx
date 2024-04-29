@@ -1,3 +1,6 @@
+import { type AreEqualFunction } from "./misc-operations";
+
+export type Size = { width: number, height: number };
 export type RGB = { r: number, g: number, b: number };
 export type HSL = { h: number, s: number, l: number };
 export type BorderRadii = { tl: number, tr: number, bl: number, br: number };
@@ -38,10 +41,15 @@ export const hexToHSL: (hexColor: string) => HSL | undefined = (hexColor) => {
   return rgb !== undefined ? rgbToHSL(rgb) : undefined;
 };
 
-export const compareHSL: (color1: HSL, color2: HSL) => boolean = (color1, color2) => {
-  return (color1.h === color2.h
-    && color1.s === color2.s
-    && color1.l === color2.l);
+export const areHSLsEqual:AreEqualFunction<HSL> = (color1, color2) => {
+  return (color1?.h === color2?.h
+    && color1?.s === color2?.s
+    && color1?.l === color2?.l);
+};
+
+export const areSizesEqual:AreEqualFunction<Size> = (size1, size2) => {
+  return (size1?.width === size2?.width
+    && size1?.height === size2?.height);
 };
 
 export type RenderFunction = <T>(context: CanvasRenderingContext2D, data: T) => void;

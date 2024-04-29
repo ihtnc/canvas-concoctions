@@ -2,6 +2,7 @@ import { describe, expect, test, vi, afterEach } from "vitest";
 import { clearFrame } from "./canvas-operations";
 
 describe('canvas operations', () => {
+
   describe('clearFrame function', () => {
     afterEach(() => {
       vi.resetAllMocks();

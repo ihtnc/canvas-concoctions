@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
+import { MockInstance, afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 import {
   type MatrixValue,
   HResizeDirection,
@@ -434,7 +434,7 @@ describe('matrix-operations', () => {
   });
 
   describe('matrixPipeline function', () => {
-    let operationPipeline: any;
+    let operationPipeline: MockInstance<any>;
 
     afterEach(() => {
       vi.restoreAllMocks();

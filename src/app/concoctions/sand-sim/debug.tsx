@@ -29,7 +29,8 @@ export const renderDebugLayer: ParticleRenderFunction = (context: CanvasRenderin
   const tr = { y: 0, x: lastX };
   const bl = { y: lastY, x: 0 };
   const br = { y: lastY, x: lastX };
-  const originalFillStyle = context.fillStyle;
+
+  context.save();
 
   context.fillStyle = '#000000';
   const matrixSizeText = `map[${rowCount}][${colCount}];`
@@ -52,6 +53,6 @@ export const renderDebugLayer: ParticleRenderFunction = (context: CanvasRenderin
   context.fillRect(br.x, br.y, width, height);
   context.fillText(`x=${br.x}; y=${br.y}`, br.x - 50, br.y - 30);
 
-  context.fillStyle = originalFillStyle;
+  context.restore();
 };
 

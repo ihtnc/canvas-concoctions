@@ -13,6 +13,14 @@ export const deepCopy: <T>(value: T) => T = (value) => {
     return dateCopy as typeof value;
   }
 
+  if (Array.isArray(value)) {
+    const arrayCopy = [];
+    for (let i=0; i < value.length; i++) {
+      arrayCopy.push(deepCopy(value[i]));
+    }
+    return arrayCopy as typeof value;
+  }
+
   if (value instanceof Object) {
     const objCopy = { ...value };
     const obj = value as Object;
@@ -41,3 +49,5 @@ export const operationPipeline:OperationPipelineFunction = (operations) => {
     }
   };
 };
+
+export type AreEqualFunction<T> = (value1?: T, value2?: T) => boolean;

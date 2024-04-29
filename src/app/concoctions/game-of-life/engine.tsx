@@ -352,8 +352,7 @@ const getCellShape: (map: MatrixValue<CellValue>, coordinate: MatrixCoordinate, 
 const renderCellLayer: CellRenderFunction = (context: CanvasRenderingContext2D, data: RenderPipelineData) => {
   const { map, width, height, cycleIndex, aliveColor, dyingColor, growingColor } = data;
 
-  const originalFillStyle = context.fillStyle;
-  const originalStrokeStyle = context.strokeStyle;
+  context.save();
 
   const stateMap = getStateMap(map);
   const displayMap = getDisplayMap(
@@ -387,8 +386,7 @@ const renderCellLayer: CellRenderFunction = (context: CanvasRenderingContext2D, 
     context.stroke();
   }
 
-  context.fillStyle = originalFillStyle;
-  context.strokeStyle = originalStrokeStyle;
+  context.restore();
 };
 
 type RunCellRenderPipelineFunction = (context: CanvasRenderingContext2D, data: RenderPipelineData, pre?: Array<RenderFunction>, post?: Array<RenderFunction>) => void;

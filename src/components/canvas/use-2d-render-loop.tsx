@@ -113,7 +113,7 @@ const use2DRenderLoop = (options: Use2DRenderLoopOptions): Use2DRenderLoopRespon
 
       const shouldRedraw = !onShouldRedraw || onShouldRedraw(canvas, renderData);
       if (shouldRedraw && onDraw) { onDraw(renderData); }
-      if (onPostDraw) { onPostDraw(); }
+      if (onPostDraw) { onPostDraw(canvas, renderData); }
 
       frame = (frame + 1 <= options.maxFrame!) ? frame + 1: 0;
       animationFrameId = window.requestAnimationFrame(render);

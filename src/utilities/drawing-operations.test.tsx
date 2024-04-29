@@ -2,7 +2,9 @@ import { afterEach, describe, expect, test, vi } from "vitest";
 import {
   type HSL,
   type RGB,
-  compareHSL,
+  type Size,
+  areHSLsEqual,
+  areSizesEqual,
   hexToRGB,
   rgbToHSL,
   hexToHSL,
@@ -10,6 +12,7 @@ import {
 } from "./drawing-operations";
 
 describe('drawing operations', () => {
+
   describe('hexToRGB function', () => {
     test.each([
       { value: 'red' },
@@ -97,16 +100,43 @@ describe('drawing operations', () => {
     });
   });
 
-  describe('compareHSL function', () => {
+  describe('areHSLsEqual function', () => {
     test('should return true when comparing HSL to itself', () => {
       const hsl: HSL = {
         h: 76,
         s: 54,
         l: 98
-       };
+      };
 
-       const result = compareHSL(hsl, hsl);
-       expect(result).toBe(true);
+      const result = areHSLsEqual(hsl, hsl);
+      expect(result).toBe(true);
+    });
+
+    test('should handle undefined value1', () => {
+      const hsl: HSL = {
+        h: 76,
+        s: 54,
+        l: 98
+      };
+
+      const result = areHSLsEqual(undefined, hsl);
+      expect(result).toBe(false);
+    });
+
+    test('should handle undefined value2', () => {
+      const hsl: HSL = {
+        h: 76,
+        s: 54,
+        l: 98
+      };
+
+      const result = areHSLsEqual(hsl, undefined);
+      expect(result).toBe(false);
+    });
+
+    test('should return true if both are undefined', () => {
+      const result = areHSLsEqual(undefined, undefined);
+      expect(result).toBe(true);
     });
 
     test.each([
@@ -114,19 +144,19 @@ describe('drawing operations', () => {
       { value: 7, expected: false },
       { value: 6, expected: false }
     ])('should compare the h component ($value)', ({ value, expected }: ({ value: number, expected: boolean })) => {
-      const mainHSL = {
+      const mainHSL: HSL = {
         h: 8,
         s: 42,
         l: 88
       };
 
-      const otherHSL = {
+      const otherHSL: HSL = {
         h: value,
         s: mainHSL.s,
         l: mainHSL.l
       };
 
-      const result = compareHSL(mainHSL, otherHSL);
+      const result = areHSLsEqual(mainHSL, otherHSL);
       expect(result).toBe(expected);
     });
 
@@ -135,19 +165,19 @@ describe('drawing operations', () => {
       { value: 7, expected: false },
       { value: 6, expected: false }
     ])('should compare the s component ($value)', ({ value, expected }: ({ value: number, expected: boolean })) => {
-      const mainHSL = {
+      const mainHSL: HSL = {
         h: 42,
         s: 8,
         l: 88
       };
 
-      const otherHSL = {
+      const otherHSL: HSL = {
         h: mainHSL.h,
         s: value,
         l: mainHSL.l
       };
 
-      const result = compareHSL(mainHSL, otherHSL);
+      const result = areHSLsEqual(mainHSL, otherHSL);
       expect(result).toBe(expected);
     });
 
@@ -156,19 +186,94 @@ describe('drawing operations', () => {
       { value: 7, expected: false },
       { value: 6, expected: false }
     ])('should compare the l component ($value)', ({ value, expected }: ({ value: number, expected: boolean })) => {
-      const mainHSL = {
+      const mainHSL: HSL = {
         h: 42,
         s: 88,
         l: 8
       };
 
-      const otherHSL = {
+      const otherHSL: HSL = {
         h: mainHSL.h,
         s: mainHSL.s,
         l: value
       };
 
-      const result = compareHSL(mainHSL, otherHSL);
+      const result = areHSLsEqual(mainHSL, otherHSL);
+      expect(result).toBe(expected);
+    });
+  });
+
+  describe('areSizesEqual function', () => {
+    test('should return true when comparing Size to itself', () => {
+      const size: Size = {
+        width: 12,
+        height: 34
+      };
+
+      const result = areSizesEqual(size, size);
+      expect(result).toBe(true);
+    });
+
+    test('should handle undefined value1', () => {
+      const size: Size = {
+        width: 12,
+        height: 34
+      };
+
+      const result = areSizesEqual(undefined, size);
+      expect(result).toBe(false);
+    });
+
+    test('should handle undefined value2', () => {
+      const size: Size = {
+        width: 12,
+        height: 34
+      };
+
+      const result = areSizesEqual(size, undefined);
+      expect(result).toBe(false);
+    });
+
+    test('should return true if both are undefined', () => {
+      const result = areSizesEqual(undefined, undefined);
+      expect(result).toBe(true);
+    });
+
+    test.each([
+      { value: 432, expected: true },
+      { value: 431, expected: false },
+      { value: 987, expected: false }
+    ])('should compare the width component ($value)', ({ value, expected }: ({ value: number, expected: boolean })) => {
+      const mainSize: Size = {
+        width: 432,
+        height: 987
+      };
+
+      const otherSize: Size = {
+        width: value,
+        height: mainSize.height
+      };
+
+      const result = areSizesEqual(mainSize, otherSize);
+      expect(result).toBe(expected);
+    });
+
+    test.each([
+      { value: 432, expected: true },
+      { value: 431, expected: false },
+      { value: 987, expected: false }
+    ])('should compare the height component ($value)', ({ value, expected }: ({ value: number, expected: boolean })) => {
+      const mainSize: Size = {
+        width: 987,
+        height: 432
+      };
+
+      const otherSize: Size = {
+        width: mainSize.width,
+        height: value
+      };
+
+      const result = areSizesEqual(mainSize, otherSize);
       expect(result).toBe(expected);
     });
   });

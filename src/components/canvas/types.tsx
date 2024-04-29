@@ -10,7 +10,7 @@ export type DrawData = {
 export type ShouldRedrawHandler = (canvas: HTMLCanvasElement, data: DrawData) => boolean;
 export type DrawHandler = (data: DrawData) => void;
 export type PreDrawHandler = (canvas: HTMLCanvasElement, data: DrawData) => void;
-export type PostDrawHandler = () => void;
+export type PostDrawHandler = (canvas: HTMLCanvasElement, data: DrawData) => void;
 export type RenderEnvironmentLayerDrawHandler = (value: RenderEnvironmentValue, context: CanvasRenderingContext2D) => void;
 
 export enum RenderLocation {

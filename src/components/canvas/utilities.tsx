@@ -1,3 +1,4 @@
+import { type AreEqualFunction } from "@/utilities/misc-operations";
 import {
   RenderLocation,
   type RenderEnvironmentLayerDrawHandler,
@@ -134,3 +135,10 @@ export const getRenderEnvironmentLayerRenderer: (value?: RenderEnvironmentLayerR
 
   return renderer;
 }
+
+export const areCoordinatesEqual: AreEqualFunction<Coordinates> = (coordinates1, coordinates2): boolean => {
+  if (coordinates1?.x !== coordinates2?.x) { return false; }
+  if (coordinates1?.y !== coordinates2?.y) { return false; }
+
+  return true;
+};

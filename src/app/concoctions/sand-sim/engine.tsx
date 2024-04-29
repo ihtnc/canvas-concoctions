@@ -6,8 +6,8 @@ import {
   type HSL,
   type RenderFunction,
   type BorderRadii,
-  compareHSL,
-  runRenderPipeline
+  runRenderPipeline,
+  areHSLsEqual
 } from "@/utilities/drawing-operations";
 import {
   VResizeDirection,
@@ -207,7 +207,7 @@ const getColorMap = (value: MatrixValue<ParticleValue>): Array<ParticleColorMap>
       if (value[i][j].color === undefined) { continue; }
 
       const color = value[i][j].color!;
-      let group = sorted.find(item => compareHSL(item.color, color));
+      let group = sorted.find(item => areHSLsEqual(item.color, color));
       if (group === undefined) {
         const newLength = sorted.push({ color: deepCopy(color), particles: [] })
         group = sorted[newLength - 1];
@@ -233,8 +233,7 @@ const renderParticleLayer: ParticleRenderFunction = (context: CanvasRenderingCon
   const { map, width, height } = data;
   let shape: BorderRadii = { tl: 0, tr: 0, bl: 0, br: 0 };
 
-  const originalFillStyle = context.fillStyle;
-  const originalStrokeStyle = context.strokeStyle;
+  context.save();
 
   const colorMap = getColorMap(map);
   for(let g = 0; g < colorMap.length; g++) {
@@ -274,8 +273,7 @@ const renderParticleLayer: ParticleRenderFunction = (context: CanvasRenderingCon
     context.stroke();
   }
 
-  context.fillStyle = originalFillStyle;
-  context.strokeStyle = originalStrokeStyle;
+  context.restore();
 };
 
 type RunParticleRenderPipelineFunction = (context: CanvasRenderingContext2D, data: RenderPipelineData, pre?: Array<RenderFunction>, post?: Array<RenderFunction>) => void;

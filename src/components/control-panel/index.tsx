@@ -1,4 +1,4 @@
-import { type ReactNode, useState } from "react";
+import { useState } from "react";
 
 type ControlPropValue<T extends string | number | boolean | object> = T | (() => T);
 
@@ -13,7 +13,7 @@ type BaseControlItem = {
 interface ButtonControlItem extends BaseControlItem {
   type: "button",
   onClickHandler: OnClickHandler,
-  content: ReactNode,
+  content: JSX.Element,
   name?: string
 };
 
@@ -27,7 +27,7 @@ interface TextInputControlItem extends BaseControlItem {
 
 interface LabelControlItem extends BaseControlItem {
   type: "label",
-  content: ReactNode,
+  content: JSX.Element,
   for?: string,
 }
 

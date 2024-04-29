@@ -2,6 +2,7 @@ import { afterEach, describe, expect, test, vi } from "vitest";
 import { chooseRandom, deepCopy, operationPipeline } from "./misc-operations";
 
 describe('misc operations', () => {
+
   describe('chooseRandom function', () => {
     test('should only choose between min and max inclusive', () => {
       const min = 2;
@@ -32,6 +33,26 @@ describe('misc operations', () => {
       const value = new Date(2024, 1, 1);
       const result = deepCopy(value);
       expect(result).toStrictEqual(value);
+    });
+
+    test('should handle array', () => {
+      const value = [1, 2, 3];
+      const result = deepCopy(value);
+      expect(result).toStrictEqual(value);
+    });
+
+    test('should handle array of objects', () => {
+      const obj1 = { id: 1 };
+      const obj2 = { id: 2 };
+      const obj3 = { id: 3 };
+      const value = [obj1, obj2, obj3];
+
+      const result = deepCopy(value);
+
+      expect(result).toStrictEqual(value);
+      expect(result[0]).not.toBe(obj1);
+      expect(result[1]).not.toBe(obj2);
+      expect(result[2]).not.toBe(obj3);
     });
 
     test('should handle objects', () => {

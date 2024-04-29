@@ -34,7 +34,8 @@ export const getRenderDebugLayer: GetRenderDebugLayerFunction = (debug) => {
     const tr = { y: 0, x: lastX };
     const bl = { y: lastY, x: 0 };
     const br = { y: lastY, x: lastX };
-    const originalFillStyle = context.fillStyle;
+
+    context.save();
 
     const { buttonState, cycleState } = debug;
     context.fillStyle = '#000000';
@@ -62,7 +63,7 @@ export const getRenderDebugLayer: GetRenderDebugLayerFunction = (debug) => {
     context.fillRect(br.x, br.y, width, height);
     context.fillText(`x=${br.x}; y=${br.y}`, br.x - 50, br.y - 30);
 
-    context.fillStyle = originalFillStyle;
+    context.restore();
   };
 
   return renderDebug;
