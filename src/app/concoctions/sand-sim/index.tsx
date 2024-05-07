@@ -18,15 +18,15 @@ import {
 } from "@/components/canvas/types";
 import useAnimatedCanvas from "@/components/canvas/use-animated-canvas";
 import {
-  type ParticleValue,
   initialiseParticleMap,
   resetParticleMap,
   resizeParticleMap,
-  runParticleMapPipeline,
-  runParticleRenderPipeline
+  processParticleMap,
+  renderParticleMap
 } from "./engine";
 import TrashIcon from "@/components/icons/trash-icon";
 import ControlPanel, { type ControlItem } from "@/components/control-panel";
+import { type ParticleValue } from "./engine/types";
 
 type SandboxProps = {
   className?: string,
@@ -91,14 +91,14 @@ const SandSim = ({
     if (particleMap.current === null) { return; }
 
     const map = particleMap.current;
-    const newMap = runParticleMapPipeline(map, currentHSL, canGenerateParticle ? newParticleCoordinate : undefined);
+    const newMap = processParticleMap(map, currentHSL, canGenerateParticle ? newParticleCoordinate : undefined);
     particleMap.current = newMap;
   };
 
   const drawFn: DrawHandler = ({ context }) => {
     if (particleMap?.current === null) { return; }
 
-    runParticleRenderPipeline(
+    renderParticleMap(
       context,
       { map: particleMap.current, width: grainSize, height: grainSize },
       [],

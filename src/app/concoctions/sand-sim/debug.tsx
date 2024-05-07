@@ -6,7 +6,7 @@ import {
   type RenderPipelineData,
   type ParticleOperationFunction,
   type ParticleRenderFunction
-} from "./engine";
+} from "./engine/types";
 
 export const setMatrixValue: ParticleOperationFunction = (value: MatrixValue<ParticleValue>) => {
   for(let i = 0; i < value.length; i++) {
