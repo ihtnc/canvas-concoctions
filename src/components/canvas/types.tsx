@@ -5,7 +5,8 @@ export type InitRenderHandler = (canvas: HTMLCanvasElement, data: InitData) => v
 
 export type DrawData = {
   context: CanvasRenderingContext2D,
-  frame: number
+  frame: number,
+  fps: number
 };
 export type ShouldRedrawHandler = (canvas: HTMLCanvasElement, data: DrawData) => boolean;
 export type DrawHandler = (data: DrawData) => void;

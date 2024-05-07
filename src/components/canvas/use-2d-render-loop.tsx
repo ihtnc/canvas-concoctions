@@ -9,7 +9,7 @@ import {
 } from "./types";
 import { DEFAULT_OPTIONS, getRenderEnvironmentLayerRenderer } from "./utilities";
 
-type FpsCounter = { frameCount: number, fps: number, reference: number };
+type FrameCounter = { frameCount: number, fps: number, lastRender: number };
 
 const use2DRenderLoop = (options: Use2DRenderLoopOptions): Use2DRenderLoopResponse => {
   options = Object.assign({}, DEFAULT_OPTIONS, options);
@@ -18,26 +18,27 @@ const use2DRenderLoop = (options: Use2DRenderLoopOptions): Use2DRenderLoopRespon
   const { onInit, onPreDraw, onDraw, onPostDraw, onShouldRedraw, renderEnvironmentLayerRenderer } = options;
   const renderEnvironmentLayerHandler = getRenderEnvironmentLayerRenderer(renderEnvironmentLayerRenderer);
 
-  const fpsCounter = useRef<FpsCounter>({
+  const frameCounter = useRef<FrameCounter>({
     frameCount: 0,
     fps: 0,
-    reference: new Date().getTime()
+    lastRender: performance.now()
   });
 
-  const updateFpsCounter: () => number = () => {
-    fpsCounter.current.frameCount++;
-    const current = new Date().getTime();
-    const elapsed = current - fpsCounter.current.reference;
-    if (elapsed > 1000) {
-      fpsCounter.current.fps = fpsCounter.current.frameCount;
-      fpsCounter.current.frameCount = 0;
-      fpsCounter.current.reference = current;
-    }
+  const updateFrameCounter: () => number = () => {
+    const current = performance.now();
+    const frameLength = current - frameCounter.current.lastRender;
+    const fps = Math.round(1000 / frameLength);
 
-    return fpsCounter.current.frameCount;
+    frameCounter.current.fps = fps;
+    frameCounter.current.lastRender = current;
+
+    let frame = frameCounter.current.frameCount;
+    frame = (frame + 1 <= options.maxFrame!) ? frame + 1: 0;
+    frameCounter.current.frameCount = frame;
+
+    return fps;
   };
 
-  let frame: number = 0;
   let request: boolean | null = null;
   let requestOnce: boolean | null = null;
 
@@ -93,21 +94,24 @@ const use2DRenderLoop = (options: Use2DRenderLoopOptions): Use2DRenderLoopRespon
         return;
       }
 
-      const renderData: DrawData = { context, frame };
+      const renderData: DrawData = {
+        context,
+        frame: frameCounter.current.frameCount,
+        fps: frameCounter.current.fps
+      };
 
       if (onPreDraw) { onPreDraw(canvas, renderData); }
       if (options.clearEachFrame) { clearFrame(canvas); }
 
       if (renderEnvironmentLayerHandler) {
-        updateFpsCounter();
         renderEnvironmentLayerHandler({
-          fps: fpsCounter.current.fps,
+          fps: frameCounter.current.fps,
           width: canvas.width,
           height: canvas.height,
           clientWidth: canvas.clientWidth,
           clientHeight: canvas.clientHeight,
           pixelRatio: devicePixelRatio,
-          frame
+          frame: frameCounter.current.frameCount
         }, context);
       }
 
@@ -115,7 +119,7 @@ const use2DRenderLoop = (options: Use2DRenderLoopOptions): Use2DRenderLoopRespon
       if (shouldRedraw && onDraw) { onDraw(renderData); }
       if (onPostDraw) { onPostDraw(canvas, renderData); }
 
-      frame = (frame + 1 <= options.maxFrame!) ? frame + 1: 0;
+      updateFrameCounter();
       animationFrameId = window.requestAnimationFrame(render);
     };
 
