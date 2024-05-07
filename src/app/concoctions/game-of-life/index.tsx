@@ -13,21 +13,20 @@ import { type MatrixCoordinate, type MatrixValue } from "@/utilities/matrix-oper
 import { hexToHSL } from "@/utilities/drawing-operations";
 import { type PointerEventHandler, useRef } from "react";
 import {
-  type CellValue,
-  CycleState,
   initialiseCellMap,
   resizeCellMap,
   resetCellMap,
-  runCellMapPipeline,
-  runCellRenderPipeline,
+  processCellMap,
+  renderCellMap,
   getNextCycle,
-  isEndPhase
+  isFullCycle
 } from "./engine";
 import ControlPanel, { type ControlItem } from "@/components/control-panel";
 import PlayIcon from "@/components/icons/play-icon";
 import PauseIcon from "@/components/icons/pause-icon";
 import ForwardIcon from "@/components/icons/forward-icon";
 import TrashIcon from "@/components/icons/trash-icon";
+import { type CellValue, CycleState } from "./engine/types";
 
 type GameOfLifeProps = {
   className?: string,
@@ -153,14 +152,14 @@ const GameOfLife = ({
     if (cellMap.current === null) { return; }
 
     const map = cellMap.current;
-    const newMap = runCellMapPipeline(map, cycleIndex, canGenerateCell ? newCellCoordinate : undefined);
+    const newMap = processCellMap(map, cycleIndex, canGenerateCell ? newCellCoordinate : undefined);
     cellMap.current = newMap;
   };
 
   const drawFn: DrawHandler = ({ context }) => {
     if (cellMap?.current === null) { return; }
 
-    runCellRenderPipeline(
+    renderCellMap(
       context,
       {
         map: cellMap.current,
@@ -174,7 +173,7 @@ const GameOfLife = ({
   };
 
   const postDrawFn: PostDrawHandler = () => {
-    if (lastButtonClicked === ButtonType.Step && isEndPhase(cycleIndex)) {
+    if (lastButtonClicked === ButtonType.Step && isFullCycle(cycleIndex)) {
       cycleState = CycleState.Stop;
     }
     cycleIndex = getNextCycle(cycleIndex, cycleState);

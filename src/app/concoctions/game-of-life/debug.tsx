@@ -1,12 +1,12 @@
 import { type MatrixValue } from "@/utilities/matrix-operations";
 import {
-  type CellValue,
   type CellOperationFunction,
-  type RenderPipelineData,
   type CellRenderFunction,
+  type CellValue,
+  type RenderPipelineData,
   CellState,
   CycleState
-} from "./engine";
+} from "./engine/types";
 
 export const setMatrixValue: CellOperationFunction = (value: MatrixValue<CellValue>) => {
   value[0][2] = { state: CellState.Alive };
