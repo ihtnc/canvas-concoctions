@@ -1,0 +1,123 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`ControlPanel component > when providing a ButtonControlItem > should not render the button if hidden is true 1`] = `
+<div>
+  <div
+    class="flex gap-4 "
+  />
+</div>
+`;
+
+exports[`ControlPanel component > when providing a ButtonControlItem > should render a button 1`] = `
+<div>
+  <div
+    class="flex gap-4 "
+  >
+    <button
+      class="flex "
+    >
+      <span>
+        this is a button
+      </span>
+    </button>
+  </div>
+</div>
+`;
+
+exports[`ControlPanel component > when providing a ButtonControlItem > should render a button with optional string properties 1`] = `
+<div>
+  <div
+    class="flex gap-4 "
+  >
+    <button
+      class="flex buttonClass"
+      disabled=""
+      name="buttonName"
+      title="buttonTitle"
+    >
+      <span>
+        this is a button
+      </span>
+    </button>
+  </div>
+</div>
+`;
+
+exports[`ControlPanel component > when providing a LabelControlItem > should not render the label if hidden is true 1`] = `
+<div>
+  <div
+    class="flex gap-4 "
+  />
+</div>
+`;
+
+exports[`ControlPanel component > when providing a LabelControlItem > should render a label 1`] = `
+<div>
+  <div
+    class="flex gap-4 "
+  >
+    <label
+      class="flex "
+    >
+      this is a label
+    </label>
+  </div>
+</div>
+`;
+
+exports[`ControlPanel component > when providing a LabelControlItem > should render a label with optional string properties 1`] = `
+<div>
+  <div
+    class="flex gap-4 "
+  >
+    <label
+      class="flex labelClass"
+      for="labelFor"
+      title="labelTitle"
+    >
+      this is a label
+    </label>
+  </div>
+</div>
+`;
+
+exports[`ControlPanel component > when providing a TextInputControlItem > should not render the input if hidden is true 1`] = `
+<div>
+  <div
+    class="flex gap-4 "
+  />
+</div>
+`;
+
+exports[`ControlPanel component > when providing a TextInputControlItem > should render a text input 1`] = `
+<div>
+  <div
+    class="flex gap-4 "
+  >
+    <input
+      class="flex "
+      name="inputName"
+      type="text"
+      value=""
+    />
+  </div>
+</div>
+`;
+
+exports[`ControlPanel component > when providing a TextInputControlItem > should render a text input with optional string properties 1`] = `
+<div>
+  <div
+    class="flex gap-4 "
+  >
+    <input
+      class="flex inputClass"
+      disabled=""
+      name="inputName"
+      placeholder="inputPlaceholder"
+      title="inputTitle"
+      type="text"
+      value="initialValue"
+    />
+  </div>
+</div>
+`;

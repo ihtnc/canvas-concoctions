@@ -1,0 +1,44 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`ConcoctionsTemplate component > should render the children correctly 1`] = `
+<div>
+  <section
+    class="flex flex-col w-full h-full gap-2"
+  >
+    <h1
+      class="self-center"
+    >
+      Concoction
+    </h1>
+    Test Content
+  </section>
+</div>
+`;
+
+exports[`ConcoctionsTemplate component > should render the title of the current concoction correctly 1`] = `
+<div>
+  <section
+    class="flex flex-col w-full h-full gap-2"
+  >
+    <h1
+      class="self-center"
+    >
+      Test Concoction
+    </h1>
+  </section>
+</div>
+`;
+
+exports[`ConcoctionsTemplate component > should render the title of the current concoction if it is not recognised 1`] = `
+<div>
+  <section
+    class="flex flex-col w-full h-full gap-2"
+  >
+    <h1
+      class="self-center"
+    >
+      Concoction
+    </h1>
+  </section>
+</div>
+`;

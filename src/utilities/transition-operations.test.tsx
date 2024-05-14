@@ -21,9 +21,9 @@ describe('transition operations', () => {
     let props1: TransitionProps;
     let props2: TransitionProps;
 
-    let areCoordinatesEqual: MockInstance<any>;
-    let areHSLsEqual: MockInstance<any>;
-    let areSizesEqual: MockInstance<any>;
+    let areCoordinatesEqual: MockInstance;
+    let areHSLsEqual: MockInstance;
+    let areSizesEqual: MockInstance;
 
     beforeEach(() => {
       props1 = {};
@@ -421,7 +421,7 @@ describe('transition operations', () => {
   });
 
   describe('runTransition function', () => {
-    let operationFn: MockInstance<any>;
+    let operationFn: MockInstance;
     let transition: Transition;
 
     beforeEach(() => {

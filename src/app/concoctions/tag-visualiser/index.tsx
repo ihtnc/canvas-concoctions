@@ -3,7 +3,7 @@
 import { type PreDrawHandler, type DrawHandler, type PostDrawHandler, RenderLocation } from "@/components/canvas/types";
 import { type ConcoctionNavigation } from "@/app/concoctions/utilities";
 import useAnimatedCanvas from "@/components/canvas/use-animated-canvas";
-import ControlPanel, { type OnChangeHandler, type ControlItem } from "@/components/control-panel";
+import ControlPanel, { type OnInputHandler, type ControlItem } from "@/components/control-panel";
 import TrashIcon from "@/components/icons/trash-icon";
 import TagIcon from "@/components/icons/tag-icon";
 import PlusCircleIcon from "@/components/icons/plus-circle-icon";
@@ -48,7 +48,7 @@ const TagVisualiser = ({ className }: TagVisualiserProps) => {
     tags.current = newTags;
   };
 
-  const changeHandler: OnChangeHandler = (value) => {
+  const inputHandler: OnInputHandler = (value) => {
     tagInput = value;
   };
 
@@ -90,7 +90,7 @@ const TagVisualiser = ({ className }: TagVisualiserProps) => {
     for: "tag"
   }, {
     type: "text",
-    onChangeHandler: changeHandler,
+    onInputHandler: inputHandler,
     name: "tag",
     placeholder: "Enter tag",
     value: () => tagInput

@@ -5,7 +5,6 @@ import PlayIcon from "./play-icon";
 import TrashIcon from "./trash-icon";
 import TagIcon from "./tag-icon";
 import PlusCircleIcon from "./plus-circle-icon";
-import { ReactNode } from "react";
 import { render } from '@testing-library/react'
 
 describe('icons', () => {
@@ -16,7 +15,7 @@ describe('icons', () => {
     { icon: TrashIcon, title: 'TrashIcon' },
     { icon: TagIcon, title: 'TrashIcon' },
     { icon: PlusCircleIcon, title: 'PlusCircleIcon' }
-  ])('should define $title', ({ icon }: { icon: () => ReactNode }) => {
+  ])('should define $title', ({ icon }: { icon: () => JSX.Element }) => {
     const { container } = render(icon());
     expect(container).toMatchSnapshot();
   });

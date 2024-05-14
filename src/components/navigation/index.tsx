@@ -4,12 +4,20 @@ import { usePathname } from 'next/navigation';
 import { getConcoctions } from '@/app/concoctions/utilities';
 import NavItem from './nav-item';
 
-const Navigation = () => {
+type NavigationProps = {
+  baseUrl?: string
+};
+
+const Navigation = ({ baseUrl }: NavigationProps) => {
   const links = getConcoctions();
   const pathName = usePathname();
+  const concoctionId = pathName.split('/').pop();
+  const itemBaseUrl = baseUrl !== undefined ? `/${baseUrl.replace(/^\//, '').replace(/\/$/, '')}` : '';
 
-  const activeLink = links.find(l => `/concoctions/${l.linkUrl}` === pathName);
-  const isHomeActive = pathName === '/';
+  const constructPath = (linkUrl: string) => {
+    const trimUrl = linkUrl.replace(/^\//, '');
+    return `${itemBaseUrl}/${trimUrl}`;
+  }
 
   return (
     <nav>
@@ -18,15 +26,15 @@ const Navigation = () => {
           <NavItem
             href='/'
             title='Home'
-            isActive={isHomeActive} />
+            isActive={pathName === '/'} />
         </li>
         {links.map((value) => (
           <li key={value.linkUrl} className='flex'>
             <NavItem
-              href={`/concoctions/${value.linkUrl}`}
+              href={`${constructPath(value.linkUrl)}`}
               title={value.linkTitle}
               previewHref={value.previewUrl ? value.previewUrl : undefined}
-              isActive={value.linkUrl === activeLink?.linkUrl}
+              isActive={value.linkUrl === concoctionId}
             />
           </li>
         ))}

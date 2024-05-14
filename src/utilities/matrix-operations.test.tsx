@@ -434,7 +434,7 @@ describe('matrix-operations', () => {
   });
 
   describe('matrixPipeline function', () => {
-    let operationPipeline: MockInstance<any>;
+    let operationPipeline: MockInstance;
 
     afterEach(() => {
       vi.restoreAllMocks();

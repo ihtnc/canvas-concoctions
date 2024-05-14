@@ -20,7 +20,7 @@ interface ButtonControlItem extends BaseControlItem {
 interface TextInputControlItem extends BaseControlItem {
   type: "text"
   name: string,
-  onChangeHandler: OnChangeHandler,
+  onInputHandler: OnInputHandler,
   placeholder?: ControlPropValue<string>,
   value?: ControlPropValue<string>
 };
@@ -32,7 +32,7 @@ interface LabelControlItem extends BaseControlItem {
 }
 
 export type OnClickHandler = () => void;
-export type OnChangeHandler = (value: string) => void;
+export type OnInputHandler = (value: string) => void;
 export type ControlItem = ButtonControlItem | TextInputControlItem | LabelControlItem;
 
 type ControlPanelProps = {
@@ -76,8 +76,8 @@ const ControlPanel = ({ className, controls }: ControlPanelProps) => {
       const txt = c as TextInputControlItem;
       return (<input key={txt.name} type='text' name={txt.name}
         value={getPropValue(txt.value, '')}
-        onChange={(e) => {
-          txt.onChangeHandler(e.target.value);
+        onInput={(e) => {
+          txt.onInputHandler(e.currentTarget.value);
           forceRerender();
         }}
         title={getPropValue(txt.title)}
