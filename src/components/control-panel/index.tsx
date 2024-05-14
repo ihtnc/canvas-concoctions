@@ -67,7 +67,7 @@ const ControlPanel = ({ className, controls }: ControlPanelProps) => {
         name={btn.name}
         title={getPropValue(btn.title)}
         disabled={getPropValue(btn.disabled, false)}
-        className={`flex ${getPropValue(btn.className)}`}>
+        className={`flex ${getPropValue(btn.className, '')}`}>
         {btn.content}
       </button>);
     }
@@ -83,7 +83,7 @@ const ControlPanel = ({ className, controls }: ControlPanelProps) => {
         title={getPropValue(txt.title)}
         placeholder={getPropValue(txt.placeholder)}
         disabled={getPropValue(txt.disabled, false)}
-        className={`flex ${getPropValue(txt.className)}`}
+        className={`flex ${getPropValue(txt.className, '')}`}
       />);
     }
 
@@ -92,13 +92,13 @@ const ControlPanel = ({ className, controls }: ControlPanelProps) => {
       return (<label key={`label${controlCount++}`}
         htmlFor={lbl.for}
         title={getPropValue(lbl.title)}
-        className={`flex ${getPropValue(lbl.className)}`}>
+        className={`flex ${getPropValue(lbl.className, '')}`}>
           {lbl.content}
       </label>);
     }
   }
 
-  return <div className={`flex self-center gap-4 justify-center ${className}`}>
+  return <div className={`flex gap-4 ${className ?? ''}`}>
     {controls.map(getControl)}
   </div>;
 };

@@ -103,6 +103,7 @@ const useAnimatedCanvas: (props: UseAnimatedCanvasProps) => UseAnimatedCanvasRes
       <div ref={divRef} className={className}>
         <canvas
           ref={ref}
+          className="grow"
           {...rest}
         />
       </div>

@@ -243,7 +243,7 @@ const GameOfLife = ({
     className: "ml-auto"
   }];
 
-  return <div className="flex flex-col w-full h-full gap-2">
+  return <>
     <Canvas
       className={className}
       onPointerDown={startNewCells}
@@ -251,8 +251,8 @@ const GameOfLife = ({
       onPointerOut={stopNewCells}
       onPointerMove={updateNewCellCoordinate}
     />
-    <ControlPanel controls={controls} className="w-full" />
-  </div>
+    <ControlPanel controls={controls} />
+  </>
 };
 
 export const NavigationDetails: ConcoctionNavigation = {

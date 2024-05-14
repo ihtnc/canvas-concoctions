@@ -25,7 +25,7 @@ const NavItem = ({ href, className, title, previewHref, isActive }: NavItemProps
       <Link
         ref={refs.setReference}
         href={href}
-        className={`link ${className} ${isActive ? 'active': ''}`}
+        className={`link ${className ?? ''} ${isActive ? 'active': ''}`}
         {...getReferenceProps()}
       >
         {title}

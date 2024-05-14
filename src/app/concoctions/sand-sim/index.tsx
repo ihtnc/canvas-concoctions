@@ -159,7 +159,7 @@ const SandSim = ({
     className: "ml-auto"
   }];
 
-  return <div className="flex flex-col w-full h-full gap-2">
+  return <>
     <Canvas
       className={className}
       onPointerDown={startNewParticles}
@@ -167,8 +167,8 @@ const SandSim = ({
       onPointerOut={stopNewParticles}
       onPointerMove={updateNewParticleCoordinate}
     />
-    <ControlPanel controls={controls} className="w-full" />
-  </div>
+    <ControlPanel controls={controls} />
+  </>
 };
 
 export const NavigationDetails: ConcoctionNavigation = {

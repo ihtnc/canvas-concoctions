@@ -11,11 +11,9 @@ const ConcoctionsTemplate = ({ children }: { children: ReactNode }) => {
   const active = links.find(l => l.linkUrl === segment);
 
   return (
-    <section className='flex flex-col w-full grow'>
+    <section className='flex flex-col w-full h-full gap-2'>
       <h1 className='self-center'>{active?.title}</h1>
-      <div className='flex w-full h-full justify-center'>
-        {children}
-      </div>
+      {children}
     </section>
   );
 };

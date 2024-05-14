@@ -18,7 +18,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        <main className="flex flex-col w-full h-dvh items-center p-12 min-w-24 min-h-24 gap-4">
+        <main className="flex flex-col w-screen h-screen items-center p-12 min-w-96 min-h-96 gap-4">
           <section className="flex flex-col self-center">
             <Navigation />
           </section>
