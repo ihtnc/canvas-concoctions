@@ -33,7 +33,7 @@ const Navigation = ({ baseUrl }: NavigationProps) => {
             <NavItem
               href={`${constructPath(value.linkUrl)}`}
               title={value.linkTitle}
-              previewHref={value.previewUrl ? value.previewUrl : undefined}
+              previewHref={value.previewUrl ? value.previewUrl : '/previews/default.gif'}
               isActive={value.linkUrl === concoctionId}
             />
           </li>
