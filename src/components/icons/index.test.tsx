@@ -1,4 +1,4 @@
-import { describe, expect, test } from "vitest";
+import { describe, expect, test } from "vitest"
 import {
   ForwardIcon,
   PauseIcon,
@@ -7,7 +7,7 @@ import {
   TagIcon,
   PlusCircleIcon,
   BeakerIcon
-} from ".";
+} from "."
 import { render } from '@testing-library/react'
 
 describe('icons', () => {
@@ -20,7 +20,7 @@ describe('icons', () => {
     { icon: PlusCircleIcon, title: 'PlusCircleIcon' },
     { icon: BeakerIcon, title: 'BeakerIcon' }
   ])('should define $title', ({ icon }: { icon: () => JSX.Element }) => {
-    const { container } = render(icon());
-    expect(container).toMatchSnapshot();
-  });
-});
+    const { container } = render(icon())
+    expect(container).toMatchSnapshot()
+  })
+})

@@ -1,6 +1,6 @@
-import { type RenderFunction, type HSL } from "@/utilities/drawing-operations";
-import { type OperationFunction } from "@/utilities/misc-operations";
-import { type Transition, type TransitionProps } from "@/utilities/transition-operations";
+import { type RenderFunction, type HSL } from "@/utilities/drawing-operations"
+import { type OperationFunction } from "@/utilities/misc-operations"
+import { type Transition, type TransitionProps } from "@/utilities/transition-operations"
 
 export enum TagState {
   Normal,

@@ -1,5 +1,5 @@
-import { type BorderRadii } from "@/utilities/drawing-operations";
-import { type ParticleValue } from "./types";
+import { type BorderRadii } from "@/utilities/drawing-operations"
+import { type ParticleValue } from "./types"
 
 type EngineData = {
   EmptyParticle: ParticleValue,
@@ -17,6 +17,6 @@ const data: EngineData = {
   InitialVelocity: 1,
   Acceleration: 0.1,
   ParticleShape: { tl: 10, tr: 10, bl: 10, br: 10 }
-};
+}
 
-export default data;
+export default data

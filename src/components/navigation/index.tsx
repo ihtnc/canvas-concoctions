@@ -1,22 +1,22 @@
-'use client';
+'use client'
 
-import { usePathname } from 'next/navigation';
-import { getConcoctions } from '@/app/concoctions/utilities';
-import NavItem from './nav-item';
+import { usePathname } from 'next/navigation'
+import { getConcoctions } from '@/app/concoctions/utilities'
+import NavItem from './nav-item'
 
 type NavigationProps = {
   baseUrl?: string
 };
 
 const Navigation = ({ baseUrl }: NavigationProps) => {
-  const links = getConcoctions();
-  const pathName = usePathname();
-  const concoctionId = pathName.split('/').pop();
-  const itemBaseUrl = baseUrl !== undefined ? `/${baseUrl.replace(/^\//, '').replace(/\/$/, '')}` : '';
+  const links = getConcoctions()
+  const pathName = usePathname()
+  const concoctionId = pathName.split('/').pop()
+  const itemBaseUrl = baseUrl !== undefined ? `/${baseUrl.replace(/^\//, '').replace(/\/$/, '')}` : ''
 
   const constructPath = (linkUrl: string) => {
-    const trimUrl = linkUrl.replace(/^\//, '');
-    return `${itemBaseUrl}/${trimUrl}`;
+    const trimUrl = linkUrl.replace(/^\//, '')
+    return `${itemBaseUrl}/${trimUrl}`
   }
 
   return (
@@ -40,7 +40,7 @@ const Navigation = ({ baseUrl }: NavigationProps) => {
         ))}
       </ul>
     </nav>
-  );
-};
+  )
+}
 
-export default Navigation;
+export default Navigation

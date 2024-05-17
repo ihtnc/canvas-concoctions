@@ -1,5 +1,5 @@
-import { type BorderRadii } from "@/utilities/drawing-operations";
-import { type CellValue, CellState } from "./types";
+import { type BorderRadii } from "@/utilities/drawing-operations"
+import { type CellValue, CellState } from "./types"
 
 type EngineData = {
   DeadCell: CellValue,
@@ -15,6 +15,6 @@ const data: EngineData = {
   CellShape: { tl: 10, tr: 10, bl: 10, br: 10 },
   CycleLength: 16,
   StateTransitionLength: 12
-};
+}
 
-export default data;
+export default data

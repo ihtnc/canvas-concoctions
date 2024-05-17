@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, test, vi } from "vitest";
+import { afterEach, describe, expect, test, vi } from "vitest"
 import {
   type HSL,
   type RGB,
@@ -9,7 +9,7 @@ import {
   rgbToHSL,
   hexToHSL,
   runRenderPipeline
-} from "./drawing-operations";
+} from "./drawing-operations"
 
 describe('drawing operations', () => {
 
@@ -21,9 +21,9 @@ describe('drawing operations', () => {
       { value: 'invalid' },
       { value: '' }
     ])('should handle invalid value ($value)', ({ value }: { value: string }) => {
-      const rgb = hexToRGB(value);
-      expect(rgb).toBeUndefined();
-    });
+      const rgb = hexToRGB(value)
+      expect(rgb).toBeUndefined()
+    })
 
     test.each([
       { value: '#FF0000', expected: 255 },
@@ -32,9 +32,9 @@ describe('drawing operations', () => {
       { value: '#560000', expected: 86  },
       { value: '#E90000', expected: 233  }
     ])('should convert the red component of ($value)', ({ value, expected }: { value: string, expected: number }) => {
-      const rgb = hexToRGB(value);
-      expect(rgb?.r).toBe(expected);
-    });
+      const rgb = hexToRGB(value)
+      expect(rgb?.r).toBe(expected)
+    })
 
     test.each([
       { value: '#00FF00', expected: 255 },
@@ -43,9 +43,9 @@ describe('drawing operations', () => {
       { value: '#005600', expected: 86  },
       { value: '#00E900', expected: 233  }
     ])('should convert the green component of ($value)', ({ value, expected }: { value: string, expected: number }) => {
-      const rgb = hexToRGB(value);
-      expect(rgb?.g).toBe(expected);
-    });
+      const rgb = hexToRGB(value)
+      expect(rgb?.g).toBe(expected)
+    })
 
     test.each([
       { value: '#0000FF', expected: 255 },
@@ -54,10 +54,10 @@ describe('drawing operations', () => {
       { value: '#000056', expected: 86  },
       { value: '#0000E9', expected: 233  }
     ])('should convert the blue component of ($value)', ({ value, expected }: { value: string, expected: number }) => {
-      const rgb = hexToRGB(value);
-      expect(rgb?.b).toBe(expected);
-    });
-  });
+      const rgb = hexToRGB(value)
+      expect(rgb?.b).toBe(expected)
+    })
+  })
 
   describe('rgbToHSL function', () => {
     test.each([
@@ -67,12 +67,12 @@ describe('drawing operations', () => {
       { rgb: { r: 0, g: 0, b: 0 }, hsl: { h: 0, s: 0, l: 0 } },
       { rgb: { r: 255, g: 255, b: 255 }, hsl: { h: 0, s: 0, l: 100 } }
     ])('should convert RGB($rgb)', ({ rgb, hsl }: { rgb: RGB, hsl: HSL }) => {
-      const result = rgbToHSL(rgb);
-      expect(result.h).toBe(hsl.h);
-      expect(result.s).toBe(hsl.s);
-      expect(result.l).toBe(hsl.l);
-    });
-  });
+      const result = rgbToHSL(rgb)
+      expect(result.h).toBe(hsl.h)
+      expect(result.s).toBe(hsl.s)
+      expect(result.l).toBe(hsl.l)
+    })
+  })
 
   describe('hexToHSL function', () => {
     test.each([
@@ -82,9 +82,9 @@ describe('drawing operations', () => {
       { value: 'invalid' },
       { value: '' }
     ])('should handle invalid value ($value)', ({ value }: { value: string }) => {
-      const hsl = hexToHSL(value);
-      expect(hsl).toBeUndefined();
-    });
+      const hsl = hexToHSL(value)
+      expect(hsl).toBeUndefined()
+    })
 
     test.each([
       { hex: '#C2B180', hsl: { h: 45, s: 35, l: 63 } },
@@ -93,12 +93,12 @@ describe('drawing operations', () => {
       { hex: '#000000', hsl: { h: 0, s: 0, l: 0 } },
       { hex: '#FFFFFF', hsl: { h: 0, s: 0, l: 100 } }
     ])('should convert $hex', ({ hex, hsl }: { hex: string, hsl: HSL }) => {
-      const result = hexToHSL(hex)!;
-      expect(result.h).toBe(hsl.h);
-      expect(result.s).toBe(hsl.s);
-      expect(result.l).toBe(hsl.l);
-    });
-  });
+      const result = hexToHSL(hex)!
+      expect(result.h).toBe(hsl.h)
+      expect(result.s).toBe(hsl.s)
+      expect(result.l).toBe(hsl.l)
+    })
+  })
 
   describe('areHSLsEqual function', () => {
     test('should return true when comparing HSL to itself', () => {
@@ -106,38 +106,38 @@ describe('drawing operations', () => {
         h: 76,
         s: 54,
         l: 98
-      };
+      }
 
-      const result = areHSLsEqual(hsl, hsl);
-      expect(result).toBe(true);
-    });
+      const result = areHSLsEqual(hsl, hsl)
+      expect(result).toBe(true)
+    })
 
     test('should handle undefined value1', () => {
       const hsl: HSL = {
         h: 76,
         s: 54,
         l: 98
-      };
+      }
 
-      const result = areHSLsEqual(undefined, hsl);
-      expect(result).toBe(false);
-    });
+      const result = areHSLsEqual(undefined, hsl)
+      expect(result).toBe(false)
+    })
 
     test('should handle undefined value2', () => {
       const hsl: HSL = {
         h: 76,
         s: 54,
         l: 98
-      };
+      }
 
-      const result = areHSLsEqual(hsl, undefined);
-      expect(result).toBe(false);
-    });
+      const result = areHSLsEqual(hsl, undefined)
+      expect(result).toBe(false)
+    })
 
     test('should return true if both are undefined', () => {
-      const result = areHSLsEqual(undefined, undefined);
-      expect(result).toBe(true);
-    });
+      const result = areHSLsEqual(undefined, undefined)
+      expect(result).toBe(true)
+    })
 
     test.each([
       { value: 8, expected: true },
@@ -148,17 +148,17 @@ describe('drawing operations', () => {
         h: 8,
         s: 42,
         l: 88
-      };
+      }
 
       const otherHSL: HSL = {
         h: value,
         s: mainHSL.s,
         l: mainHSL.l
-      };
+      }
 
-      const result = areHSLsEqual(mainHSL, otherHSL);
-      expect(result).toBe(expected);
-    });
+      const result = areHSLsEqual(mainHSL, otherHSL)
+      expect(result).toBe(expected)
+    })
 
     test.each([
       { value: 8, expected: true },
@@ -169,17 +169,17 @@ describe('drawing operations', () => {
         h: 42,
         s: 8,
         l: 88
-      };
+      }
 
       const otherHSL: HSL = {
         h: mainHSL.h,
         s: value,
         l: mainHSL.l
-      };
+      }
 
-      const result = areHSLsEqual(mainHSL, otherHSL);
-      expect(result).toBe(expected);
-    });
+      const result = areHSLsEqual(mainHSL, otherHSL)
+      expect(result).toBe(expected)
+    })
 
     test.each([
       { value: 8, expected: true },
@@ -190,54 +190,54 @@ describe('drawing operations', () => {
         h: 42,
         s: 88,
         l: 8
-      };
+      }
 
       const otherHSL: HSL = {
         h: mainHSL.h,
         s: mainHSL.s,
         l: value
-      };
+      }
 
-      const result = areHSLsEqual(mainHSL, otherHSL);
-      expect(result).toBe(expected);
-    });
-  });
+      const result = areHSLsEqual(mainHSL, otherHSL)
+      expect(result).toBe(expected)
+    })
+  })
 
   describe('areSizesEqual function', () => {
     test('should return true when comparing Size to itself', () => {
       const size: Size = {
         width: 12,
         height: 34
-      };
+      }
 
-      const result = areSizesEqual(size, size);
-      expect(result).toBe(true);
-    });
+      const result = areSizesEqual(size, size)
+      expect(result).toBe(true)
+    })
 
     test('should handle undefined value1', () => {
       const size: Size = {
         width: 12,
         height: 34
-      };
+      }
 
-      const result = areSizesEqual(undefined, size);
-      expect(result).toBe(false);
-    });
+      const result = areSizesEqual(undefined, size)
+      expect(result).toBe(false)
+    })
 
     test('should handle undefined value2', () => {
       const size: Size = {
         width: 12,
         height: 34
-      };
+      }
 
-      const result = areSizesEqual(size, undefined);
-      expect(result).toBe(false);
-    });
+      const result = areSizesEqual(size, undefined)
+      expect(result).toBe(false)
+    })
 
     test('should return true if both are undefined', () => {
-      const result = areSizesEqual(undefined, undefined);
-      expect(result).toBe(true);
-    });
+      const result = areSizesEqual(undefined, undefined)
+      expect(result).toBe(true)
+    })
 
     test.each([
       { value: 432, expected: true },
@@ -247,16 +247,16 @@ describe('drawing operations', () => {
       const mainSize: Size = {
         width: 432,
         height: 987
-      };
+      }
 
       const otherSize: Size = {
         width: value,
         height: mainSize.height
-      };
+      }
 
-      const result = areSizesEqual(mainSize, otherSize);
-      expect(result).toBe(expected);
-    });
+      const result = areSizesEqual(mainSize, otherSize)
+      expect(result).toBe(expected)
+    })
 
     test.each([
       { value: 432, expected: true },
@@ -266,84 +266,84 @@ describe('drawing operations', () => {
       const mainSize: Size = {
         width: 987,
         height: 432
-      };
+      }
 
       const otherSize: Size = {
         width: mainSize.width,
         height: value
-      };
+      }
 
-      const result = areSizesEqual(mainSize, otherSize);
-      expect(result).toBe(expected);
-    });
-  });
+      const result = areSizesEqual(mainSize, otherSize)
+      expect(result).toBe(expected)
+    })
+  })
 
   describe('runRenderPipeline function', () => {
     afterEach(() => {
-      vi.resetAllMocks();
-    });
+      vi.resetAllMocks()
+    })
 
     test('should call render function', () => {
-      const fn = vi.fn();
-      const data = 1;
-      const context: CanvasRenderingContext2D = {} as CanvasRenderingContext2D;
+      const fn = vi.fn()
+      const data = 1
+      const context: CanvasRenderingContext2D = {} as CanvasRenderingContext2D
 
-      runRenderPipeline(context, data, fn);
+      runRenderPipeline(context, data, fn)
 
-      expect(fn).toHaveBeenCalledWith(context, data);
-    });
+      expect(fn).toHaveBeenCalledWith(context, data)
+    })
 
     test('should call pre functions before render function', () => {
-      let callCount = 0;
-      const fn1 = vi.fn(() => expect(++callCount).toBe(1));
-      const fn2 = vi.fn(() => expect(++callCount).toBe(2));
-      const fn3 = vi.fn(() => expect(++callCount).toBe(3));
-      const render = vi.fn(() => expect(++callCount).toBe(4));
-      const data = 1;
-      const context: CanvasRenderingContext2D = {} as CanvasRenderingContext2D;
+      let callCount = 0
+      const fn1 = vi.fn(() => expect(++callCount).toBe(1))
+      const fn2 = vi.fn(() => expect(++callCount).toBe(2))
+      const fn3 = vi.fn(() => expect(++callCount).toBe(3))
+      const render = vi.fn(() => expect(++callCount).toBe(4))
+      const data = 1
+      const context: CanvasRenderingContext2D = {} as CanvasRenderingContext2D
 
-      runRenderPipeline(context, data, render, [fn1, fn2, fn3]);
+      runRenderPipeline(context, data, render, [fn1, fn2, fn3])
 
-      expect(fn1).toHaveBeenCalledWith(context, data);
-      expect(fn2).toHaveBeenCalledWith(context, data);
-      expect(fn3).toHaveBeenCalledWith(context, data);
-      expect(render).toHaveBeenCalledWith(context, data);
-    });
+      expect(fn1).toHaveBeenCalledWith(context, data)
+      expect(fn2).toHaveBeenCalledWith(context, data)
+      expect(fn3).toHaveBeenCalledWith(context, data)
+      expect(render).toHaveBeenCalledWith(context, data)
+    })
 
     test('should call post functions after render function', () => {
-      let callCount = 0;
-      const render = vi.fn(() => expect(++callCount).toBe(1));
-      const fn1 = vi.fn(() => expect(++callCount).toBe(2));
-      const fn2 = vi.fn(() => expect(++callCount).toBe(3));
-      const fn3 = vi.fn(() => expect(++callCount).toBe(4));
-      const data = 1;
-      const context: CanvasRenderingContext2D = {} as CanvasRenderingContext2D;
+      let callCount = 0
+      const render = vi.fn(() => expect(++callCount).toBe(1))
+      const fn1 = vi.fn(() => expect(++callCount).toBe(2))
+      const fn2 = vi.fn(() => expect(++callCount).toBe(3))
+      const fn3 = vi.fn(() => expect(++callCount).toBe(4))
+      const data = 1
+      const context: CanvasRenderingContext2D = {} as CanvasRenderingContext2D
 
-      runRenderPipeline(context, data, render, [], [fn1, fn2, fn3]);
+      runRenderPipeline(context, data, render, [], [fn1, fn2, fn3])
 
-      expect(render).toHaveBeenCalledWith(context, data);
-      expect(fn1).toHaveBeenCalledWith(context, data);
-      expect(fn2).toHaveBeenCalledWith(context, data);
-      expect(fn3).toHaveBeenCalledWith(context, data);
-    });
+      expect(render).toHaveBeenCalledWith(context, data)
+      expect(fn1).toHaveBeenCalledWith(context, data)
+      expect(fn2).toHaveBeenCalledWith(context, data)
+      expect(fn3).toHaveBeenCalledWith(context, data)
+    })
 
     test('should call functions in order', () => {
-      let callCount = 0;
-      const pre1 = vi.fn(() => expect(++callCount).toBe(1));
-      const pre2 = vi.fn(() => expect(++callCount).toBe(2));
-      const render = vi.fn(() => expect(++callCount).toBe(3));
-      const post1 = vi.fn(() => expect(++callCount).toBe(4));
-      const post2 = vi.fn(() => expect(++callCount).toBe(5));
-      const data = 1;
-      const context: CanvasRenderingContext2D = {} as CanvasRenderingContext2D;
+      let callCount = 0
+      const pre1 = vi.fn(() => expect(++callCount).toBe(1))
+      const pre2 = vi.fn(() => expect(++callCount).toBe(2))
+      const render = vi.fn(() => expect(++callCount).toBe(3))
+      const post1 = vi.fn(() => expect(++callCount).toBe(4))
+      const post2 = vi.fn(() => expect(++callCount).toBe(5))
+      const data = 1
+      const context: CanvasRenderingContext2D = {} as CanvasRenderingContext2D
 
-      runRenderPipeline(context, data, render, [pre1, pre2], [post1, post2]);
+      runRenderPipeline(context, data, render, [pre1, pre2], [post1, post2])
 
-      expect(pre1).toHaveBeenCalledWith(context, data);
-      expect(pre2).toHaveBeenCalledWith(context, data);
-      expect(render).toHaveBeenCalledWith(context, data);
-      expect(post1).toHaveBeenCalledWith(context, data);
-      expect(post2).toHaveBeenCalledWith(context, data);
-    });
-  });
-});
+      expect(pre1).toHaveBeenCalledWith(context, data)
+      expect(pre2).toHaveBeenCalledWith(context, data)
+      expect(render).toHaveBeenCalledWith(context, data)
+      expect(post1).toHaveBeenCalledWith(context, data)
+      expect(post2).toHaveBeenCalledWith(context, data)
+    })
+  })
+})

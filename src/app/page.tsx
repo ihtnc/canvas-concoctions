@@ -1,6 +1,6 @@
-import Metadata from "./metadata";
+import Metadata from "./metadata"
 
-export const metadata = Metadata;
+export const metadata = Metadata
 
 export default function Home() {
   return (
@@ -8,5 +8,5 @@ export default function Home() {
       This is a collection of various small, interactive applications / animations
       that served as a playground for ideas using the canvas HTML element.
     </section>
-  );
+  )
 };

@@ -1,7 +1,7 @@
-import { useFloating, useHover, useInteractions } from '@floating-ui/react';
-import Image from 'next/image';
-import Link from 'next/link';
-import { useState } from 'react';
+import { useFloating, useHover, useInteractions } from '@floating-ui/react'
+import Image from 'next/image'
+import Link from 'next/link'
+import { useState } from 'react'
 
 type NavItemProps = {
   href: string,
@@ -12,13 +12,13 @@ type NavItemProps = {
 };
 
 const NavItem = ({ href, className, title, previewHref, isActive }: NavItemProps) => {
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(false)
   const { refs, floatingStyles, context } = useFloating({
     open: isOpen,
     onOpenChange: setIsOpen
-  });
-  const hover = useHover(context);
-  const { getReferenceProps, getFloatingProps } = useInteractions([hover]);
+  })
+  const hover = useHover(context)
+  const { getReferenceProps, getFloatingProps } = useInteractions([hover])
 
   return (
     <>
@@ -41,7 +41,7 @@ const NavItem = ({ href, className, title, previewHref, isActive }: NavItemProps
         />
       )}
     </>
-  );
-};
+  )
+}
 
-export default NavItem;
+export default NavItem

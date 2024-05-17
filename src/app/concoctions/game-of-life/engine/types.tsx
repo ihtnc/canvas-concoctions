@@ -1,5 +1,5 @@
-import { type HSL, type RenderFunction } from "@/utilities/drawing-operations";
-import { type MatrixOperationFunction, type MatrixValue } from "@/utilities/matrix-operations";
+import { type HSL, type RenderFunction } from "@/utilities/drawing-operations"
+import { type MatrixOperationFunction, type MatrixValue } from "@/utilities/matrix-operations"
 
 export enum CycleState {
   Start,

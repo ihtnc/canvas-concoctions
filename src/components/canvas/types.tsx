@@ -1,4 +1,4 @@
-import { RefObject } from "react";
+import { RefObject } from "react"
 
 type InitData = { devicePixelRatio: number };
 export type InitRenderHandler = (canvas: HTMLCanvasElement, data: InitData) => void;

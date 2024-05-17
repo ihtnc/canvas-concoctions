@@ -1,6 +1,6 @@
-'use client';
+'use client'
 
-import use2DRenderLoop from "./use-2d-render-loop";
+import use2DRenderLoop from "./use-2d-render-loop"
 import type {
   DrawHandler,
   ShouldRedrawHandler,
@@ -10,14 +10,14 @@ import type {
   OnResizeHandler,
   RenderEnvironmentLayerRendererValue,
   DebugObject
-} from "./types";
+} from "./types"
 import {
   type MouseEventHandler,
   type PointerEventHandler,
   type JSXElementConstructor,
   useRef
-} from "react";
-import { useDebounceCallback, useResizeObserver } from "usehooks-ts";
+} from "react"
+import { useDebounceCallback, useResizeObserver } from "usehooks-ts"
 
 type UseAnimatedCanvasOptions = {
   autoStart?: boolean,
@@ -57,7 +57,7 @@ const DEFAULT_OPTIONS: UseAnimatedCanvasOptions = {
   enableDebug: false,
   clearEachFrame: true,
   resizeDelayMs: 200
-};
+}
 
 const useAnimatedCanvas: (props: UseAnimatedCanvasProps) => UseAnimatedCanvasResponse = (props) => {
   const {
@@ -65,12 +65,12 @@ const useAnimatedCanvas: (props: UseAnimatedCanvasProps) => UseAnimatedCanvasRes
     onResize,
     options,
     renderEnvironmentLayerRenderer
-  } = props;
+  } = props
 
-  const canvasOptions = Object.assign({}, DEFAULT_OPTIONS, options);
-  const { autoStart, enableDebug, clearEachFrame, resizeDelayMs } = canvasOptions;
+  const canvasOptions = Object.assign({}, DEFAULT_OPTIONS, options)
+  const { autoStart, enableDebug, clearEachFrame, resizeDelayMs } = canvasOptions
 
-  const divRef = useRef<HTMLDivElement>(null);
+  const divRef = useRef<HTMLDivElement>(null)
 
   const { ref, debug } = use2DRenderLoop({
     autoStart,
@@ -82,21 +82,21 @@ const useAnimatedCanvas: (props: UseAnimatedCanvasProps) => UseAnimatedCanvasRes
     onPostDraw: postdraw,
     onShouldRedraw: shouldRedraw,
     renderEnvironmentLayerRenderer
-  });
+  })
 
   const resizeCallback: (size: { width?: number, height?: number }) => void = (size) => {
-    const { width, height } = size;
+    const { width, height } = size
     if (ref.current && width && height) {
       if (onResize) {
-        onResize(ref.current, width, height);
+        onResize(ref.current, width, height)
       }
 
-      ref.current.width = width;
-      ref.current.height = height;
+      ref.current.width = width
+      ref.current.height = height
     }
-  };
-  const debouncedOnResize = useDebounceCallback(resizeCallback, resizeDelayMs);
-  useResizeObserver({ ref: divRef, onResize: debouncedOnResize });
+  }
+  const debouncedOnResize = useDebounceCallback(resizeCallback, resizeDelayMs)
+  useResizeObserver({ ref: divRef, onResize: debouncedOnResize })
 
   const canvasElement: JSXElementConstructor<AnimatedCanvasProps> = ({ className, ...rest }) => {
     return (
@@ -108,12 +108,12 @@ const useAnimatedCanvas: (props: UseAnimatedCanvasProps) => UseAnimatedCanvasRes
         />
       </div>
     )
-  };
+  }
 
   return {
     Canvas: canvasElement,
     debug
-  };
-};
+  }
+}
 
-export default useAnimatedCanvas;
+export default useAnimatedCanvas

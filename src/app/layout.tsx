@@ -1,19 +1,19 @@
-'use client';
+'use client'
 
 import { useSearchParams } from "next/navigation"
-import { Inter } from "next/font/google";
-import Navigation from "@/components/navigation";
-import "./globals.css";
+import { Inter } from "next/font/google"
+import Navigation from "@/components/navigation"
+import "./globals.css"
 
-const inter = Inter({ subsets: ["latin"] });
+const inter = Inter({ subsets: ["latin"] })
 
 export default function RootLayout({
   children,
 }: Readonly<{
   children: JSX.Element;
 }>) {
-  const searchParams = useSearchParams();
-  const isApp = searchParams.has("app");
+  const searchParams = useSearchParams()
+  const isApp = searchParams.has("app")
 
   return (
     <html lang="en">
@@ -28,5 +28,5 @@ export default function RootLayout({
         </main>
       </body>
     </html>
-  );
+  )
 }

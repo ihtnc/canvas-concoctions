@@ -1,30 +1,30 @@
-import { type MatrixValue, type MatrixCoordinate, PeekDirection, peek } from "@/utilities/matrix-operations";
-import { type CellValue, type CellRenderFunction, type RenderPipelineData, CellState } from "./types";
-import { type BorderRadii, type HSL } from "@/utilities/drawing-operations";
-import { deepCopy } from "@/utilities/misc-operations";
-import ENGINE_DATA from './data';
-import { getCycleProgress } from "./cycle-operations";
-import { isCellUndefinedOrTechnicallyAlive } from "./cell-state-operations";
+import { type MatrixValue, type MatrixCoordinate, PeekDirection, peek } from "@/utilities/matrix-operations"
+import { type CellValue, type CellRenderFunction, type RenderPipelineData, CellState } from "./types"
+import { type BorderRadii, type HSL } from "@/utilities/drawing-operations"
+import { deepCopy } from "@/utilities/misc-operations"
+import ENGINE_DATA from './data'
+import { getCycleProgress } from "./cycle-operations"
+import { isCellUndefinedOrTechnicallyAlive } from "./cell-state-operations"
 
 type CellStateMap = { state: CellState, cells: Array<MatrixCoordinate> };
 type GetStateMapFunction = (value: MatrixValue<CellValue>) => Array<CellStateMap>;
 const getStateMap: GetStateMapFunction = (value): Array<CellStateMap> => {
-  const sorted: Array<CellStateMap> = [];
+  const sorted: Array<CellStateMap> = []
 
   for (let i = 0; i < value.length; i++) {
     for (let j = 0; j < value[i].length; j++) {
-      const state = value[i][j].state;
-      let group = sorted.find(item => item.state === state);
+      const state = value[i][j].state
+      let group = sorted.find(item => item.state === state)
       if (group === undefined) {
         const newLength = sorted.push({ state, cells: [] })
-        group = sorted[newLength - 1];
+        group = sorted[newLength - 1]
       }
-      group.cells.push({ row: i, col: j });
+      group.cells.push({ row: i, col: j })
     }
   }
 
-  return sorted;
-};
+  return sorted
+}
 
 type CellDisplayMap = {
   state: CellState,
@@ -35,40 +35,40 @@ type CellDisplayMap = {
 };
 type GetDisplayMapFunction = (stateMap: Array<CellStateMap>, cycleIndex: number, width: number, height: number, aliveColor: HSL, dyingColor: HSL, growingColor: HSL) => Array<CellDisplayMap>;
 const getDisplayMap: GetDisplayMapFunction = (stateMap, cycleIndex, width: number, height: number, aliveColor, dyingColor, growingColor): Array<CellDisplayMap> => {
-  const sorted: Array<CellDisplayMap> = [];
-  const cycleProgress = getCycleProgress(cycleIndex);
+  const sorted: Array<CellDisplayMap> = []
+  const cycleProgress = getCycleProgress(cycleIndex)
 
   for (let i = 0; i < stateMap.length; i++) {
-    if (stateMap[i].state === CellState.Dead) { continue; }
+    if (stateMap[i].state === CellState.Dead) { continue }
 
-    let color: HSL;
-    let cellWidth: number;
-    let cellHeight: number;
-    let opacity: number;
-    const state = stateMap[i].state;
+    let color: HSL
+    let cellWidth: number
+    let cellHeight: number
+    let opacity: number
+    const state = stateMap[i].state
     switch (state) {
       case CellState.Dying:
-        const dyingProgress = 1 - cycleProgress;
-        color = deepCopy(dyingColor);
-        color.s = color.s * dyingProgress;
-        opacity = dyingProgress;
-        cellWidth = width * dyingProgress;
-        cellHeight = height * dyingProgress;
-        break;
+        const dyingProgress = 1 - cycleProgress
+        color = deepCopy(dyingColor)
+        color.s = color.s * dyingProgress
+        opacity = dyingProgress
+        cellWidth = width * dyingProgress
+        cellHeight = height * dyingProgress
+        break
       case CellState.Growing:
-        const growingProgress = cycleProgress;
-        color = deepCopy(growingColor);
-        color.s = color.s * growingProgress;
-        opacity = growingProgress;
-        cellWidth = width * growingProgress;
-        cellHeight = height * growingProgress;
-        break;
+        const growingProgress = cycleProgress
+        color = deepCopy(growingColor)
+        color.s = color.s * growingProgress
+        opacity = growingProgress
+        cellWidth = width * growingProgress
+        cellHeight = height * growingProgress
+        break
       default:
-        color = deepCopy(aliveColor);
-        opacity = 1;
-        cellWidth = width;
-        cellHeight = width;
-        break;
+        color = deepCopy(aliveColor)
+        opacity = 1
+        cellWidth = width
+        cellHeight = width
+        break
     }
 
     const group: CellDisplayMap = {
@@ -78,104 +78,104 @@ const getDisplayMap: GetDisplayMapFunction = (stateMap, cycleIndex, width: numbe
       width: cellWidth,
       height: cellHeight,
       cells: []
-    };
+    }
     for (let j = 0; j < stateMap[i].cells.length; j++) {
-      group.cells.push(stateMap[i].cells[j]);
+      group.cells.push(stateMap[i].cells[j])
     }
 
-    sorted.push(group);
+    sorted.push(group)
   }
 
-  return sorted;
-};
+  return sorted
+}
 
 const getCellShape: (map: MatrixValue<CellValue>, coordinate: MatrixCoordinate, cycleIndex: number) => BorderRadii = (map, coordinate, cycleIndex) => {
-  const { row, col } = coordinate;
-  const shape = deepCopy(ENGINE_DATA.CellShape);
+  const { row, col } = coordinate
+  const shape = deepCopy(ENGINE_DATA.CellShape)
 
-  const cellTopLeft = peek(map, { row, col }, PeekDirection.UpperLeft);
+  const cellTopLeft = peek(map, { row, col }, PeekDirection.UpperLeft)
   if (isCellUndefinedOrTechnicallyAlive(cellTopLeft)) {
-    shape.tl = 0;
+    shape.tl = 0
   }
 
-  const cellAbove = peek(map, { row, col }, PeekDirection.Up);
+  const cellAbove = peek(map, { row, col }, PeekDirection.Up)
   if (isCellUndefinedOrTechnicallyAlive(cellAbove)) {
-    shape.tl = 0;
-    shape.tr = 0;
+    shape.tl = 0
+    shape.tr = 0
   }
 
-  const cellTopRight = peek(map, { row, col }, PeekDirection.UpperRight);
+  const cellTopRight = peek(map, { row, col }, PeekDirection.UpperRight)
   if (isCellUndefinedOrTechnicallyAlive(cellTopRight)) {
-    shape.tr = 0;
+    shape.tr = 0
   }
 
-  const cellLeft = peek(map, { row, col }, PeekDirection.Left);
+  const cellLeft = peek(map, { row, col }, PeekDirection.Left)
   if (isCellUndefinedOrTechnicallyAlive(cellLeft)) {
-    shape.tl = 0;
-    shape.bl = 0;
+    shape.tl = 0
+    shape.bl = 0
   }
 
-  const cellRight = peek(map, { row, col }, PeekDirection.Right);
+  const cellRight = peek(map, { row, col }, PeekDirection.Right)
   if (isCellUndefinedOrTechnicallyAlive(cellRight)) {
-    shape.tr = 0;
-    shape.br = 0;
+    shape.tr = 0
+    shape.br = 0
   }
 
-  const cellBottomLeft = peek(map, { row, col }, PeekDirection.LowerLeft);
+  const cellBottomLeft = peek(map, { row, col }, PeekDirection.LowerLeft)
   if (isCellUndefinedOrTechnicallyAlive(cellBottomLeft)) {
-    shape.bl = 0;
+    shape.bl = 0
   }
 
-  const cellBelow = peek(map, { row, col }, PeekDirection.Down);
+  const cellBelow = peek(map, { row, col }, PeekDirection.Down)
   if (isCellUndefinedOrTechnicallyAlive(cellBelow)) {
-    shape.bl = 0;
-    shape.br = 0;
+    shape.bl = 0
+    shape.br = 0
   }
 
-  const cellBottomRight = peek(map, { row, col }, PeekDirection.LowerRight);
+  const cellBottomRight = peek(map, { row, col }, PeekDirection.LowerRight)
   if (isCellUndefinedOrTechnicallyAlive(cellBottomRight)) {
-    shape.br = 0;
+    shape.br = 0
   }
 
-  return shape;
-};
+  return shape
+}
 
 export const renderCellLayer: CellRenderFunction = (context: CanvasRenderingContext2D, data: RenderPipelineData) => {
-  const { map, width, height, cycleIndex, aliveColor, dyingColor, growingColor } = data;
+  const { map, width, height, cycleIndex, aliveColor, dyingColor, growingColor } = data
 
-  context.save();
+  context.save()
 
-  const stateMap = getStateMap(map);
+  const stateMap = getStateMap(map)
   const displayMap = getDisplayMap(
     stateMap,
     cycleIndex,
     width, height,
     aliveColor, dyingColor, growingColor
-  );
+  )
   for(let g = 0; g < displayMap.length; g++) {
-    const group = displayMap[g];
+    const group = displayMap[g]
 
-    const { h, s, l } = group.color;
-    const color = `HSLA(${h}, ${s}%, ${l}%, ${group.opacity})`;
+    const { h, s, l } = group.color
+    const color = `HSLA(${h}, ${s}%, ${l}%, ${group.opacity})`
 
-    context.beginPath();
-    context.fillStyle = color;
-    context.strokeStyle = color;
+    context.beginPath()
+    context.fillStyle = color
+    context.strokeStyle = color
 
     for(let i = 0; i < group.cells.length; i++) {
-      const { row, col } = group.cells[i];
-      const cellShape = getCellShape(map, { row, col }, cycleIndex);
-      const cellRadius = [cellShape.tl, cellShape.tr, cellShape.br, cellShape.bl];
-      const xOffset = Math.floor((width - group.width) / 2);
-      const yOffset = Math.floor((height - group.height) / 2);
-      const x = (col * width) + xOffset;
-      const y = (row * height) + yOffset;
-      context.roundRect(x, y, width, height, cellRadius);
+      const { row, col } = group.cells[i]
+      const cellShape = getCellShape(map, { row, col }, cycleIndex)
+      const cellRadius = [cellShape.tl, cellShape.tr, cellShape.br, cellShape.bl]
+      const xOffset = Math.floor((width - group.width) / 2)
+      const yOffset = Math.floor((height - group.height) / 2)
+      const x = (col * width) + xOffset
+      const y = (row * height) + yOffset
+      context.roundRect(x, y, width, height, cellRadius)
     }
 
-    context.fill();
-    context.stroke();
+    context.fill()
+    context.stroke()
   }
 
-  context.restore();
-};
+  context.restore()
+}

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState } from "react"
 
 type ControlPropValue<T extends string | number | boolean | object> = T | (() => T);
 
@@ -43,64 +43,64 @@ type ControlPanelProps = {
 type GetPropValueFunction = <T extends string | number | boolean | object>(value?: ControlPropValue<T>, defaultValue?: T) => T | undefined;
 
 const ControlPanel = ({ className, controls }: ControlPanelProps) => {
-  const [_, setLastRenderDate] = useState<Date>(new Date());
-  let controlCount = 0;
+  const [_, setLastRenderDate] = useState<Date>(new Date())
+  let controlCount = 0
 
-  const forceRerender = () => setLastRenderDate(new Date());
+  const forceRerender = () => setLastRenderDate(new Date())
 
   const getPropValue: GetPropValueFunction = (value, defaultValue) => {
-    if (typeof value === 'function') { return value(); }
-    else if (value !== undefined) { return value; }
-    else return defaultValue;
-  };
+    if (typeof value === 'function') { return value() }
+    else if (value !== undefined) { return value }
+    else return defaultValue
+  }
 
   const getControl = (c: ControlItem) => {
-    if (getPropValue(c.hidden, false)) { return undefined; }
+    if (getPropValue(c.hidden, false)) { return undefined }
 
     if (c.type === "button") {
-      const btn = c as ButtonControlItem;
+      const btn = c as ButtonControlItem
       return (<button key={btn.name ?? `button${controlCount++}`}
         onClick={() => {
-          forceRerender();
-          btn.onClickHandler();
+          forceRerender()
+          btn.onClickHandler()
         }}
         name={btn.name}
         title={getPropValue(btn.title)}
         disabled={getPropValue(btn.disabled, false)}
         className={`flex ${getPropValue(btn.className, '')}`}>
         {btn.content}
-      </button>);
+      </button>)
     }
 
     if (c.type === "text") {
-      const txt = c as TextInputControlItem;
+      const txt = c as TextInputControlItem
       return (<input key={txt.name} type='text' name={txt.name}
         value={getPropValue(txt.value, '')}
         onInput={(e) => {
-          txt.onInputHandler(e.currentTarget.value);
-          forceRerender();
+          txt.onInputHandler(e.currentTarget.value)
+          forceRerender()
         }}
         title={getPropValue(txt.title)}
         placeholder={getPropValue(txt.placeholder)}
         disabled={getPropValue(txt.disabled, false)}
         className={`flex ${getPropValue(txt.className, '')}`}
-      />);
+      />)
     }
 
     if (c.type === "label") {
-      const lbl = c as LabelControlItem;
+      const lbl = c as LabelControlItem
       return (<label key={`label${controlCount++}`}
         htmlFor={lbl.for}
         title={getPropValue(lbl.title)}
         className={`flex ${getPropValue(lbl.className, '')}`}>
           {lbl.content}
-      </label>);
+      </label>)
     }
   }
 
   return <div className={`flex gap-4 ${className ?? ''}`}>
     {controls.map(getControl)}
-  </div>;
-};
+  </div>
+}
 
-export default ControlPanel;
+export default ControlPanel

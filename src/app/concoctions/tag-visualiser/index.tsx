@@ -1,15 +1,15 @@
-'use client';
+'use client'
 
-import { type PreDrawHandler, type DrawHandler, type PostDrawHandler, RenderLocation } from "@/components/canvas/types";
-import { type ConcoctionNavigation } from "@/app/concoctions/utilities";
-import useAnimatedCanvas from "@/components/canvas/use-animated-canvas";
-import ControlPanel, { type OnInputHandler, type ControlItem } from "@/components/control-panel";
-import { useRef } from "react";
+import { type PreDrawHandler, type DrawHandler, type PostDrawHandler, RenderLocation } from "@/components/canvas/types"
+import { type ConcoctionNavigation } from "@/app/concoctions/utilities"
+import useAnimatedCanvas from "@/components/canvas/use-animated-canvas"
+import ControlPanel, { type OnInputHandler, type ControlItem } from "@/components/control-panel"
+import { useRef } from "react"
 import {
   addTag, cleanUpTags, getNewColor, processTags, renderTags,
-} from "./engine";
-import { renderDebugLayer } from "./debug";
-import { type Tags } from "./engine/types";
+} from "./engine"
+import { renderDebugLayer } from "./debug"
+import { type Tags } from "./engine/types"
 import {
   TrashIcon,
   TagIcon,
@@ -17,22 +17,22 @@ import {
   PlayIcon,
   PauseIcon,
   ForwardIcon
-} from "@/components/icons";
+} from "@/components/icons"
 
 type TagVisualiserProps = {
   className?: string
 };
 
 const TagVisualiser = ({ className }: TagVisualiserProps) => {
-  const tags = useRef<Tags>({});
-  const existingHues: Array<number> = [];
-  let tagInput = '';
+  const tags = useRef<Tags>({})
+  const existingHues: Array<number> = []
+  let tagInput = ''
 
   const preDrawFn: PreDrawHandler = (canvas, data) => {
-    const current = tags.current;
-    const newTags = processTags(data.frame, current);
-    tags.current = newTags;
-  };
+    const current = tags.current
+    const newTags = processTags(data.frame, current)
+    tags.current = newTags
+  }
 
   const drawFn: DrawHandler = ({ context, frame }) => {
     renderTags(
@@ -41,30 +41,30 @@ const TagVisualiser = ({ className }: TagVisualiserProps) => {
       frame,
       [],
       [renderDebugLayer]
-    );
-  };
+    )
+  }
 
   const postDrawFn: PostDrawHandler = (canvas, data) => {
-    const current = tags.current;
-    const newTags = cleanUpTags(data.frame, current);
-    tags.current = newTags;
-  };
+    const current = tags.current
+    const newTags = cleanUpTags(data.frame, current)
+    tags.current = newTags
+  }
 
   const inputHandler: OnInputHandler = (value) => {
-    tagInput = value;
-  };
+    tagInput = value
+  }
 
   const addHandler = () => {
-    if (tagInput.trim().length === 0) { return; }
-    const color = getNewColor(existingHues);
-    tags.current = addTag(tags.current, tagInput, color);
-    existingHues.push(color.h);
-    tagInput = '';
+    if (tagInput.trim().length === 0) { return }
+    const color = getNewColor(existingHues)
+    tags.current = addTag(tags.current, tagInput, color)
+    existingHues.push(color.h)
+    tagInput = ''
   }
 
   const resetConcoction = () => {
-    tags.current = {};
-  };
+    tags.current = {}
+  }
 
   const { Canvas, debug } = useAnimatedCanvas({
     predraw: preDrawFn,
@@ -72,18 +72,18 @@ const TagVisualiser = ({ className }: TagVisualiserProps) => {
     postdraw: postDrawFn,
     options: { enableDebug: true },
     renderEnvironmentLayerRenderer: RenderLocation.BottomCenter
-  });
+  })
 
   const play = () => {
-    debug.renderContinue();
+    debug.renderContinue()
   }
 
   const pause = () => {
-    debug.renderBreak();
+    debug.renderBreak()
   }
 
   const step = () => {
-    debug.renderStep();
+    debug.renderStep()
   }
 
   const controls: Array<ControlItem> = [{
@@ -122,18 +122,18 @@ const TagVisualiser = ({ className }: TagVisualiserProps) => {
     content: (<TrashIcon />),
     title: "Reset canvas",
     className: "ml-auto"
-  }];
+  }]
 
   return <>
     <Canvas className={className} />
     <ControlPanel controls={controls} />
-  </>;
-};
+  </>
+}
 
 export const NavigationDetails: ConcoctionNavigation = {
   linkTitle: 'Tag Visualiser',
   linkUrl: 'tag-visualiser',
   title: 'Tag Visualiser'
-};
+}
 
-export default TagVisualiser;
+export default TagVisualiser
