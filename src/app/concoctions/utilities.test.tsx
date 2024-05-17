@@ -6,7 +6,7 @@ describe('concoction utilities', () => {
     test('should return an array of ConcoctionNavigation objects', () => {
       const result = getConcoctions()
 
-      expect(result.length).toBe(3)
+      expect(result.length).toBe(4)
     })
 
     test('should include navigation details for sand-sim', () => {
@@ -25,6 +25,12 @@ describe('concoction utilities', () => {
       const result = getConcoctions()
       const gameOfLife = result.find(c => c.linkUrl === 'game-of-life')
       expect(gameOfLife).toBeDefined()
+    })
+
+    test('should include navigation details for tank-game', () => {
+      const result = getConcoctions()
+      const tankGame = result.find(c => c.linkUrl === 'tank-game')
+      expect(tankGame).toBeDefined()
     })
   })
 

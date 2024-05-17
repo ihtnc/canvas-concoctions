@@ -84,7 +84,12 @@ const use2DRenderLoop = (options: Use2DRenderLoopOptions): Use2DRenderLoopRespon
       if (options.autoStart === true && request === null && requestOnce === null) { return true }
       if (options.autoStart === false && request === null && requestOnce === null) { return false }
       if (options.enableDebug && request === false && requestOnce === false) { return false }
+
+      // requestOnce is used to step through the render loop and is manually set
+      //   so there's no need to preserve the value after each render
+      // eslint-disable-next-line react-hooks/exhaustive-deps
       if (options.enableDebug && requestOnce) { requestOnce = false }
+
       return true
     }
 
