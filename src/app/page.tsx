@@ -1,3 +1,7 @@
+import Metadata from "./metadata";
+
+export const metadata = Metadata;
+
 export default function Home() {
   return (
     <section className='flex text-center max-w-96'>

@@ -1,10 +1,13 @@
 import { describe, expect, test } from "vitest";
-import ForwardIcon from "./forward-icon";
-import PauseIcon from "./pause-icon";
-import PlayIcon from "./play-icon";
-import TrashIcon from "./trash-icon";
-import TagIcon from "./tag-icon";
-import PlusCircleIcon from "./plus-circle-icon";
+import {
+  ForwardIcon,
+  PauseIcon,
+  PlayIcon,
+  TrashIcon,
+  TagIcon,
+  PlusCircleIcon,
+  BeakerIcon
+} from ".";
 import { render } from '@testing-library/react'
 
 describe('icons', () => {
@@ -14,7 +17,8 @@ describe('icons', () => {
     { icon: PlayIcon, title: 'PlayIcon' },
     { icon: TrashIcon, title: 'TrashIcon' },
     { icon: TagIcon, title: 'TrashIcon' },
-    { icon: PlusCircleIcon, title: 'PlusCircleIcon' }
+    { icon: PlusCircleIcon, title: 'PlusCircleIcon' },
+    { icon: BeakerIcon, title: 'BeakerIcon' }
   ])('should define $title', ({ icon }: { icon: () => JSX.Element }) => {
     const { container } = render(icon());
     expect(container).toMatchSnapshot();

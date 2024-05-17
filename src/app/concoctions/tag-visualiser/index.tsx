@@ -4,18 +4,20 @@ import { type PreDrawHandler, type DrawHandler, type PostDrawHandler, RenderLoca
 import { type ConcoctionNavigation } from "@/app/concoctions/utilities";
 import useAnimatedCanvas from "@/components/canvas/use-animated-canvas";
 import ControlPanel, { type OnInputHandler, type ControlItem } from "@/components/control-panel";
-import TrashIcon from "@/components/icons/trash-icon";
-import TagIcon from "@/components/icons/tag-icon";
-import PlusCircleIcon from "@/components/icons/plus-circle-icon";
 import { useRef } from "react";
 import {
   addTag, cleanUpTags, getNewColor, processTags, renderTags,
 } from "./engine";
 import { renderDebugLayer } from "./debug";
 import { type Tags } from "./engine/types";
-import PlayIcon from "@/components/icons/play-icon";
-import PauseIcon from "@/components/icons/pause-icon";
-import ForwardIcon from "@/components/icons/forward-icon";
+import {
+  TrashIcon,
+  TagIcon,
+  PlusCircleIcon,
+  PlayIcon,
+  PauseIcon,
+  ForwardIcon
+} from "@/components/icons";
 
 type TagVisualiserProps = {
   className?: string

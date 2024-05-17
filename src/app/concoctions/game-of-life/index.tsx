@@ -22,10 +22,12 @@ import {
   isFullCycle
 } from "./engine";
 import ControlPanel, { type ControlItem } from "@/components/control-panel";
-import PlayIcon from "@/components/icons/play-icon";
-import PauseIcon from "@/components/icons/pause-icon";
-import ForwardIcon from "@/components/icons/forward-icon";
-import TrashIcon from "@/components/icons/trash-icon";
+import {
+  PlayIcon,
+  PauseIcon,
+  ForwardIcon,
+  TrashIcon
+} from "@/components/icons";
 import { type CellValue, CycleState } from "./engine/types";
 
 type GameOfLifeProps = {

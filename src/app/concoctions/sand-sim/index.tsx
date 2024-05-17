@@ -24,7 +24,7 @@ import {
   processParticleMap,
   renderParticleMap
 } from "./engine";
-import TrashIcon from "@/components/icons/trash-icon";
+import { TrashIcon } from "@/components/icons";
 import ControlPanel, { type ControlItem } from "@/components/control-panel";
 import { type ParticleValue } from "./engine/types";
 
