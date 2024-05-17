@@ -1,3 +1,5 @@
+import { Coordinates } from "@/components/canvas/types"
+
 export const chooseRandom: (min: number, max: number) => number = (min, max) => {
   const range = max - min + 1
   const chosen = Math.floor(Math.random() * range)
@@ -51,3 +53,23 @@ export const operationPipeline:OperationPipelineFunction = (operations) => {
 }
 
 export type AreEqualFunction<T> = (value1?: T, value2?: T) => boolean;
+
+export const degreesToRadians = (degrees: number): number => {
+  return degrees * Math.PI / 180
+}
+
+export const radiansToDegrees = (radians: number): number => {
+  return radians * 180 / Math.PI
+}
+
+export const getRotatedCoordinates = (coordinates: Coordinates, pointOfRotation: Coordinates, angle: number): Coordinates => {
+  const { x, y } = coordinates
+  const { x: cx, y: cy } = pointOfRotation
+
+  const radians = degreesToRadians(angle)
+  const cos = Math.cos(radians)
+  const sin = Math.sin(radians)
+  const rx = cos * (x - cx) - sin * (y - cy) + cx
+  const ry = sin * (x - cx) + cos * (y - cy) + cy
+  return { x: rx, y: ry }
+}

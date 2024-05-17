@@ -2,139 +2,161 @@
 
 exports[`Navigation component > should append baseUrl to concoction linkUrl 1`] = `
 <div>
-  <nav>
-    <ul
-      class="flex flex-row gap-2"
-    >
-      <li
-        class="flex"
+  <section
+    class="flex flex-col self-center"
+  >
+    <nav>
+      <ul
+        class="flex flex-row gap-2"
       >
-        <div>
-          {"href":"/","title":"Home","isActive":false}
-        </div>
-      </li>
-      <li
-        class="flex"
-      >
-        <div>
-          {"href":"/base/concoction1","title":"Concoction 1","isActive":true}
-        </div>
-      </li>
-    </ul>
-  </nav>
+        <li
+          class="flex"
+        >
+          <div>
+            {"href":"/","title":"Home","isActive":false}
+          </div>
+        </li>
+        <li
+          class="flex"
+        >
+          <div>
+            {"href":"/base/concoction1","title":"Concoction 1","previewHref":"/previews/default.gif","isActive":true}
+          </div>
+        </li>
+      </ul>
+    </nav>
+  </section>
 </div>
 `;
 
+exports[`Navigation component > should not render anything if app search params exists 1`] = `<div />`;
+
 exports[`Navigation component > should render home menu and list of concoctions 1`] = `
 <div>
-  <nav>
-    <ul
-      class="flex flex-row gap-2"
-    >
-      <li
-        class="flex"
+  <section
+    class="flex flex-col self-center"
+  >
+    <nav>
+      <ul
+        class="flex flex-row gap-2"
       >
-        <div>
-          {"href":"/","title":"Home","isActive":false}
-        </div>
-      </li>
-      <li
-        class="flex"
-      >
-        <div>
-          {"href":"/concoction1","title":"Concoction 1","isActive":false}
-        </div>
-      </li>
-      <li
-        class="flex"
-      >
-        <div>
-          {"href":"/concoction2","title":"Concoction 2","previewHref":"concoction2.jpg","isActive":false}
-        </div>
-      </li>
-    </ul>
-  </nav>
+        <li
+          class="flex"
+        >
+          <div>
+            {"href":"/","title":"Home","isActive":false}
+          </div>
+        </li>
+        <li
+          class="flex"
+        >
+          <div>
+            {"href":"/concoction1","title":"Concoction 1","previewHref":"/previews/default.gif","isActive":false}
+          </div>
+        </li>
+        <li
+          class="flex"
+        >
+          <div>
+            {"href":"/concoction2","title":"Concoction 2","previewHref":"concoction2.jpg","isActive":false}
+          </div>
+        </li>
+      </ul>
+    </nav>
+  </section>
 </div>
 `;
 
 exports[`Navigation component > should render menu items if current path is not recognised 1`] = `
 <div>
-  <nav>
-    <ul
-      class="flex flex-row gap-2"
-    >
-      <li
-        class="flex"
+  <section
+    class="flex flex-col self-center"
+  >
+    <nav>
+      <ul
+        class="flex flex-row gap-2"
       >
-        <div>
-          {"href":"/","title":"Home","isActive":false}
-        </div>
-      </li>
-      <li
-        class="flex"
-      >
-        <div>
-          {"href":"/concoction1","title":"Concoction 1","isActive":false}
-        </div>
-      </li>
-      <li
-        class="flex"
-      >
-        <div>
-          {"href":"/concoction2","title":"Concoction 2","isActive":false}
-        </div>
-      </li>
-    </ul>
-  </nav>
+        <li
+          class="flex"
+        >
+          <div>
+            {"href":"/","title":"Home","isActive":false}
+          </div>
+        </li>
+        <li
+          class="flex"
+        >
+          <div>
+            {"href":"/concoction1","title":"Concoction 1","previewHref":"/previews/default.gif","isActive":false}
+          </div>
+        </li>
+        <li
+          class="flex"
+        >
+          <div>
+            {"href":"/concoction2","title":"Concoction 2","previewHref":"/previews/default.gif","isActive":false}
+          </div>
+        </li>
+      </ul>
+    </nav>
+  </section>
 </div>
 `;
 
 exports[`Navigation component > should set appropriate concoction menu item as active based on current path 1`] = `
 <div>
-  <nav>
-    <ul
-      class="flex flex-row gap-2"
-    >
-      <li
-        class="flex"
+  <section
+    class="flex flex-col self-center"
+  >
+    <nav>
+      <ul
+        class="flex flex-row gap-2"
       >
-        <div>
-          {"href":"/","title":"Home","isActive":false}
-        </div>
-      </li>
-      <li
-        class="flex"
-      >
-        <div>
-          {"href":"/concoction1","title":"Concoction 1","isActive":false}
-        </div>
-      </li>
-      <li
-        class="flex"
-      >
-        <div>
-          {"href":"/concoction2","title":"Concoction 2","isActive":true}
-        </div>
-      </li>
-    </ul>
-  </nav>
+        <li
+          class="flex"
+        >
+          <div>
+            {"href":"/","title":"Home","isActive":false}
+          </div>
+        </li>
+        <li
+          class="flex"
+        >
+          <div>
+            {"href":"/concoction1","title":"Concoction 1","previewHref":"/previews/default.gif","isActive":false}
+          </div>
+        </li>
+        <li
+          class="flex"
+        >
+          <div>
+            {"href":"/concoction2","title":"Concoction 2","previewHref":"/previews/default.gif","isActive":true}
+          </div>
+        </li>
+      </ul>
+    </nav>
+  </section>
 </div>
 `;
 
 exports[`Navigation component > should set home menu item as active when current path is on root 1`] = `
 <div>
-  <nav>
-    <ul
-      class="flex flex-row gap-2"
-    >
-      <li
-        class="flex"
+  <section
+    class="flex flex-col self-center"
+  >
+    <nav>
+      <ul
+        class="flex flex-row gap-2"
       >
-        <div>
-          {"href":"/","title":"Home","isActive":true}
-        </div>
-      </li>
-    </ul>
-  </nav>
+        <li
+          class="flex"
+        >
+          <div>
+            {"href":"/","title":"Home","isActive":true}
+          </div>
+        </li>
+      </ul>
+    </nav>
+  </section>
 </div>
 `;

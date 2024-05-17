@@ -17,7 +17,7 @@ import {
   type JSXElementConstructor,
   useRef
 } from "react"
-import { useDebounceCallback, useResizeObserver } from "usehooks-ts"
+import { useDebounceCallback, useResizeObserver, useEventListener } from "usehooks-ts"
 
 type UseAnimatedCanvasOptions = {
   autoStart?: boolean,
@@ -50,6 +50,8 @@ type AnimatedCanvasProps = {
   onPointerMove?: PointerEventHandler<HTMLCanvasElement>,
   onPointerOut?: PointerEventHandler<HTMLCanvasElement>,
   onPointerEnter?: PointerEventHandler<HTMLCanvasElement>,
+  onKeyDown?: (event: KeyboardEvent) => void,
+  onKeyUp?: (event: KeyboardEvent) => void,
 };
 
 const DEFAULT_OPTIONS: UseAnimatedCanvasOptions = {
@@ -72,7 +74,7 @@ const useAnimatedCanvas: (props: UseAnimatedCanvasProps) => UseAnimatedCanvasRes
 
   const divRef = useRef<HTMLDivElement>(null)
 
-  const { ref, debug } = use2DRenderLoop({
+  const { ref, utilities, debug } = use2DRenderLoop({
     autoStart,
     enableDebug,
     clearEachFrame,
@@ -86,21 +88,28 @@ const useAnimatedCanvas: (props: UseAnimatedCanvasProps) => UseAnimatedCanvasRes
 
   const resizeCallback: (size: { width?: number, height?: number }) => void = (size) => {
     const { width, height } = size
+    const { resize } = utilities
+
     if (ref.current && width && height) {
       if (onResize) {
         onResize(ref.current, width, height)
       }
 
-      ref.current.width = width
-      ref.current.height = height
+      resize(width, height)
     }
   }
   const debouncedOnResize = useDebounceCallback(resizeCallback, resizeDelayMs)
   useResizeObserver({ ref: divRef, onResize: debouncedOnResize })
 
-  const canvasElement: JSXElementConstructor<AnimatedCanvasProps> = ({ className, ...rest }) => {
+  const CanvasElement: JSXElementConstructor<AnimatedCanvasProps> = ({ className, onKeyDown, onKeyUp, ...rest }) => {
+    const onKeyDownHandler = onKeyDown ?? (() => {})
+    const onKeyUpHandler = onKeyUp ?? (() => {})
+    useEventListener("keydown", onKeyDownHandler)
+    useEventListener("keyup", onKeyUpHandler)
+
     return (
-      <div ref={divRef} className={className}>
+      <div ref={divRef}
+        className={className}>
         <canvas
           ref={ref}
           className="grow"
@@ -111,7 +120,7 @@ const useAnimatedCanvas: (props: UseAnimatedCanvasProps) => UseAnimatedCanvasRes
   }
 
   return {
-    Canvas: canvasElement,
+    Canvas: CanvasElement,
     debug
   }
 }

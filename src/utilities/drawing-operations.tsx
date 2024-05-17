@@ -52,10 +52,17 @@ export const areSizesEqual:AreEqualFunction<Size> = (size1, size2) => {
     && size1?.height === size2?.height)
 }
 
+export const getTextSize = (context: CanvasRenderingContext2D, text: string): Size => {
+  const { width, actualBoundingBoxAscent, actualBoundingBoxDescent } = context.measureText(text)
+  const height = actualBoundingBoxAscent + actualBoundingBoxDescent
+
+  return { width, height }
+}
+
 export type RenderFunction = <T>(context: CanvasRenderingContext2D, data: T) => void;
 
 type RenderPipelinFunction = (pipeline: Array<RenderFunction>) => { run: RenderFunction };
-const renderPipeline:RenderPipelinFunction = (pipeline) => {
+export const renderPipeline:RenderPipelinFunction = (pipeline) => {
   return {
     run: (context, data) => {
       for (let i = 0; i < pipeline.length; i++) {

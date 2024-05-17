@@ -1,4 +1,4 @@
-import { useRef, useEffect, RefObject } from "react"
+import { useRef, useEffect } from "react"
 import { clearFrame } from "@/utilities/canvas-operations"
 import {
   type Use2DRenderLoopResponse,
@@ -8,6 +8,7 @@ import {
   type DrawData
 } from "./types"
 import { DEFAULT_OPTIONS, getRenderEnvironmentLayerRenderer } from "./utilities"
+import { cancelAnimationFrame, getDevicePixelRatio, requestAnimationFrame } from "@/utilities/client-operations"
 
 type FrameCounter = { frameCount: number, fps: number, lastRender: number };
 
@@ -68,6 +69,14 @@ const use2DRenderLoop = (options: Use2DRenderLoopOptions): Use2DRenderLoopRespon
     request = false
   }
 
+  const resize = (width: number, height: number) => {
+    const canvas = canvasRef.current
+    if (canvas === null) { return }
+
+    canvas.width = width
+    canvas.height = height
+  }
+
   useEffect(() => {
     const canvas = canvasRef.current
     if (canvas === null) { return }
@@ -75,7 +84,7 @@ const use2DRenderLoop = (options: Use2DRenderLoopOptions): Use2DRenderLoopRespon
     canvas.style.touchAction = "none"
 
     const context = canvas.getContext('2d')
-    const { devicePixelRatio=1 } = window
+    const devicePixelRatio = getDevicePixelRatio()
     let animationFrameId: number
 
     if (onInit) { onInit(canvas, { devicePixelRatio }) }
@@ -95,14 +104,15 @@ const use2DRenderLoop = (options: Use2DRenderLoopOptions): Use2DRenderLoopRespon
 
     const render = () => {
       if (!context || needsNewFrame() == false) {
-        animationFrameId = window.requestAnimationFrame(render)
+        animationFrameId = requestAnimationFrame(render)
         return
       }
 
       const renderData: DrawData = {
         context,
         frame: frameCounter.current.frameCount,
-        fps: frameCounter.current.fps
+        fps: frameCounter.current.fps,
+        devicePixelRatio
       }
 
       if (onPreDraw) { onPreDraw(canvas, renderData) }
@@ -125,18 +135,21 @@ const use2DRenderLoop = (options: Use2DRenderLoopOptions): Use2DRenderLoopRespon
       if (onPostDraw) { onPostDraw(canvas, renderData) }
 
       updateFrameCounter()
-      animationFrameId = window.requestAnimationFrame(render)
+      animationFrameId = requestAnimationFrame(render)
     }
 
     render()
 
     return () => {
-      window.cancelAnimationFrame(animationFrameId)
+      cancelAnimationFrame(animationFrameId)
     }
   }, [options])
 
   return {
     ref: canvasRef,
+    utilities: {
+      resize
+    },
     debug: {
       renderBreak, renderBreakWhen, renderContinue, renderStep
     }

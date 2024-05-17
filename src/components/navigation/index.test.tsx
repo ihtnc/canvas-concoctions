@@ -1,11 +1,12 @@
 import { render, screen } from '@testing-library/react'
 import Navigation from './index'
 import { Mock, afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
-import { usePathname } from 'next/navigation'
+import { usePathname, useSearchParams } from 'next/navigation'
 import { getConcoctions } from '@/app/concoctions/utilities'
 
 vi.mock('next/navigation', () => ({
-  usePathname: vi.fn()
+  usePathname: vi.fn(),
+  useSearchParams: vi.fn()
 }))
 
 vi.mock('@/app/concoctions/utilities', () => ({
@@ -18,11 +19,18 @@ vi.mock('./nav-item', () => ({
 
 describe('Navigation component', () => {
   let usePathnameMock: Mock
+  let useSearchParamsMock: Mock
+  let searchParamsMock = { has: vi.fn() }
   let getConcoctionsMock: Mock
 
   beforeEach(() => {
     usePathnameMock = usePathname as Mock
     usePathnameMock.mockReturnValue('')
+
+    searchParamsMock.has.mockReturnValue(false)
+
+    useSearchParamsMock = useSearchParams as Mock
+    useSearchParamsMock.mockReturnValue(searchParamsMock)
 
     getConcoctionsMock = getConcoctions as Mock
     getConcoctionsMock.mockReturnValue([])
@@ -42,6 +50,13 @@ describe('Navigation component', () => {
     render(<Navigation />)
 
     expect(usePathnameMock).toHaveBeenCalled()
+  })
+
+  test('should check for the app search params', () => {
+    render(<Navigation />)
+
+    expect(useSearchParamsMock).toHaveBeenCalled()
+    expect(searchParamsMock.has).toHaveBeenCalledWith('app')
   })
 
   test('should render home menu and list of concoctions', () => {
@@ -119,5 +134,13 @@ describe('Navigation component', () => {
     const content = screen.getByText(expected, { exact: false })
 
     expect(content).toBeDefined()
+  })
+
+  test('should not render anything if app search params exists', () => {
+    searchParamsMock.has.mockReturnValue(true)
+
+    const { container } = render(<Navigation />)
+
+    expect(container).toMatchSnapshot()
   })
 })

@@ -6,7 +6,8 @@ export type InitRenderHandler = (canvas: HTMLCanvasElement, data: InitData) => v
 export type DrawData = {
   context: CanvasRenderingContext2D,
   frame: number,
-  fps: number
+  fps: number,
+  devicePixelRatio: number
 };
 export type ShouldRedrawHandler = (canvas: HTMLCanvasElement, data: DrawData) => boolean;
 export type DrawHandler = (data: DrawData) => void;
@@ -57,14 +58,18 @@ export type Use2DRenderLoopOptions = {
 
 export type RenderDebugHandler = () => void;
 export type RenderDebugConditionalHandler = (condition: () => boolean) => void;
+export type UtilitiesObject = {
+  resize: (width: number, height: number) => void,
+}
 export type DebugObject = {
   renderBreak: RenderDebugHandler,
   renderBreakWhen: RenderDebugConditionalHandler,
   renderContinue: RenderDebugHandler,
   renderStep: RenderDebugHandler
-};
+}
 export type Use2DRenderLoopResponse = {
   ref: RefObject<HTMLCanvasElement>,
+  utilities: UtilitiesObject,
   debug: DebugObject
 };
 

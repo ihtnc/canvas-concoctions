@@ -8,6 +8,7 @@ import {
   type Coordinates,
   type RenderEnvironmentValue,
 } from "./types"
+import { getTextSize } from "@/utilities/drawing-operations"
 
 export const DEFAULT_RENDER_ENVIRONMENT_LAYER_OPTIONS: RenderEnvironmentLayerOptions = {
   location: RenderLocation.TopLeft,
@@ -68,16 +69,14 @@ export const getRenderEnvironmentLayerRenderer: (value?: RenderEnvironmentLayerR
     let { x, y } = options.location as Coordinates
     if (x !== undefined && y !== undefined) { return {x, y} }
 
-    const { width, actualBoundingBoxAscent, actualBoundingBoxDescent } = context.measureText(value)
-    const textWidth = width
-    const textHeight = actualBoundingBoxAscent + actualBoundingBoxDescent
+    const { width, height } = getTextSize(context, value)
     const offSet = 10
     const leftX = 0 + offSet
     const topY = 0 + offSet + offSet
-    const midX = (debugValue.width / 2) - (textWidth / 2)
-    const midY = (debugValue.height / 2) - (textHeight / 2)
-    const rightX = debugValue.width - textWidth - offSet
-    const bottomY = debugValue.height - textHeight
+    const midX = (debugValue.width / 2) - (width / 2)
+    const midY = (debugValue.height / 2) - (height / 2)
+    const rightX = debugValue.width - width - offSet
+    const bottomY = debugValue.height - height
     switch(options.location) {
       case RenderLocation.TopLeft:
         x = leftX
