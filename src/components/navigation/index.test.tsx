@@ -1,16 +1,20 @@
 import { render, screen } from '@testing-library/react'
 import Navigation from './index'
 import { Mock, afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
-import { usePathname, useSearchParams } from 'next/navigation'
+import { usePathname } from 'next/navigation'
 import { getConcoctions } from '@/app/concoctions/utilities'
+import { useAppDisplay } from '@/utilities/app-operations'
 
 vi.mock('next/navigation', () => ({
-  usePathname: vi.fn(),
-  useSearchParams: vi.fn()
+  usePathname: vi.fn()
 }))
 
 vi.mock('@/app/concoctions/utilities', () => ({
   getConcoctions: vi.fn()
+}))
+
+vi.mock('@/utilities/app-operations', () => ({
+  useAppDisplay: vi.fn()
 }))
 
 vi.mock('./nav-item', () => ({
@@ -19,18 +23,17 @@ vi.mock('./nav-item', () => ({
 
 describe('Navigation component', () => {
   let usePathnameMock: Mock
-  let useSearchParamsMock: Mock
-  let searchParamsMock = { has: vi.fn() }
+  let appDisplay = { nav: true }
+  let useAppDisplayMock: Mock
   let getConcoctionsMock: Mock
 
   beforeEach(() => {
     usePathnameMock = usePathname as Mock
     usePathnameMock.mockReturnValue('')
 
-    searchParamsMock.has.mockReturnValue(false)
-
-    useSearchParamsMock = useSearchParams as Mock
-    useSearchParamsMock.mockReturnValue(searchParamsMock)
+    appDisplay = { nav: true }
+    useAppDisplayMock = useAppDisplay as Mock
+    useAppDisplayMock.mockReturnValue(appDisplay)
 
     getConcoctionsMock = getConcoctions as Mock
     getConcoctionsMock.mockReturnValue([])
@@ -43,20 +46,19 @@ describe('Navigation component', () => {
   test('should retrieve list of concoctions', () => {
     render(<Navigation />)
 
-    expect(getConcoctionsMock).toHaveBeenCalled()
+    expect(getConcoctions).toHaveBeenCalled()
   })
 
   test('should retrieve current path', () => {
     render(<Navigation />)
 
-    expect(usePathnameMock).toHaveBeenCalled()
+    expect(usePathname).toHaveBeenCalled()
   })
 
-  test('should check for the app search params', () => {
+  test('should check for app display status', () => {
     render(<Navigation />)
 
-    expect(useSearchParamsMock).toHaveBeenCalled()
-    expect(searchParamsMock.has).toHaveBeenCalledWith('app')
+    expect(useAppDisplay).toHaveBeenCalled()
   })
 
   test('should render home menu and list of concoctions', () => {
@@ -124,7 +126,6 @@ describe('Navigation component', () => {
   ])('should handle URLs without leading / (baseUrl: $baseUrl; linkUrl: $linkUrl)', ({ baseUrl, linkUrl, expected }: { baseUrl: string, linkUrl: string, expected: string }) => {
     usePathnameMock.mockReturnValue('/')
 
-    const concoctionUrl = 'concoction'
     getConcoctionsMock.mockReturnValue([
       { linkUrl, linkTitle: 'Concoction 1' }
     ])
@@ -136,8 +137,8 @@ describe('Navigation component', () => {
     expect(content).toBeDefined()
   })
 
-  test('should not render anything if app search params exists', () => {
-    searchParamsMock.has.mockReturnValue(true)
+  test('should not render anything if navigation is hidden in app display', () => {
+    appDisplay.nav = false
 
     const { container } = render(<Navigation />)
 

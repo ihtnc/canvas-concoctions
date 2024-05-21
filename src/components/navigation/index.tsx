@@ -1,8 +1,9 @@
 'use client'
 
-import { usePathname, useSearchParams } from 'next/navigation'
+import { usePathname } from 'next/navigation'
 import { getConcoctions } from '@/app/concoctions/utilities'
 import NavItem from './nav-item'
+import { useAppDisplay } from '@/utilities/app-operations'
 
 type NavigationProps = {
   baseUrl?: string
@@ -12,8 +13,7 @@ const Navigation = ({ baseUrl }: NavigationProps) => {
   const links = getConcoctions()
   const pathName = usePathname()
   const concoctionId = pathName.split('/').pop()
-  const searchParams = useSearchParams()
-  const isApp = searchParams.has("app")
+  const { nav: showNav } = useAppDisplay()
   const itemBaseUrl = baseUrl !== undefined ? `/${baseUrl.replace(/^\//, '').replace(/\/$/, '')}` : ''
 
   const constructPath = (linkUrl: string) => {
@@ -21,7 +21,7 @@ const Navigation = ({ baseUrl }: NavigationProps) => {
     return `${itemBaseUrl}/${trimUrl}`
   }
 
-  return isApp === false ? (
+  return showNav ? (
     <section className="flex flex-col self-center">
       <nav>
         <ul className='flex flex-row gap-2'>

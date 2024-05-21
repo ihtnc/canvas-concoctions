@@ -2,6 +2,8 @@
 
 # Canvas Concoctions
 
+See it [live](https://ihtnc.github.io/canvas-concoctions/)!
+
 This is a repository for various small, interactive applications / animations that served as a playground for ideas using the canvas HTML element.
 
 Icons provided by https://heroicons.com/.
@@ -19,8 +21,16 @@ Implementation of Conway's Game of Life.
 
 <img alt="Game of Life Preview" src="/public/previews/game-of-life.gif?raw=true" width="500px" />
 
-## Usage
-    \canvas-concoctions> npm install
-    \canvas-concoctions> npm run build
-    \canvas-concoctions> npm run test
-    \canvas-concoctions> npm run dev
+## Toggle UI elements
+When accessing each concoction, query params can be added to toggle certain parts of the UI.
+
+|Query   |Description               |
+|--------|--------------------------|
+|no-nav  |Hides the navigation menu |
+|no-title|Hides the title section   |
+
+### Example:
+To view the Sand Simulation concoction without the navigation menu and the title section, use:
+
+    /canvas-concoction/concoctions/sand-sim?no-nav&no-title
+

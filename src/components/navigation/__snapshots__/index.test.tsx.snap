@@ -29,7 +29,7 @@ exports[`Navigation component > should append baseUrl to concoction linkUrl 1`] 
 </div>
 `;
 
-exports[`Navigation component > should not render anything if app search params exists 1`] = `<div />`;
+exports[`Navigation component > should not render anything if navigation is hidden in app display 1`] = `<div />`;
 
 exports[`Navigation component > should render home menu and list of concoctions 1`] = `
 <div>

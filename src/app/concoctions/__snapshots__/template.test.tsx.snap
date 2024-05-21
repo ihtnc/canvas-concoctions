@@ -1,5 +1,15 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
+exports[`ConcoctionsTemplate component > should not render title if title is hidden in app display 1`] = `
+<div>
+  <section
+    class="flex flex-col w-full h-full gap-2"
+  >
+    Test Content
+  </section>
+</div>
+`;
+
 exports[`ConcoctionsTemplate component > should render the children correctly 1`] = `
 <div>
   <section
