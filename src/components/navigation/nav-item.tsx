@@ -2,6 +2,7 @@ import { useFloating, useHover, useInteractions } from '@floating-ui/react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useState } from 'react'
+import { constructPublicPath } from '@/utilities/client-operations'
 
 type NavItemProps = {
   href: string,
@@ -33,7 +34,7 @@ const NavItem = ({ href, className, title, previewHref, isActive }: NavItemProps
       {!isActive && previewHref && isOpen && (
         <Image
           className='w-72 h-auto border border-black'
-          src={previewHref} alt={title}
+          src={constructPublicPath(previewHref)} alt={title}
           width='0' height='0'
           ref={refs.setFloating}
           style={floatingStyles}

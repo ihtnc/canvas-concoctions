@@ -1,3 +1,5 @@
+![github.io](https://github.com/ihtnc/canvas-concoctions/actions/workflows/nextjs.yml/badge.svg)
+
 # Canvas Concoctions
 
 This is a repository for various small, interactive applications / animations that served as a playground for ideas using the canvas HTML element.
