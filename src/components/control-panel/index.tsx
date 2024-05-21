@@ -15,7 +15,7 @@ interface ButtonControlItem extends BaseControlItem {
   onClickHandler: OnClickHandler,
   content: JSX.Element,
   name?: string
-};
+}
 
 interface TextInputControlItem extends BaseControlItem {
   type: "text"
@@ -23,7 +23,7 @@ interface TextInputControlItem extends BaseControlItem {
   onInputHandler: OnInputHandler,
   placeholder?: ControlPropValue<string>,
   value?: ControlPropValue<string>
-};
+}
 
 interface LabelControlItem extends BaseControlItem {
   type: "label",

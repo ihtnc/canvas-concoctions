@@ -1,5 +1,5 @@
 import { type MatrixCoordinate, type MatrixValue } from "@/utilities/matrix-operations"
-import { type CellValue, type CreateCellOperationFunction, type CellOperationFunction, CellState } from "./types"
+import { type CellValue, type CreateCellOperationFunction, type CellOperationFunction } from "./types"
 import { deepCopy } from "@/utilities/misc-operations"
 import ENGINE_DATA from './data'
 import { isCheckStatePhase, isDormantPhase, isEndPhase } from "./cycle-operations"

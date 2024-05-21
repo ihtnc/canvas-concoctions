@@ -32,7 +32,7 @@ export type TransitionOperationData = {
 };
 export interface TransitionOperationFunction {
   (data: TransitionOperationData): TransitionProps
-};
+}
 
 export const calculateProgress = (data: TransitionOperationData): number => {
   const duration = data.currentFrame - data.startFrame

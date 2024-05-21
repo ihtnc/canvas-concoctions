@@ -11,14 +11,14 @@ export enum CellState {
   Dying,
   Dead,
   Growing
-};
-export type CellValue = { state: CellState };
+}
+export type CellValue = { state: CellState }
 
 export type CreateCellOperationFunction<T> = (cycleIndex: number, data?: T) => CellOperationFunction;
 
 export interface CellOperationFunction extends MatrixOperationFunction {
   (value: MatrixValue<CellValue>): MatrixValue<CellValue>
-};
+}
 
 export type RenderPipelineData = {
   map: MatrixValue<CellValue>,
@@ -32,4 +32,4 @@ export type RenderPipelineData = {
 
 export interface CellRenderFunction extends RenderFunction {
   (context: CanvasRenderingContext2D, data: RenderPipelineData): void;
-};
+}

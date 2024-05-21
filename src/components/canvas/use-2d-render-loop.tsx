@@ -103,7 +103,7 @@ const use2DRenderLoop = (options: Use2DRenderLoopOptions): Use2DRenderLoopRespon
     }
 
     const render = () => {
-      if (!context || needsNewFrame() == false) {
+      if (!context || needsNewFrame() === false) {
         animationFrameId = requestAnimationFrame(render)
         return
       }

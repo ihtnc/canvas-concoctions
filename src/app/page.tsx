@@ -9,4 +9,4 @@ export default function Home() {
       that served as a playground for ideas using the canvas HTML element.
     </section>
   )
-};
+}

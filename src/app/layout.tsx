@@ -1,6 +1,5 @@
 'use client'
 
-import { useSearchParams } from "next/navigation"
 import { Inter } from "next/font/google"
 import Navigation from "@/components/navigation"
 import "./globals.css"

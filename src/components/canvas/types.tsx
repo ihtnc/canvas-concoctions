@@ -19,7 +19,7 @@ export enum RenderLocation {
   TopLeft, TopCenter, TopRight,
   MiddleLeft, Center, MiddleRight,
   BottomLeft, BottomCenter, BottomRight
-};
+}
 
 export type Coordinates = { x: number, y: number };
 export type RenderEnvironmentLayerOptions = {

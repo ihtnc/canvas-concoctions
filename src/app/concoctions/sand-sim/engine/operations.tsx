@@ -34,8 +34,8 @@ const getNextCoordinate = (value: MatrixValue<ParticleValue>, current: MatrixCoo
         col: current.col
       }
 
-      if (direction == PeekDirection.LowerLeft) { next.col = current.col - 1 }
-      else if (direction == PeekDirection.LowerRight) { next.col = current.col + 1 }
+      if (direction === PeekDirection.LowerLeft) { next.col = current.col - 1 }
+      else if (direction === PeekDirection.LowerRight) { next.col = current.col + 1 }
 
       return next
     }

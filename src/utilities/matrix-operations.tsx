@@ -17,11 +17,11 @@ export const matrixPipeline:MatrixPipelineFunction = (operations: Array<MatrixOp
 
 export enum HResizeDirection {
   Left, Right, Both
-};
+}
 
 export enum VResizeDirection {
   Up, Down, Both
-};
+}
 
 type MatrixInitialiseFunction = <T>(row: number, col: number, defaultValue: T) => MatrixValue<T>;
 export const initialise: MatrixInitialiseFunction = (row, col, defaultValue) => {
@@ -109,7 +109,7 @@ export enum PeekDirection {
   UpperLeft, Up, UpperRight,
   Left, Right,
   LowerLeft, Down, LowerRight
-};
+}
 
 type MatrixPeekFunction = <T>(matrix: MatrixValue<T>, start: MatrixCoordinate, direction: PeekDirection) => T | undefined
 export const peek: MatrixPeekFunction = (matrix, start, direction) => {
