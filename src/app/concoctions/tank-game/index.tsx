@@ -1,6 +1,5 @@
 'use client'
 
-import { type ConcoctionNavigation } from "@/app/concoctions/utilities"
 import { type DrawHandler, type InitRenderHandler, type OnResizeHandler, type PreDrawHandler, RenderLocation } from "@/components/canvas/types"
 import useAnimatedCanvas from "@/components/canvas/use-animated-canvas"
 import {
@@ -112,12 +111,6 @@ const TankGame = ({ className }: TankGameProps) => {
       onPointerDown={pointerCommand}
     />
   </>
-}
-
-export const NavigationDetails: ConcoctionNavigation = {
-  linkTitle: 'Tank Game',
-  linkUrl: 'tank-game',
-  title: 'Tank Game'
 }
 
 export default TankGame

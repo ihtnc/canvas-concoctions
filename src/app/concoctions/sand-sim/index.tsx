@@ -4,7 +4,6 @@ import {
   type PointerEventHandler,
   useRef
 } from "react"
-import { type ConcoctionNavigation } from "@/app/concoctions/utilities"
 import {
   type MatrixValue,
   type MatrixCoordinate
@@ -169,13 +168,6 @@ const SandSim = ({
     />
     <ControlPanel controls={controls} />
   </>
-}
-
-export const NavigationDetails: ConcoctionNavigation = {
-  linkTitle: 'Sand Sim',
-  linkUrl: 'sand-sim',
-  title: 'Sand Simulation',
-  previewUrl: '/previews/sand-sim.gif'
 }
 
 export default SandSim

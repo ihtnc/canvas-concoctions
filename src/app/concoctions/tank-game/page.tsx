@@ -1,5 +1,11 @@
 import { constructPublicPath } from "@/utilities/client-operations"
 import TankGame from "."
+import NavigationDetails from "./navigation-details"
+import { Metadata } from "next"
+
+export const metadata: Metadata = {
+  title: NavigationDetails.title
+}
 
 const Page = () => {
   const background = constructPublicPath("/resources/tank-game/background.svg")

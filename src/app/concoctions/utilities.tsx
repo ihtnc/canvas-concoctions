@@ -1,13 +1,13 @@
-import { NavigationDetails as sandSimNav } from './sand-sim'
-import { NavigationDetails as tagVisualiserNav } from './tag-visualiser'
-import { NavigationDetails as gameOfLifeNav } from './game-of-life'
-import { NavigationDetails as tankGameNav } from './tank-game'
+import sandSim from './sand-sim/navigation-details'
+import tagVisualiser from './tag-visualiser/navigation-details'
+import gameOfLife from './game-of-life/navigation-details'
+import tankGame from './tank-game/navigation-details'
 
 const concoctions = [
-  sandSimNav,
-  tagVisualiserNav,
-  gameOfLifeNav,
-  tankGameNav
+  sandSim,
+  tagVisualiser,
+  gameOfLife,
+  tankGame
 ]
 
 export type ConcoctionNavigation = {

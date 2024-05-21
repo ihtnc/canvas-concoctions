@@ -1,7 +1,6 @@
 'use client'
 
 import { type PreDrawHandler, type DrawHandler, type PostDrawHandler, RenderLocation } from "@/components/canvas/types"
-import { type ConcoctionNavigation } from "@/app/concoctions/utilities"
 import useAnimatedCanvas from "@/components/canvas/use-animated-canvas"
 import ControlPanel, { type OnInputHandler, type ControlItem } from "@/components/control-panel"
 import { useRef } from "react"
@@ -128,12 +127,6 @@ const TagVisualiser = ({ className }: TagVisualiserProps) => {
     <Canvas className={className} />
     <ControlPanel controls={controls} />
   </>
-}
-
-export const NavigationDetails: ConcoctionNavigation = {
-  linkTitle: 'Tag Visualiser',
-  linkUrl: 'tag-visualiser',
-  title: 'Tag Visualiser'
 }
 
 export default TagVisualiser
