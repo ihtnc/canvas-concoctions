@@ -43,14 +43,25 @@ describe("app operations", () => {
     })
 
     test.each([
-        { param: 'no-title', value: true, expected: false },
-        { param: 'no-title', value: false, expected: true },
-        { param: 'other', value: true, expected: true },
-      ])("should set search param to title property ($param | $value)", ({ param, value, expected }: { param: string, value: boolean, expected: boolean }) => {
-        searchParams.has.mockImplementation((key: string) => key === param ? value : false)
+      { param: 'no-title', value: true, expected: false },
+      { param: 'no-title', value: false, expected: true },
+      { param: 'other', value: true, expected: true },
+    ])("should set search param to title property ($param | $value)", ({ param, value, expected }: { param: string, value: boolean, expected: boolean }) => {
+      searchParams.has.mockImplementation((key: string) => key === param ? value : false)
 
-        const result = useAppDisplay()
-        expect(result.title).toBe(expected)
-      })
+      const result = useAppDisplay()
+      expect(result.title).toBe(expected)
+    })
+
+    test.each([
+      { param: 'no-padding', value: true, expected: false },
+      { param: 'no-padding', value: false, expected: true },
+      { param: 'other', value: true, expected: true },
+    ])("should set search param to padding property ($param | $value)", ({ param, value, expected }: { param: string, value: boolean, expected: boolean }) => {
+      searchParams.has.mockImplementation((key: string) => key === param ? value : false)
+
+      const result = useAppDisplay()
+      expect(result.padding).toBe(expected)
+    })
   })
 })

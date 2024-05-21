@@ -24,10 +24,11 @@ Implementation of Conway's Game of Life.
 ## Toggle UI elements
 When accessing each concoction, query params can be added to toggle certain parts of the UI.
 
-|Query   |Description               |
-|--------|--------------------------|
-|no-nav  |Hides the navigation menu |
-|no-title|Hides the title section   |
+|Query      |Description               |
+|-----------|--------------------------|
+|no-nav     |Hides the navigation menu |
+|no-title   |Hides the title section   |
+|no-padding |Hides the outside padding |
 
 ### Example:
 To view the Sand Simulation concoction without the navigation menu and the title section, use:
