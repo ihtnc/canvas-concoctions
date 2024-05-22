@@ -23,6 +23,7 @@ export const loadImage = async (src: string): Promise<HTMLImageElement> => {
     image.src = constructPublicPath(src)
   })
 }
+
 export const requestAnimationFrame = (callback: FrameRequestCallback): number => {
   return window.requestAnimationFrame(callback)
 }
@@ -32,5 +33,5 @@ export const cancelAnimationFrame = (handle: number): void => {
 }
 
 export const getDevicePixelRatio = (): number => {
-  return window.devicePixelRatio ?? 1
+  return window.devicePixelRatio || 1
 }

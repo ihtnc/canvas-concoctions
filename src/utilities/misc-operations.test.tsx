@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, test, vi } from "vitest"
-import { chooseRandom, deepCopy, operationPipeline } from "./misc-operations"
+import { chooseRandom, deepCopy, degreesToRadians, getRotatedCoordinates, operationPipeline, radiansToDegrees } from "./misc-operations"
 
 describe('misc operations', () => {
 
@@ -136,6 +136,116 @@ describe('misc operations', () => {
       ]).run([])
 
       expect(finalValue).toBe(fn3Return)
+    })
+  })
+
+  describe('degreesToRadians function', () => {
+    test('should convert degrees to radians', () => {
+      const degrees = 180
+      const radians = degreesToRadians(degrees)
+      expect(radians).toBe(Math.PI)
+    })
+
+    test('should convert 0 degrees to 0 radians', () => {
+      const degrees = 0
+      const radians = degreesToRadians(degrees)
+      expect(radians).toBe(0)
+    })
+
+    test('should convert 90 degrees to PI/2 radians', () => {
+      const degrees = 90
+      const radians = degreesToRadians(degrees)
+      expect(radians).toBe(Math.PI / 2)
+    })
+
+    test('should convert 270 degrees to 3PI/2 radians', () => {
+      const degrees = 270
+      const radians = degreesToRadians(degrees)
+      expect(radians).toBe(3 * Math.PI / 2)
+    })
+
+    test('should convert 360 degrees to 2PI radians', () => {
+      const degrees = 360
+      const radians = degreesToRadians(degrees)
+      expect(radians).toBe(2 * Math.PI)
+    })
+  })
+
+  describe('radiansToDegrees function', () => {
+    test('should convert radians to degrees', () => {
+      const radians = Math.PI
+      const degrees = radiansToDegrees(radians)
+      expect(degrees).toBe(180)
+    })
+
+    test('should convert 0 radians to 0 degrees', () => {
+      const radians = 0
+      const degrees = radiansToDegrees(radians)
+      expect(degrees).toBe(0)
+    })
+
+    test('should convert PI/2 radians to 90 degrees', () => {
+      const radians = Math.PI / 2
+      const degrees = radiansToDegrees(radians)
+      expect(degrees).toBe(90)
+    })
+
+    test('should convert 3PI/2 radians to 270 degrees', () => {
+      const radians = 3 * Math.PI / 2
+      const degrees = radiansToDegrees(radians)
+      expect(degrees).toBe(270)
+    })
+
+    test('should convert 2PI radians to 360 degrees', () => {
+      const radians = 2 * Math.PI
+      const degrees = radiansToDegrees(radians)
+      expect(degrees).toBe(360)
+    })
+  })
+
+  describe('getRotatedCoordinates function', () => {
+    test('should rotate coordinates around point of rotation by angle (90)', () => {
+      const coordinates = { x: 10, y: 10 }
+      const pointOfRotation = { x: 0, y: 0 }
+      const angle = 90
+
+      const result = getRotatedCoordinates(coordinates, pointOfRotation, angle)
+
+      expect(result.x).toBeCloseTo(-10)
+      expect(result.y).toBeCloseTo(10)
+    })
+
+    test('should rotate coordinates around point of rotation by angle (180)', () => {
+      const coordinates = { x: 10, y: 10 }
+      const pointOfRotation = { x: 0, y: 0 }
+      const angle = 180
+
+      const result = getRotatedCoordinates(coordinates, pointOfRotation, angle)
+
+      expect(result.x).toBeCloseTo(-10)
+      expect(result.y).toBeCloseTo(-10)
+    })
+
+    test('should rotate coordinates around point of rotation by angle (270)', () => {
+      const coordinates = { x: 10, y: 10 }
+      const pointOfRotation = { x: 0, y: 0 }
+      const angle = 270
+
+      const result = getRotatedCoordinates(coordinates, pointOfRotation, angle)
+
+      expect(result.x).toBeCloseTo(10)
+      expect(result.y).toBeCloseTo(-10)
+    })
+
+    test('should rotate coordinates around point of rotation by angle (360)', () => {
+      const coordinates = { x: 10, y: 10 }
+      const pointOfRotation = { x: 0, y: 0 }
+      const angle = 360
+
+      const result = getRotatedCoordinates(coordinates, pointOfRotation, angle)
+
+      expect(result.x).toBeCloseTo(10)
+      expect(result.y).toBeCloseTo(10)
     })
   })
 })
