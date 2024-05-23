@@ -1,6 +1,6 @@
 import { type GameConfig } from "./types"
 
-const data: GameConfig = {
+const data: Readonly<GameConfig> = {
   tank: {
     size: {
       width: 100,
@@ -35,7 +35,7 @@ const data: GameConfig = {
       width: 30,
       height: 10
     },
-    speed: 0.10,
+    animationSpeed: 6,
     padding: 5
   },
   rank: {
@@ -57,7 +57,8 @@ const data: GameConfig = {
     size: {
       width: 75,
       height: 75
-    }
+    },
+    duration: 90
   },
   environment: {
     gravity: 3.75,
@@ -68,8 +69,7 @@ const data: GameConfig = {
     minAngle: -15,
     maxPower: 20,
     minPower: 5,
-    hitsPerDifficulty: 5,
-    fps: 60
+    hitsPerDifficulty: 5
   },
   controls: {
     size: {
@@ -120,6 +120,13 @@ const data: GameConfig = {
         y: 0
       },
       sizeMultiplier: 2
+    },
+    restart: {
+      offset: {
+        x: 0,
+        y: 0
+      },
+      sizeMultiplier: 2
     }
   },
   stats: {
@@ -128,8 +135,38 @@ const data: GameConfig = {
       y: 20
     },
     padding: 10,
-    color: { h: 0, s: 100, l: 50 },
+    color: { r: 0, g: 0, b: 0 },
     font: "20px Arial"
+  },
+  message: {
+    duration: 120,
+    hit: {
+      color: { r: 0, g: 255, b: 0 },
+      font: "50px Arial"
+    },
+    miss: {
+      color: { r: 255, g: 0, b: 0 },
+      font: "50px Arial"
+    }
+  },
+  gameOver: {
+    animationSpeed: 90,
+    padding: 10,
+    message: {
+      color: { r: 0, g: 0, b: 0 },
+      font: "50px Arial"
+    },
+    score: {
+      color: { r: 0, g: 0, b: 0 },
+      font: "30px Arial"
+    },
+    highScore: {
+      color: { r: 0, g: 255, b: 0 },
+      font: "25px Arial"
+    }
+  },
+  localStorage: {
+    highScoreKey: "tank-game.high-score"
   }
 }
 

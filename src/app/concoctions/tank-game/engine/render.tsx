@@ -1,8 +1,8 @@
-import { getLocalStorage } from "@/utilities/client-operations"
 import { type TankGameRenderFunction, type RenderPipelineData, Command } from "./types"
-import { getTextSize, renderPipeline } from "@/utilities/drawing-operations"
+import { type RenderFilterFunction, getTextSize, renderPipeline, renderWhen } from "@/utilities/drawing-operations"
 import { type Coordinates } from "@/components/canvas/types"
-import { degreesToRadians, radiansToDegrees } from "@/utilities/misc-operations"
+import { chooseRandom, degreesToRadians, radiansToDegrees } from "@/utilities/misc-operations"
+import { isBulletImageLoaded, isRankImageLoaded } from "./conditional-functions"
 
 type CreateTextStatRenderFunction = (key: string, value: string, offset: Coordinates) => TankGameRenderFunction
 const createTextStatMessage: CreateTextStatRenderFunction = (key, value, offset) => {
@@ -10,10 +10,10 @@ const createTextStatMessage: CreateTextStatRenderFunction = (key, value, offset)
     const { stats } = data.config
 
     const col1X = stats.location.x
-    var col1Y = stats.location.y + offset.y
+    const col1Y = stats.location.y + offset.y
 
-    var col2X = col1X + offset.x
-    var col2Y = col1Y
+    const col2X = col1X + offset.x
+    const col2Y = col1Y
 
     context.fillText(key, col1X, col1Y)
     context.fillText(value, col2X, col2Y)
@@ -27,7 +27,6 @@ type CreateImageStatRenderFunction = (location: Coordinates) => TankGameRenderFu
 const createBulletImageStat: CreateImageStatRenderFunction = (location) => {
   const render: TankGameRenderFunction = (context: CanvasRenderingContext2D, data: RenderPipelineData) => {
     const { bulletImage } = data.resources
-    if (bulletImage.complete === false) { return }
 
     context.save()
 
@@ -43,7 +42,7 @@ const createBulletImageStat: CreateImageStatRenderFunction = (location) => {
     context.rotate(degreesToRadians(-90))
 
     const bulletSpacing = size.height + bullet.padding
-    for (var i = 0; i < tank.bullets; i++) {
+    for (let i = 0; i < tank.bullets; i++) {
       context.drawImage(bulletImage, x - size.width, bulletSpacing * i, size.width, size.height)
     }
 
@@ -56,7 +55,6 @@ const createBulletImageStat: CreateImageStatRenderFunction = (location) => {
 const createRankImageStat: CreateImageStatRenderFunction = (location) => {
   const render: TankGameRenderFunction = (context: CanvasRenderingContext2D, data: RenderPipelineData) => {
     const { rankImage } = data.resources
-    if (rankImage.complete === false) { return }
 
     const { stats } = data.config
     const { x: statX, y: statY } = stats.location
@@ -66,7 +64,7 @@ const createRankImageStat: CreateImageStatRenderFunction = (location) => {
     const { rank } = data.config
     const { size, offset } = rank
 
-    for (var i = 0; i < difficulty; i++) {
+    for (let i = 0; i < difficulty; i++) {
       context.drawImage(rankImage, x + size.width * i + offset.x, y + offset.y, size.width, size.height)
     }
   }
@@ -78,21 +76,20 @@ export const renderGameStats: TankGameRenderFunction = (context: CanvasRendering
   context.save()
 
   const { stats } = data.config
-  const { score } = data.state
+  const { score, hiScore: hiScoreValue } = data.state
 
-  const { h, s, l } = stats.color
-  const color = `HSL(${h}, ${s}%, ${l}%)`
+  const { r, g, b } = stats.color
+  const color = `RGB(${r}, ${g}, ${b})`
   context.fillStyle = color
   context.font = stats.font
 
-  const hiScoreMessage = "Hi Score:"
+  const hiScoreMessage = "Hi Score: "
   const hiScoreSize = getTextSize(context, hiScoreMessage)
-  const scoreMessage = "Score:"
+  const scoreMessage = "Score: "
   const scoreSize = getTextSize(context, scoreMessage)
   const longestMessage = Math.max(hiScoreSize.width, scoreSize.width)
 
-  const hiScoreValue = getLocalStorage("hiScore", "0")
-  const hiScoreFn = createTextStatMessage(hiScoreMessage, hiScoreValue, { x: longestMessage, y: 0 })
+  const hiScoreFn = createTextStatMessage(hiScoreMessage, `${hiScoreValue}`, { x: longestMessage, y: 0 })
 
   const scoreOffset: Coordinates = { x: longestMessage, y: hiScoreSize.height + stats.padding }
   const scoreValue = `${score}`
@@ -108,8 +105,8 @@ export const renderGameStats: TankGameRenderFunction = (context: CanvasRendering
   const renderFns = [
     hiScoreFn,
     scoreFn,
-    bulletFn,
-    rankFn
+    renderWhen<RenderPipelineData>(isBulletImageLoaded, bulletFn),
+    renderWhen<RenderPipelineData>(isRankImageLoaded, rankFn)
   ]
 
   renderPipeline(renderFns).run(context, data)
@@ -119,7 +116,6 @@ export const renderGameStats: TankGameRenderFunction = (context: CanvasRendering
 
 export const renderTank: TankGameRenderFunction = (context: CanvasRenderingContext2D, data: RenderPipelineData) => {
   const { tankImage } = data.resources
-  if (tankImage.complete === false) { return }
 
   const { tank } = data.game
   const { size } = data.config.tank
@@ -130,7 +126,6 @@ export const renderTank: TankGameRenderFunction = (context: CanvasRenderingConte
 
 export const renderGunBarrel: TankGameRenderFunction = (context: CanvasRenderingContext2D, data: RenderPipelineData) => {
   const { gunBarrelImage } = data.resources
-  if (gunBarrelImage.complete === false) { return }
 
   const { gunBarrel, tank } = data.game
   const { size, angleMultiplier } = data.config.gunBarrel
@@ -148,15 +143,10 @@ export const renderGunBarrel: TankGameRenderFunction = (context: CanvasRendering
 
 export const renderTarget: TankGameRenderFunction = (context: CanvasRenderingContext2D, data: RenderPipelineData) => {
   const { targetImage } = data.resources
-  if (targetImage.complete === false) { return }
-
-  const { target } = data.game
-  if (target.isHit === false) { return }
-
-  const { location } = target
+  const { location } = data.game.target
   const { size } = data.config.target
 
-  context.drawImage(targetImage, location.x, location.y, size.width, size.height)
+  context.drawImage(targetImage, location.x - size.width / 2, location.y - size.height / 2, size.width, size.height)
 }
 
 export const renderTrajectory: TankGameRenderFunction = (context: CanvasRenderingContext2D, data: RenderPipelineData) => {
@@ -187,13 +177,7 @@ export const renderTrajectory: TankGameRenderFunction = (context: CanvasRenderin
 
 export const renderBullet: TankGameRenderFunction = (context: CanvasRenderingContext2D, data: RenderPipelineData) => {
   const { bulletImage } = data.resources
-  if (bulletImage.complete === false) { return }
-
-  const { bullet } = data.game
-  const { bulletFired, bulletStopped } = data.state
-  if (bulletFired === false || bulletStopped) { return }
-
-  const { location, velocity } = bullet
+  const { location, velocity } = data.game.bullet
   const { size } = data.config.bullet
   const angle = radiansToDegrees(Math.atan2(velocity.y, velocity.x))
 
@@ -208,8 +192,6 @@ export const renderBullet: TankGameRenderFunction = (context: CanvasRenderingCon
 
 export const renderPowerDownControl: TankGameRenderFunction = (context: CanvasRenderingContext2D, data: RenderPipelineData) => {
   const { arrowImage } = data.resources
-  if (arrowImage.complete === false) { return }
-
   const { currentCommand } = data.state
   const { powerDown } = data.game.controls
   const { powerDown: config, size, activeOpacity, inactiveOpacity } = data.config.controls
@@ -225,8 +207,6 @@ export const renderPowerDownControl: TankGameRenderFunction = (context: CanvasRe
 
 export const renderPowerUpControl: TankGameRenderFunction = (context: CanvasRenderingContext2D, data: RenderPipelineData) => {
   const { arrowImage } = data.resources
-  if (arrowImage.complete === false) { return }
-
   const { currentCommand } = data.state
   const { powerUp } = data.game.controls
   const { powerUp: config, size, activeOpacity, inactiveOpacity } = data.config.controls
@@ -239,8 +219,6 @@ export const renderPowerUpControl: TankGameRenderFunction = (context: CanvasRend
 
 export const renderAngleDownControl: TankGameRenderFunction = (context: CanvasRenderingContext2D, data: RenderPipelineData) => {
   const { arrowImage } = data.resources
-  if (arrowImage.complete === false) { return }
-
   const { currentCommand } = data.state
   const { angleDown } = data.game.controls
   const { angleDown: config, size, activeOpacity, inactiveOpacity } = data.config.controls
@@ -256,8 +234,6 @@ export const renderAngleDownControl: TankGameRenderFunction = (context: CanvasRe
 
 export const renderAngleUpControl: TankGameRenderFunction = (context: CanvasRenderingContext2D, data: RenderPipelineData) => {
   const { arrowImage } = data.resources
-  if (arrowImage.complete === false) { return }
-
   const { currentCommand } = data.state
   const { angleUp } = data.game.controls
   const { angleUp: config, size, activeOpacity, inactiveOpacity } = data.config.controls
@@ -273,8 +249,6 @@ export const renderAngleUpControl: TankGameRenderFunction = (context: CanvasRend
 
 export const renderFireControl: TankGameRenderFunction = (context: CanvasRenderingContext2D, data: RenderPipelineData) => {
   const { shootImage } = data.resources
-  if (shootImage.complete === false) { return }
-
   const { currentCommand } = data.state
   const { fire } = data.game.controls
   const { fire: config, size, activeOpacity, inactiveOpacity } = data.config.controls
@@ -287,8 +261,6 @@ export const renderFireControl: TankGameRenderFunction = (context: CanvasRenderi
 
 export const renderGunBarrelFireControl: TankGameRenderFunction = (context: CanvasRenderingContext2D, data: RenderPipelineData) => {
   const { shootImage } = data.resources
-  if (shootImage.complete === false) { return }
-
   const { currentCommand } = data.state
   const { gunBarrelFire } = data.game.controls
   const { gunBarrelFire: config, size, activeOpacity, inactiveOpacity } = data.config.controls
@@ -297,4 +269,99 @@ export const renderGunBarrelFireControl: TankGameRenderFunction = (context: Canv
   context.globalAlpha = currentCommand === Command.Fire ? activeOpacity : inactiveOpacity
   context.drawImage(shootImage, gunBarrelFire.location.x, gunBarrelFire.location.y, size.width * config.sizeMultiplier, size.height * config.sizeMultiplier)
   context.restore()
+}
+
+export const renderRestartControl: TankGameRenderFunction = (context: CanvasRenderingContext2D, data: RenderPipelineData) => {
+  const { restartImage } = data.resources
+  const { location } = data.game.controls.restart
+  const { restart: config, size } = data.config.controls
+
+  context.save()
+
+  context.globalAlpha = 1
+  context.drawImage(restartImage, location.x, location.y, size.width * config.sizeMultiplier, size.height * config.sizeMultiplier)
+
+  context.restore()
+}
+
+export const renderExplosion: TankGameRenderFunction = (context: CanvasRenderingContext2D, data: RenderPipelineData) => {
+  const { explosionImage } = data.resources
+  const { location, startFrame } = data.game.explosion
+  const { size, duration } = data.config.explosion
+
+  context.save()
+
+  const lifeTime = data.state.frame - startFrame
+  const offset: Coordinates = { x: chooseRandom(-3, 3), y: chooseRandom(-3, 3) }
+
+  context.globalAlpha = 1.5 - 1.5 * lifeTime / duration
+  context.drawImage(explosionImage, location.x - size.width / 2 + offset.x, location.y - size.height / 2 + offset.y, size.width, size.height)
+
+  context.restore()
+}
+
+export const renderMessage: TankGameRenderFunction = (context: CanvasRenderingContext2D, data: RenderPipelineData) => {
+  const { message } = data.game
+  const { size: gameSize, frame } = data.state
+  const { message: messageConfig } = data.config
+  const { hit, miss } = messageConfig
+
+  const text = message.hit ? 'HIT!' : 'MISS!'
+  const config = message.hit ? hit : miss
+  const { color, font } = config
+
+  context.save()
+
+  const lifeTime = Math.max(frame - message.startFrame, 0)
+  context.globalAlpha = 1.5 - 1.5 * (lifeTime / messageConfig.duration)
+  context.strokeStyle = 'black'
+  context.lineWidth = 1
+  context.fillStyle = `RGB(${color.r}, ${color.g}, ${color.b})`
+  context.font = font
+
+  const size = getTextSize(context, text)
+  context.fillText(text, gameSize.width / 2 - size.width / 2, gameSize.height / 2 - size.height)
+  context.strokeText(text, gameSize.width / 2 - size.width / 2, gameSize.height / 2 - size.height)
+
+  context.restore()
+}
+
+export const renderGameOver: TankGameRenderFunction = (context: CanvasRenderingContext2D, data: RenderPipelineData) => {
+  const { score, hiScore, frame } = data.state
+  const { startFrame, message: messageDetails, score: scoreDetails, highScore: highScoreDetails, newHighScore } = data.game.gameOver
+  const {
+    message: messageConfig,
+    score: scoreConfig,
+    highScore: highScoreConfig,
+    animationSpeed
+  } = data.config.gameOver
+
+  context.save()
+
+  const lifeTime = Math.max(frame - startFrame, 0)
+  context.globalAlpha = Math.min(1.5 * (lifeTime / animationSpeed), 1)
+
+  context.fillStyle = `RGB(${messageConfig.color.r}, ${messageConfig.color.g}, ${messageConfig.color.b})`
+  context.font = messageConfig.font
+  context.fillText(messageDetails.text, messageDetails.location.x, messageDetails.location.y)
+
+  context.fillStyle = `RGB(${scoreConfig.color.r}, ${scoreConfig.color.g}, ${scoreConfig.color.b})`
+  context.font = scoreConfig.font
+  context.fillText(scoreDetails.text, scoreDetails.location.x, scoreDetails.location.y)
+
+  const blink = lifeTime % animationSpeed < 2 * animationSpeed / 3
+  if (newHighScore && blink) {
+    context.strokeStyle = 'black'
+    context.lineWidth = 1
+    context.fillStyle = `RGB(${highScoreConfig.color.r}, ${highScoreConfig.color.g}, ${highScoreConfig.color.b})`
+    context.font = highScoreConfig.font
+    context.fillText(highScoreDetails.text, highScoreDetails.location.x, highScoreDetails.location.y)
+    context.strokeText(highScoreDetails.text, highScoreDetails.location.x, highScoreDetails.location.y)
+  }
+
+  context.restore()
+}
+
+export const gameOverFilter: RenderFilterFunction = (context: CanvasRenderingContext2D) => {
+  context.globalAlpha = 0.35
 }

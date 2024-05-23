@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, test, vi } from "vitest"
-import { chooseRandom, deepCopy, degreesToRadians, getRotatedCoordinates, operationPipeline, radiansToDegrees } from "./misc-operations"
+import { chooseOption, chooseRandom, deepCopy, degreesToRadians, getRotatedCoordinates, operationPipeline, radiansToDegrees } from "./misc-operations"
 
 describe('misc operations', () => {
 
@@ -13,6 +13,26 @@ describe('misc operations', () => {
         expect(result).toBeGreaterThanOrEqual(min)
         expect(result).toBeLessThanOrEqual(max)
       }
+    })
+  })
+
+  describe('chooseOption function', () => {
+    test('should choose an option from the provided numbers', () => {
+      const options = [1, 2, 3, 4, 5]
+      const result = chooseOption(options)
+      expect(options).toContain(result)
+    })
+
+    test('should choose an option from the provided booleans', () => {
+      const options = [true, false]
+      const result = chooseOption(options)
+      expect(options).toContain(result)
+    })
+
+    test('should choose an option from the provided strings', () => {
+      const options = ['str1', 'str2', 'str3']
+      const result = chooseOption(options)
+      expect(options).toContain(result)
     })
   })
 
@@ -134,6 +154,158 @@ describe('misc operations', () => {
         fn2,
         fn3
       ]).run([])
+
+      expect(finalValue).toBe(fn3Return)
+    })
+
+    test('should not immediately call object functions', () => {
+      const obj1 = { condition: vi.fn(), operation: vi.fn() }
+      const obj2 = { condition: vi.fn(), operation: vi.fn() }
+      const obj3 = { condition: vi.fn(), operation: vi.fn() }
+
+      operationPipeline([
+        obj1,
+        obj2,
+        obj3
+      ])
+
+      expect(obj1.condition).not.toHaveBeenCalled()
+      expect(obj1.operation).not.toHaveBeenCalled()
+      expect(obj2.condition).not.toHaveBeenCalled()
+      expect(obj2.operation).not.toHaveBeenCalled()
+      expect(obj3.condition).not.toHaveBeenCalled()
+      expect(obj3.operation).not.toHaveBeenCalled()
+    })
+
+    test('should call object condition function when run is called', () => {
+      const initialValue: number = 1
+
+      const obj = { condition: vi.fn(), operation: vi.fn() }
+
+      operationPipeline([obj]).run(initialValue)
+
+      expect(obj.condition).toHaveBeenCalledWith(initialValue)
+    })
+
+    test('should not call object operation function when condition returns false', () => {
+      const obj = { condition: vi.fn().mockReturnValue(false), operation: vi.fn() }
+
+      operationPipeline([obj]).run(1)
+
+      expect(obj.operation).not.toHaveBeenCalled()
+    })
+
+    test('should call object operation function when condition returns true', () => {
+      const initialValue: number = 1
+      const obj = { condition: vi.fn().mockReturnValue(true), operation: vi.fn() }
+
+      operationPipeline([obj]).run(initialValue)
+
+      expect(obj.operation).toHaveBeenCalledWith(initialValue)
+    })
+
+    test('should call object functions sequentially when run is called', () => {
+      const initialValue: number = 1
+      const fn1Return: number = 2
+      const fn2Return: number = 3
+      const fn3Return: number = 4
+
+      const obj1 = { condition: vi.fn().mockReturnValue(true), operation: vi.fn().mockReturnValue(fn1Return) }
+      const obj2 = { condition: vi.fn().mockReturnValue(true), operation: vi.fn().mockReturnValue(fn2Return) }
+      const obj3 = { condition: vi.fn().mockReturnValue(true), operation: vi.fn().mockReturnValue(fn3Return) }
+
+      operationPipeline([
+        obj1,
+        obj2,
+        obj3
+      ]).run(initialValue)
+
+      expect(obj1.condition).toHaveBeenCalledWith(initialValue)
+      expect(obj1.operation).toHaveBeenCalledWith(initialValue)
+      expect(obj2.condition).toHaveBeenCalledWith(fn1Return)
+      expect(obj2.operation).toHaveBeenCalledWith(fn1Return)
+      expect(obj3.condition).toHaveBeenCalledWith(fn2Return)
+      expect(obj3.operation).toHaveBeenCalledWith(fn2Return)
+    })
+
+    test('should return response from last object operation', () => {
+      const fn3Return: number = 4
+
+      const obj1 = { condition: vi.fn().mockReturnValue(true), operation: vi.fn() }
+      const obj2 = { condition: vi.fn().mockReturnValue(true), operation: vi.fn() }
+      const obj3 = { condition: vi.fn().mockReturnValue(true), operation: vi.fn().mockReturnValue(fn3Return) }
+
+      const finalValue = operationPipeline([
+        obj1,
+        obj2,
+        obj3
+      ]).run([])
+
+      expect(finalValue).toBe(fn3Return)
+    })
+
+    test('should not call object operation function when one condition returns false', () => {
+      const condition1 = vi.fn().mockReturnValue(true)
+      const condition2 = vi.fn().mockReturnValue(false)
+
+      const obj = { condition: [condition1, condition2], operation: vi.fn() }
+
+      operationPipeline([obj]).run(1)
+
+      expect(obj.operation).not.toHaveBeenCalled()
+    })
+
+    test('should not call object operation function when all conditions return true', () => {
+      const condition1 = vi.fn().mockReturnValue(true)
+      const condition2 = vi.fn().mockReturnValue(true)
+
+      const obj = { condition: [condition1, condition2], operation: vi.fn() }
+
+      operationPipeline([obj]).run(1)
+
+      expect(obj.operation).toHaveBeenCalled()
+    })
+
+    test('should not call next condition when condition returns false', () => {
+      const condition1 = vi.fn().mockReturnValue(false)
+      const condition2 = vi.fn().mockReturnValue(true)
+
+      const obj = { condition: [condition1, condition2], operation: vi.fn() }
+
+      operationPipeline([obj]).run(1)
+
+      expect(condition2).not.toHaveBeenCalled()
+    })
+
+    test('should call functions sequentially when an array is supplied in object', () => {
+      const initialValue: number = 1
+      const fn1Return: number = 2
+      const fn2Return: number = 3
+      const fn3Return: number = 4
+
+      const fn1 = vi.fn().mockReturnValue(fn1Return)
+      const fn2 = vi.fn().mockReturnValue(fn2Return)
+      const fn3 = vi.fn().mockReturnValue(fn3Return)
+
+      const obj = { condition: vi.fn().mockReturnValue(true), operation: [fn1, fn2, fn3] }
+
+      operationPipeline([obj]).run(initialValue)
+
+      expect(fn1).toHaveBeenCalledWith(initialValue)
+      expect(fn2).toHaveBeenCalledWith(fn1Return)
+      expect(fn3).toHaveBeenCalledWith(fn2Return)
+    })
+
+    test('should return response from last function in the array', () => {
+      const fn3Return: number = 1
+
+      const fn1 = vi.fn()
+      const fn2 = vi.fn()
+      const fn3 = vi.fn().mockReturnValue(fn3Return)
+
+      const obj = { condition: vi.fn().mockReturnValue(true), operation: [fn1, fn2, fn3] }
+
+      const finalValue = operationPipeline([obj]).run([])
 
       expect(finalValue).toBe(fn3Return)
     })
