@@ -21,6 +21,12 @@ Implementation of Conway's Game of Life.
 
 <img alt="Game of Life Preview" src="/public/previews/game-of-life.gif?raw=true" width="500px" />
 
+### Tank Game
+
+A tank game made with the help of GitHub Copilot.
+
+<img alt="Tank Game Preview" src="/public/previews/tank-game.gif?raw=true" width="500px" />
+
 ## Toggle UI elements
 When accessing each concoction, query params can be added to toggle certain parts of the UI.
 

@@ -6,7 +6,7 @@ import {
   type OnResizeHandler,
   type PreDrawHandler,
   type PostDrawHandler,
-  RenderLocation } from "@/components/canvas/types"
+} from "@/components/canvas/types"
 import useAnimatedCanvas from "@/components/canvas/use-animated-canvas"
 import {
   initialiseGame,
@@ -113,14 +113,12 @@ const TankGame = ({ className }: TankGameProps) => {
     state.current.currentCommand = command
   }
 
-  const { Canvas, debug } = useAnimatedCanvas({
+  const { Canvas } = useAnimatedCanvas({
     init: initFn,
     onResize: resizeFn,
     predraw: predrawFn,
     draw: drawFn,
-    postdraw: postdrawFn,
-    options: { enableDebug: true },
-    renderEnvironmentLayerRenderer: RenderLocation.BottomCenter
+    postdraw: postdrawFn
   })
 
   return <>

@@ -6,6 +6,6 @@ describe("NavigationDetails Component", () => {
     expect(tankGame.linkTitle).toBe('Tank Game')
     expect(tankGame.linkUrl).toBe('tank-game')
     expect(tankGame.title).toBe('Tank Game')
-    expect(tankGame.previewUrl).toBeUndefined()
+    expect(tankGame.previewUrl).toBe('/previews/tank-game.gif')
   })
 })
