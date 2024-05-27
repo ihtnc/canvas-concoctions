@@ -4,11 +4,14 @@ import NavigationDetails from "./navigation-details"
 import { Metadata } from "next"
 
 export const metadata: Metadata = {
-  title: NavigationDetails.title
+  title: NavigationDetails.title,
+  manifest: constructPublicPath("/tank-game.json"),
+  icons: constructPublicPath("/resources/icons/tank-game-favicon.svg")
 }
 
 const Page = () => {
   const background = constructPublicPath("/resources/tank-game/background.svg")
+
   return <div style={{ backgroundImage: `url('${background}')` }}
     className="bg-no-repeat bg-cover bg-bottom grow p-12"
   >
