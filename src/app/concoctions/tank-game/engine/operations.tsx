@@ -98,19 +98,19 @@ export const executeAimCommand: GameOperationFunction = (value: GameOperationDat
 
   switch (currentCommand) {
     case Command.PowerDown:
-      tank.power = Math.max(tank.power - 1, config.environment.minPower)
+      tank.power = Math.max(tank.power - 0.25, config.environment.minPower)
       break
 
     case Command.PowerUp:
-      tank.power = Math.min(tank.power + 1, config.environment.maxPower)
+      tank.power = Math.min(tank.power + 0.25, config.environment.maxPower)
       break
 
     case Command.AngleDown:
-      tank.angle = Math.max(tank.angle - 1, config.environment.minAngle)
+      tank.angle = Math.max(tank.angle - 0.25, config.environment.minAngle)
       break
 
     case Command.AngleUp:
-      tank.angle = Math.min(tank.angle + 1, config.environment.maxAngle)
+      tank.angle = Math.min(tank.angle + 0.25, config.environment.maxAngle)
       break
   }
 
