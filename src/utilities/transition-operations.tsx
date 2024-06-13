@@ -92,6 +92,52 @@ export const resizeFont: TransitionOperationFunction = (data: TransitionOperatio
   }
 }
 
+export const freeRotate: TransitionOperationFunction = (data: TransitionOperationData) => {
+  const { startProps, targetProps } = data
+
+  if (targetProps.rotation === undefined) { return {} }
+  if (startProps.rotation === undefined) {
+    return { rotation: targetProps.rotation }
+  }
+
+  const offset = targetProps.rotation - startProps.rotation
+
+  return rotate(data, startProps.rotation, offset)
+}
+
+export const minRotate: TransitionOperationFunction = (data: TransitionOperationData) => {
+  const { startProps, targetProps } = data
+
+  if (targetProps.rotation === undefined) { return {} }
+  if (startProps.rotation === undefined) {
+    return { rotation: targetProps.rotation }
+  }
+
+  const current = (startProps.rotation % 360)
+  const target = (targetProps.rotation % 360)
+
+  let offset = target - current
+  offset = offset > 180 ? offset - 360 : offset
+  offset = offset < -180 ? offset + 360 : offset
+
+  return rotate(data, current, offset)
+}
+
+const rotate = (data: TransitionOperationData, current: number, offset: number) => {
+  const { startProps, targetProps } = data
+
+  if (targetProps.rotation === undefined) { return {} }
+  if (startProps.rotation === undefined) {
+    return { rotation: targetProps.rotation }
+  }
+
+  const progress = calculateProgress(data)
+
+  return {
+    rotation: current + (offset * progress)
+  }
+}
+
 export type Transition = {
   id: string,
   startFrame: number,

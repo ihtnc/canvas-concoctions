@@ -3,12 +3,14 @@ import {
   type TransitionOperationData,
   type TransitionProps,
   type TransitionOperationFunction,
+  type Transition,
   areTransitionPropsEqual,
   calculateProgress,
   fadeIn,
   move,
   resizeFont,
-  Transition,
+  freeRotate,
+  minRotate,
   runTransition
 } from './transition-operations'
 import * as canvasUtilities from '@/components/canvas/utilities'
@@ -463,6 +465,186 @@ describe('transition operations', () => {
       const actual = runTransition(transition, 20)
 
       expect(actual).toBe(expected)
+    })
+  })
+
+  describe('freeRotate function', () => {
+    let data: TransitionOperationData
+
+    beforeEach(() => {
+      data ={
+        startFrame: 0,
+        duration: 100,
+        currentFrame: 0,
+        startProps: {},
+        targetProps: {}
+      }
+    })
+
+    test('should return an empty object if targetProps.rotation is undefined', () => {
+      const actual = freeRotate(data)
+
+      expect(actual).toStrictEqual({})
+    })
+
+    test('should return targetProps.rotation value if startProps.rotation is undefined', () => {
+      const rotation = 90
+      const { targetProps } = data
+      targetProps.rotation = rotation
+
+      const actual = freeRotate(data)
+
+      expect(actual.rotation).toBe(rotation)
+    });
+
+    test.each([
+      { frame: 0, expected: 0 },
+      { frame: 50, expected: 45 },
+      { frame: 100, expected: 90 },
+    ])('should calculate rotation progress based on currentFrame value ($frame/100)', ({ frame, expected }) => {
+      data.startProps.rotation = 0
+      data.targetProps.rotation = 90
+      data.currentFrame = frame
+
+      const actual = freeRotate(data)
+
+      expect(actual.rotation).toBe(expected)
+    })
+
+    test.each([
+      { startRotation: 0, targetRotation: 360 * 4, expected: 360 * 2 },
+      { startRotation: 0, targetRotation: -90 * 8, expected: -90 * 4 },
+      { startRotation: 90, targetRotation: 90 * 6, expected: 90 + (90 * 6 - 90) / 100 * 50 },
+      { startRotation: 90, targetRotation: -90 * 6, expected: 90 + (-90 * 6 - 90) / 100 * 50 },
+      { startRotation: -90, targetRotation: 270 * 2, expected: -90 + (270 * 2 + 90) / 100 * 50 },
+      { startRotation: -90, targetRotation: -270 * 2, expected: -90 + (-270 * 2 + 90) / 100 * 50 }
+    ])('should calculate rotation based on currentProps and targetProps values ($startRotation/$targetRotation)', ({ startRotation, targetRotation, expected }) => {
+      data.startProps.rotation = startRotation
+      data.targetProps.rotation = targetRotation
+      data.currentFrame = 50
+
+      const actual = freeRotate(data)
+
+      expect(actual.rotation).toBe(expected)
+    })
+
+    test('should only return rotation', () => {
+      data.startProps.rotation = 25
+      data.targetProps.rotation = 75
+
+      const actual = freeRotate(data)
+
+      const fields = Object.keys(actual)
+
+      expect(fields).toHaveLength(1)
+      expect(fields[0]).toBe('rotation')
+    })
+  })
+
+  describe('minRotate function', () => {
+    let data: TransitionOperationData
+
+    beforeEach(() => {
+      data ={
+        startFrame: 0,
+        duration: 100,
+        currentFrame: 0,
+        startProps: {},
+        targetProps: {}
+      }
+    })
+
+    test('should return an empty object if targetProps.rotation is undefined', () => {
+      const actual = minRotate(data)
+
+      expect(actual).toStrictEqual({})
+    })
+
+    test('should return targetProps.rotation value if startProps.rotation is undefined', () => {
+      const rotation = 90
+      const { targetProps } = data
+      targetProps.rotation = rotation
+
+      const actual = minRotate(data)
+
+      expect(actual.rotation).toBe(rotation)
+    });
+
+    test.each([
+      { frame: 0, expected: 0 },
+      { frame: 50, expected: 45 },
+      { frame: 100, expected: 90 },
+    ])('should calculate rotation progress based on currentFrame value ($frame/100)', ({ frame, expected }) => {
+      data.startProps.rotation = 0
+      data.targetProps.rotation = 90
+      data.currentFrame = frame
+
+      const actual = minRotate(data)
+
+      expect(actual.rotation).toBe(expected)
+    })
+
+    test.each([
+      { startRotation: 90, expected: 90 },
+      { startRotation: 180, expected: 180 },
+      { startRotation: 270, expected: 270 },
+      { startRotation: 360, expected: 0 },
+      { startRotation: -90, expected: -90 },
+      { startRotation: -180, expected: -180 },
+      { startRotation: -270, expected: -270 },
+      { startRotation: -360, expected: 0 },
+      { startRotation: 90 * 5, expected: 90 },
+      { startRotation: 90 * 7, expected: 270 },
+      { startRotation: -180 * 3, expected: -180 },
+      { startRotation: -270 * 3, expected: -90 }
+    ])('should normalise startProps rotation within 360 degress ($startRotation)', ({ startRotation, expected }) => {
+      data.startProps.rotation = startRotation
+      data.targetProps.rotation = 0
+      data.currentFrame = 0
+
+      const actual = minRotate(data)
+
+      expect(actual.rotation).toBe(expected)
+    })
+
+    test.each([
+      { targetRotation: 90, expected: 45 },
+      { targetRotation: 180, expected: 90 },
+      { targetRotation: 270, expected: -45 },
+    ])('should reverse rotation when greater than 180 degrees ($targetRotation)', ({ targetRotation, expected }) => {
+      data.startProps.rotation = 0
+      data.targetProps.rotation = targetRotation
+      data.currentFrame = 50
+
+      const actual = minRotate(data)
+
+      expect(actual.rotation).toBe(expected)
+    })
+
+    test.each([
+      { targetRotation: -90, expected: -45 },
+      { targetRotation: -180, expected: -90 },
+      { targetRotation: -270, expected: 45 },
+    ])('should reverse rotation when less than -180 degrees ($targetRotation)', ({ targetRotation, expected }) => {
+      data.startProps.rotation = 0
+      data.targetProps.rotation = targetRotation
+      data.currentFrame = 50
+
+      const actual = minRotate(data)
+
+      expect(actual.rotation).toBe(expected)
+    })
+
+    test('should only return rotation', () => {
+      data.startProps.rotation = 25
+      data.targetProps.rotation = 75
+
+      const actual = minRotate(data)
+
+      const fields = Object.keys(actual)
+
+      expect(fields).toHaveLength(1)
+      expect(fields[0]).toBe('rotation')
     })
   })
 })

@@ -15,7 +15,8 @@ import {
   resizeNewRanks,
   moveNewRanks,
   normaliseState,
-  clearTargetProps
+  clearTargetProps,
+  rotateNewRanks
 } from "./operations"
 import { deepCopy, operationPipeline } from "@/utilities/misc-operations"
 import { chooseRandom } from "@/utilities/misc-operations"
@@ -32,23 +33,25 @@ const NEW_TAG: TagValue = {
 }
 
 export const getNewColor = (existingHues: Array<number>): HSL => {
-  let newHue = chooseRandom(0, 359)
+  const lastColor = existingHues.length > 0 ? existingHues[existingHues.length - 1] : chooseRandom(0, 359)
+  let newHue = (lastColor + 35) % 360
   while (existingHues.findIndex(h => h === newHue) >= 0) {
-    newHue = (newHue + 35) % 360
+    newHue = (newHue + 33) % 360
   }
 
   return { h: newHue, s: ENGINE_DATA.BaseColor.s, l: ENGINE_DATA.BaseColor.l }
 }
 
 export const addTag = (tags: Tags, tag: string, color: HSL): Tags => {
-  if (!(tag in tags)) {
+  const tagKey = tag.toLowerCase()
+  if (!(tagKey in tags)) {
     const newTag = deepCopy(NEW_TAG)
     newTag.value = tag
     newTag.props.color = color
 
-    tags[tag] = newTag
+    tags[tagKey] = newTag
   }
-  tags[tag].count = tags[tag].count + 1
+  tags[tagKey].count = tags[tagKey].count + 1
   return tags
 }
 
@@ -87,6 +90,7 @@ export const processTags: ProcessTagsFunction = (frame, value) => {
       fadeInNewTags,
       moveNewRanks,
       resizeNewRanks,
+      rotateNewRanks,
       calculateProps
     ]).run(data)
 

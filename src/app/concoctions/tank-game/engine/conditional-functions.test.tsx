@@ -67,7 +67,7 @@ describe("Game Conditional Functions", () => {
       target: { isHit: false, currentDirection: undefined, location: { x: 0, y: 0 }, origin: { x: 0, y: 0 }, isReversing: false },
       explosion: { active: false, startFrame: 0, location: { x: 0, y: 0 } },
       message: { active: false, startFrame: 0, hit: false },
-      gameOver: { active: false, startFrame: 0, message: { text: "", location: { x: 0, y: 0 }, size: { width: 0, height: 0 } }, score: { text: "", location: { x: 0, y: 0 }, size: { width: 0, height: 0 } }, highScore: { text: "", location: { x: 0, y: 0 }, size: { width: 0, height: 0 } } },
+      gameOver: { active: false, startFrame: 0, message: { text: "", location: { x: 0, y: 0 }, size: { width: 0, height: 0 } }, score: { text: "", location: { x: 0, y: 0 }, size: { width: 0, height: 0 } }, highScore: { text: "", location: { x: 0, y: 0 }, size: { width: 0, height: 0 } }, newHighScore: false },
       controls: { powerUp: { location: { x: 0, y: 0 }}, powerDown: { location: { x: 0, y: 0 }}, angleUp: { location: { x: 0, y: 0 }}, angleDown: { location: { x: 0, y: 0 }}, gunBarrelFire: { location: { x: 0, y: 0 }}, fire: { location: { x: 0, y: 0 }}, restart: { location: { x: 0, y: 0 }}}
     }
 

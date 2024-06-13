@@ -1,11 +1,15 @@
+import { type Coordinates } from "@/components/canvas/types"
 import { type TagsRenderFunction, type RenderPipelineData } from "./types"
 
 export const renderTagsLayer: TagsRenderFunction = (context: CanvasRenderingContext2D, data: RenderPipelineData) => {
   const { tags } = data
 
-  context.save()
-
   for (let t in tags) {
+    context.save()
+
+    context.textBaseline = "middle"
+    context.textAlign = "center"
+
     const tag = tags[t]
     const props = tag.props
 
@@ -18,11 +22,26 @@ export const renderTagsLayer: TagsRenderFunction = (context: CanvasRenderingCont
       context.font = `${props.fontSize}px sans-serif`
     }
 
+    let location: Coordinates | undefined = undefined
     if (props.location !== undefined) {
-      context.fillText(tag.value, props.location.x, props.location.y)
+       location = {
+        x: props.location.x,
+        y: props.location.y
+       }
     }
-  }
 
-  context.restore()
+    let rotation = props.rotation !== undefined ? props.rotation % 360 : 0
+    rotation = rotation > 180 ? rotation - 360 : rotation
+    rotation = rotation < -180 ? rotation + 360 : rotation
+
+    if (location !== undefined) {
+      context.translate(location.x, location.y)
+      context.rotate(rotation * Math.PI / 180)
+      context.translate(0, 0)
+      context.fillText(tag.value, 0, 0)
+    }
+
+    context.restore()
+  }
 }
 

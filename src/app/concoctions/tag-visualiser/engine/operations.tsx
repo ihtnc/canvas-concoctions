@@ -1,11 +1,12 @@
-import { deepCopy, operationPipeline } from "@/utilities/misc-operations"
+import { deepCopy } from "@/utilities/misc-operations"
 import {
   type TransitionProps,
   type Transition,
   fadeIn,
   move,
   resizeFont,
-  runTransition
+  runTransition,
+  minRotate
 } from "@/utilities/transition-operations"
 import {
   type TagOperationFunction,
@@ -15,13 +16,14 @@ import {
 } from "./types"
 
 const getNewProps = (tag:TagValue): TransitionProps => {
-  let fontSizes = [100, 50, 40, 30, 25, 20, 15, 10]
-  let x = 50
-  let y = 50
+  const fontSizes = [100, 80, 60, 50, 40, 30, 25, 20, 15, 10]
+  const rotations = [0, -90, 90]
+  const locations = [{ x:900, y:350 }, { x:450, y:350 }, { x:1350, y:350 }]
 
   const props: TransitionProps = {}
-  props.location = { x: x * tag.rank, y: y * tag.rank }
-  props.fontSize = fontSizes[tag.rank]
+  props.location = locations[(tag.rank - 1) % locations.length]
+  props.fontSize = fontSizes[Math.min(tag.rank, fontSizes.length) - 1]
+  props.rotation = rotations[(tag.rank - 1) % rotations.length]
 
   const newProps = Object.assign({}, tag.props, tag.targetProps, props)
   return deepCopy(newProps)
@@ -106,6 +108,35 @@ export const resizeNewRanks: TagOperationFunction = (data: TagOperationData) => 
       targetProps: {},
       duration: resizeDuration,
       operation: resizeFont
+    }
+
+    tag.transitions.push(transition)
+  }
+
+  transition.startFrame = frame
+  transition.startProps = deepCopy(tag.props)
+  transition.targetProps = deepCopy(tag.targetProps)
+
+  return data
+}
+
+export const rotateNewRanks: TagOperationFunction = (data: TagOperationData) => {
+  const { frame, tag } = data
+  if (tag.state !== TagState.NewRank) { return data }
+  if (tag.targetProps === undefined) { return data }
+
+  const id = `${TagState[tag.state]}-rotate`
+  const rotateDuration = 90
+
+  let transition = tag.transitions.find(t => t.id === id)
+  if (transition === undefined) {
+    transition = {
+      id: id,
+      startFrame: frame,
+      startProps: {},
+      targetProps: {},
+      duration: rotateDuration,
+      operation: minRotate
     }
 
     tag.transitions.push(transition)
