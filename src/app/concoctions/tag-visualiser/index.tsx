@@ -5,7 +5,7 @@ import useAnimatedCanvas from "@/components/canvas/use-animated-canvas"
 import ControlPanel, { type OnInputHandler, type ControlItem } from "@/components/control-panel"
 import { useRef } from "react"
 import {
-  addTag, cleanUpTags, getNewColor, processTags, renderTags,
+  addTag, cleanUpTags, getNewColor, processTags, renderTags
 } from "./engine"
 import { renderDebugLayer } from "./debug"
 import { type Tags } from "./engine/types"
@@ -19,17 +19,36 @@ import {
 } from "@/components/icons"
 
 type TagVisualiserProps = {
-  className?: string
-};
+  className?: string,
+  gridSize?: number
+}
+type DefaultData = {
+  MinGridSize: number,
+  MaxGridSize: number,
+  DefaultGridSize: number
+}
 
-const TagVisualiser = ({ className }: TagVisualiserProps) => {
+const DEFAULT_DATA: DefaultData = {
+  MinGridSize: 10,
+  MaxGridSize: 100,
+  DefaultGridSize: 50
+}
+
+const TagVisualiser = ({
+  className,
+  gridSize = DEFAULT_DATA.DefaultGridSize
+}: TagVisualiserProps) => {
   const tags = useRef<Tags>({})
+
   const existingHues: Array<number> = []
   let tagInput = ''
 
+  if (gridSize < DEFAULT_DATA.MinGridSize) { gridSize = DEFAULT_DATA.MinGridSize }
+  else if (gridSize > DEFAULT_DATA.MaxGridSize) { gridSize = DEFAULT_DATA.MaxGridSize }
+
   const preDrawFn: PreDrawHandler = (canvas, data) => {
     const current = tags.current
-    const newTags = processTags(data.frame, current)
+    const newTags = processTags(canvas, gridSize, data.frame, current)
     tags.current = newTags
   }
 
@@ -70,7 +89,8 @@ const TagVisualiser = ({ className }: TagVisualiserProps) => {
     draw: drawFn,
     postdraw: postDrawFn,
     options: { enableDebug: true },
-    renderEnvironmentLayerRenderer: RenderLocation.BottomCenter
+    renderEnvironmentLayerRenderer: RenderLocation.BottomCenter,
+    renderGridLayerRenderer: { size: gridSize, opacity: 0.5 },
   })
 
   const play = () => {

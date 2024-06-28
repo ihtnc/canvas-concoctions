@@ -495,7 +495,7 @@ describe('transition operations', () => {
       const actual = freeRotate(data)
 
       expect(actual.rotation).toBe(rotation)
-    });
+    })
 
     test.each([
       { frame: 0, expected: 0 },
@@ -568,7 +568,7 @@ describe('transition operations', () => {
       const actual = minRotate(data)
 
       expect(actual.rotation).toBe(rotation)
-    });
+    })
 
     test.each([
       { frame: 0, expected: 0 },

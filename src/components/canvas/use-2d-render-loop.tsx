@@ -7,7 +7,7 @@ import {
   type RenderDebugConditionalHandler,
   type DrawData
 } from "./types"
-import { DEFAULT_OPTIONS, getRenderEnvironmentLayerRenderer } from "./utilities"
+import { DEFAULT_OPTIONS, getRenderEnvironmentLayerRenderer, getRenderGridLayerRenderer } from "./utilities"
 import { cancelAnimationFrame, getDevicePixelRatio, requestAnimationFrame } from "@/utilities/client-operations"
 
 type FrameCounter = { frameCount: number, fps: number, lastRender: number };
@@ -16,8 +16,9 @@ const use2DRenderLoop = (options: Use2DRenderLoopOptions): Use2DRenderLoopRespon
   options = Object.assign({}, DEFAULT_OPTIONS, options)
 
   const canvasRef = useRef<HTMLCanvasElement>(null)
-  const { onInit, onPreDraw, onDraw, onPostDraw, onShouldRedraw, renderEnvironmentLayerRenderer } = options
+  const { onInit, onPreDraw, onDraw, onPostDraw, onShouldRedraw, renderEnvironmentLayerRenderer, renderGridLayerRenderer } = options
   const renderEnvironmentLayerHandler = getRenderEnvironmentLayerRenderer(renderEnvironmentLayerRenderer)
+  const renderGridLayerHandler = getRenderGridLayerRenderer(renderGridLayerRenderer)
 
   const frameCounter = useRef<FrameCounter>({
     frameCount: 0,
@@ -117,6 +118,8 @@ const use2DRenderLoop = (options: Use2DRenderLoopOptions): Use2DRenderLoopRespon
 
       if (onPreDraw) { onPreDraw(canvas, renderData) }
       if (options.clearEachFrame) { clearFrame(canvas) }
+
+      if (renderGridLayerHandler) { renderGridLayerHandler(context) }
 
       if (renderEnvironmentLayerHandler) {
         renderEnvironmentLayerHandler({

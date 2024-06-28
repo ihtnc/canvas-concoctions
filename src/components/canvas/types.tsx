@@ -1,19 +1,21 @@
+import { Size } from "@/utilities/drawing-operations"
 import { RefObject } from "react"
 
-type InitData = { devicePixelRatio: number };
-export type InitRenderHandler = (canvas: HTMLCanvasElement, data: InitData) => void;
+type InitData = { devicePixelRatio: number }
+export type InitRenderHandler = (canvas: HTMLCanvasElement, data: InitData) => void
 
 export type DrawData = {
   context: CanvasRenderingContext2D,
   frame: number,
   fps: number,
   devicePixelRatio: number
-};
-export type ShouldRedrawHandler = (canvas: HTMLCanvasElement, data: DrawData) => boolean;
-export type DrawHandler = (data: DrawData) => void;
-export type PreDrawHandler = (canvas: HTMLCanvasElement, data: DrawData) => void;
-export type PostDrawHandler = (canvas: HTMLCanvasElement, data: DrawData) => void;
-export type RenderEnvironmentLayerDrawHandler = (value: RenderEnvironmentValue, context: CanvasRenderingContext2D) => void;
+}
+export type ShouldRedrawHandler = (canvas: HTMLCanvasElement, data: DrawData) => boolean
+export type DrawHandler = (data: DrawData) => void
+export type PreDrawHandler = (canvas: HTMLCanvasElement, data: DrawData) => void
+export type PostDrawHandler = (canvas: HTMLCanvasElement, data: DrawData) => void
+export type RenderEnvironmentLayerDrawHandler = (value: RenderEnvironmentValue, context: CanvasRenderingContext2D) => void
+export type RenderGridLayerDrawHandler = (context: CanvasRenderingContext2D) => void
 
 export enum RenderLocation {
   TopLeft, TopCenter, TopRight,
@@ -21,15 +23,17 @@ export enum RenderLocation {
   BottomLeft, BottomCenter, BottomRight
 }
 
-export type Coordinates = { x: number, y: number };
+export type Coordinates = { x: number, y: number }
 export type RenderEnvironmentLayerOptions = {
   location: RenderLocation | Coordinates,
-  renderFps: boolean,
-  renderSize: boolean,
-  renderClientSize: boolean,
-  renderPixelRatio: boolean,
-  renderFrameNumber: boolean
-};
+  color?: string,
+  opacity?: number,
+  renderFps?: boolean,
+  renderSize?: boolean,
+  renderClientSize?: boolean,
+  renderPixelRatio?: boolean,
+  renderFrameNumber?: boolean
+}
 
 export type RenderEnvironmentValue = {
   fps: number,
@@ -41,7 +45,16 @@ export type RenderEnvironmentValue = {
   frame: number
 }
 
-export type RenderEnvironmentLayerRendererValue = boolean | RenderLocation | Coordinates | RenderEnvironmentLayerOptions | RenderEnvironmentLayerDrawHandler;
+export type RenderEnvironmentLayerRendererValue = boolean | string | RenderLocation | Coordinates | RenderEnvironmentLayerOptions | RenderEnvironmentLayerDrawHandler
+
+export type RenderGridLayerOptions = {
+  size: Size | number,
+  color?: string,
+  opacity?: number,
+  dashLength?: number
+}
+
+export type RenderGridLayerRendererValue = boolean | string | number | Size | RenderGridLayerOptions | RenderGridLayerDrawHandler
 
 export type Use2DRenderLoopOptions = {
   autoStart?: boolean,
@@ -53,11 +66,12 @@ export type Use2DRenderLoopOptions = {
   onPostDraw?: PostDrawHandler,
   onShouldRedraw?: ShouldRedrawHandler,
   renderEnvironmentLayerRenderer?: RenderEnvironmentLayerRendererValue,
+  renderGridLayerRenderer?: RenderGridLayerRendererValue,
   maxFrame?: number
 }
 
-export type RenderDebugHandler = () => void;
-export type RenderDebugConditionalHandler = (condition: () => boolean) => void;
+export type RenderDebugHandler = () => void
+export type RenderDebugConditionalHandler = (condition: () => boolean) => void
 export type UtilitiesObject = {
   resize: (width: number, height: number) => void,
 }
@@ -71,6 +85,6 @@ export type Use2DRenderLoopResponse = {
   ref: RefObject<HTMLCanvasElement>,
   utilities: UtilitiesObject,
   debug: DebugObject
-};
+}
 
-export type OnResizeHandler = (canvas: HTMLCanvasElement, width: number, height: number) => void;
+export type OnResizeHandler = (canvas: HTMLCanvasElement, width: number, height: number) => void

@@ -9,7 +9,8 @@ import type {
   InitRenderHandler,
   OnResizeHandler,
   RenderEnvironmentLayerRendererValue,
-  DebugObject
+  DebugObject,
+  RenderGridLayerRendererValue
 } from "./types"
 import {
   type MouseEventHandler,
@@ -34,7 +35,8 @@ type UseAnimatedCanvasProps = {
   postdraw?: PostDrawHandler,
   onResize?: OnResizeHandler,
   options?: UseAnimatedCanvasOptions,
-  renderEnvironmentLayerRenderer?: RenderEnvironmentLayerRendererValue
+  renderEnvironmentLayerRenderer?: RenderEnvironmentLayerRendererValue,
+  renderGridLayerRenderer?: RenderGridLayerRendererValue
 }
 
 type UseAnimatedCanvasResponse = {
@@ -66,7 +68,8 @@ const useAnimatedCanvas: (props: UseAnimatedCanvasProps) => UseAnimatedCanvasRes
     init, shouldRedraw, draw, predraw, postdraw,
     onResize,
     options,
-    renderEnvironmentLayerRenderer
+    renderEnvironmentLayerRenderer,
+    renderGridLayerRenderer
   } = props
 
   const canvasOptions = Object.assign({}, DEFAULT_OPTIONS, options)
@@ -83,7 +86,8 @@ const useAnimatedCanvas: (props: UseAnimatedCanvasProps) => UseAnimatedCanvasRes
     onDraw: draw,
     onPostDraw: postdraw,
     onShouldRedraw: shouldRedraw,
-    renderEnvironmentLayerRenderer
+    renderEnvironmentLayerRenderer,
+    renderGridLayerRenderer
   })
 
   const resizeCallback: (size: { width?: number, height?: number }) => void = (size) => {

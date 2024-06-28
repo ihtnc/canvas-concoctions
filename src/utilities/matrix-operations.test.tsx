@@ -11,7 +11,9 @@ import {
   copy,
   reset,
   diff,
-  applyChanges
+  applyChanges,
+  replaceValues,
+  getUniqueValues
 } from "./matrix-operations"
 import * as miscOperations from './misc-operations'
 
@@ -868,6 +870,169 @@ describe('matrix-operations', () => {
           expect(applyMatrix[i][j]).toBe(expected)
         }
       }
+    })
+  })
+
+  describe('replaceValues function', () => {
+    let matrix: MatrixValue<number>
+
+    beforeEach(() => {
+      matrix = [
+        [0, 2, 3],
+        [4, 5, 0],
+        [7, 0, 9]
+      ]
+    })
+
+    test('should return original object', () => {
+      const sameMatrix = matrix
+      const replaceMatrix = replaceValues(matrix, 0, 1)
+      expect(sameMatrix).toBe(matrix)
+      expect(replaceMatrix).toBe(matrix)
+    })
+
+    test('should replace values in matrix when value is supplied in search', () => {
+      const search = 0
+      const replacement = 6
+
+      const replaced = replaceValues(matrix, search, replacement)
+
+      for (let i = 0; i < replaced.length; i++) {
+        for (let j = 0; j < replaced[i].length; j++) {
+          expect(replaced[i][j]).not.toBe(0)
+        }
+      }
+      expect(replaced[0][0]).toBe(replacement)
+      expect(replaced[1][2]).toBe(replacement)
+      expect(replaced[2][1]).toBe(replacement)
+    })
+
+    test('should call function for each item in matrix when function is supplied in search', () => {
+      const search = vi.fn()
+
+      for (let i = 0; i < matrix.length; i++) {
+        for (let j = 0; j < matrix[i].length; j++) {
+          matrix[i][j] = (i * matrix.length) + j + 1
+        }
+      }
+
+      const replaced = replaceValues(matrix, search, 99)
+
+      let expectedCalls = 0
+      for (let i = 0; i < replaced.length; i++) {
+        for (let j = 0; j < replaced[i].length; j++) {
+          expect(search).toHaveBeenNthCalledWith(replaced[i][j], replaced[i][j])
+          expectedCalls++
+        }
+      }
+      expect(search).toHaveBeenCalledTimes(expectedCalls)
+    })
+
+    test('should replace values in matrix when function returns true', () => {
+      const search = (value: number) => value % 2 === 0
+      const replacement = 99
+
+      for (let i = 0; i < matrix.length; i++) {
+        for (let j = 0; j < matrix[i].length; j++) {
+          matrix[i][j] = (i * matrix.length) + j + 1
+        }
+      }
+
+      const replaced = replaceValues(matrix, search, replacement)
+
+      for (let i = 0; i < replaced.length; i++) {
+        for (let j = 0; j < replaced[i].length; j++) {
+          expect(replaced[i][j] % 2).not.toBe(0)
+
+          const original = (i * matrix.length) + j + 1
+          if (original % 2 !== 0) { continue }
+          expect(replaced[i][j]).toBe(replacement)
+        }
+      }
+    })
+
+    test('should call deepCopy when replacing values in matrix', () => {
+      const search = 2
+      const replacement = 99
+
+      vi.spyOn(miscOperations, 'deepCopy')
+
+      replaceValues(matrix, search, replacement)
+
+      expect(miscOperations.deepCopy).toHaveBeenCalledOnce()
+      expect(miscOperations.deepCopy).toHaveBeenCalledWith(replacement)
+
+      vi.restoreAllMocks()
+    })
+  })
+
+  describe('getUniqueValues function', () => {
+    let matrix: MatrixValue<number>
+
+    beforeEach(() => {
+      matrix = [
+        [1, 2, 3],
+        [4, 5, 6],
+        [7, 8, 9]
+      ]
+    })
+
+    test('should return an empty array when matrix is empty', () => {
+      const uniqueValues = getUniqueValues([])
+      expect(uniqueValues).toEqual([])
+    })
+
+    test('should return an array of unique values in matrix', () => {
+      const expected = matrix.flat()
+      const uniqueValues = getUniqueValues(matrix)
+      expect(uniqueValues).toEqual(expected)
+    })
+
+    test('should return an array of unique values in matrix when matrix has duplicate values', () => {
+      matrix = [
+        [1, 2, 3],
+        [1, 2, 3],
+        [1, 2, 3]
+      ]
+      const expected = [1, 2, 3]
+
+      const uniqueValues = getUniqueValues(matrix)
+      expect(uniqueValues).toEqual(expected)
+    })
+
+    test('should not include ignoreValue', () => {
+      matrix = [
+        [1, 2, 3],
+        [4, 5, 1],
+        [6, 1, 7]
+      ]
+      const expected = [2, 3, 4, 5, 6, 7]
+
+      const uniqueValues = getUniqueValues(matrix, 1)
+      expect(uniqueValues).toEqual(expected)
+    })
+
+    test('should call function for each item in matrix when uniqueFn is supplied', () => {
+      const uniqueFn = vi.fn()
+
+      getUniqueValues(matrix, undefined, uniqueFn)
+
+      let expectedCalls = 0
+      for (let i = 0; i < matrix.length; i++) {
+        for (let j = 0; j < matrix[i].length; j++) {
+          expect(uniqueFn).toHaveBeenNthCalledWith(matrix[i][j], matrix, matrix[i][j])
+          expectedCalls++
+        }
+      }
+      expect(uniqueFn).toHaveBeenCalledTimes(expectedCalls)
+    })
+
+    test('should determine uniqueness based on uniqueFn', () => {
+      const uniqueFn = vi.fn().mockReturnValue(false)
+
+      const unique = getUniqueValues(matrix, undefined, uniqueFn)
+
+      expect(unique).toEqual([])
     })
   })
 })

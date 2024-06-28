@@ -209,3 +209,43 @@ export const applyChanges: MatrixApplyChangesFunction = (original, changes, igno
 
   return original
 }
+
+type MatrixReplaceValuesFunction = <T>(source: MatrixValue<T>, search: T | ((search: T) => boolean), replacement: T) => MatrixValue<T>;
+export const replaceValues: MatrixReplaceValuesFunction = (source, search, replacement) => {
+  type searchFunction = (criteria: InferType<typeof source>) => boolean
+
+  for (let i = 0; i < source.length; i++) {
+    for (let j = 0; j < source[i].length; j++) {
+      let searchFn: searchFunction
+      if (typeof search === 'function') {
+        searchFn = search as searchFunction
+      } else {
+        searchFn = (criteria) => criteria === search
+      }
+
+      if (searchFn(source[i][j])) {
+        source[i][j] = deepCopy(replacement)
+      }
+    }
+  }
+
+  return source
+}
+
+type MatrixGetUniqueValuesFunction = <T>(source: MatrixValue<T>, ignoreValue?: T, uniqueFn?: ((matrix: MatrixValue<T>, value:T) => boolean)) => Array<InferType<typeof source>>;
+export const getUniqueValues: MatrixGetUniqueValuesFunction = (source, ignoreValue, uniqueFn) => {
+  const items: Array<InferType<typeof source>> = []
+  const defaultUniqueFn = (matrix: typeof source, value: InferType<typeof source>) => items.findIndex((item) => item === value) === -1
+  uniqueFn = uniqueFn ?? defaultUniqueFn
+
+  for(let i = 0; i < source.length; i++) {
+    for(let j = 0; j < source[i].length; j++) {
+      if (source[i][j] === ignoreValue) { continue }
+      if (uniqueFn(source, source[i][j]) === false) { continue }
+
+      items.push(source[i][j])
+    }
+  }
+
+  return items
+}
