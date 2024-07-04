@@ -10,36 +10,11 @@ import {
 } from "@/utilities/transition-operations"
 import {
   type TagOperationFunction,
-  type TagValue,
   type TagOperationData,
   TagState
 } from "./types"
 
-const getNewProps = (tag:TagValue): TransitionProps => {
-  const fontSizes = [100, 80, 60, 50, 40, 30, 25, 20, 15, 10]
-  const rotations = [0, -90, 90]
-  const locations = [{ x:900, y:350 }, { x:450, y:350 }, { x:1350, y:350 }]
-
-  const props: TransitionProps = {}
-  props.location = locations[(tag.rank - 1) % locations.length]
-  props.fontSize = fontSizes[Math.min(tag.rank, fontSizes.length) - 1]
-  props.rotation = rotations[(tag.rank - 1) % rotations.length]
-
-  const newProps = Object.assign({}, tag.props, tag.targetProps, props)
-  return deepCopy(newProps)
-}
-
-export const setNewPositions: TagOperationFunction = (data: TagOperationData) => {
-  const { tag } = data
-  if (tag.state === TagState.Normal) { return data }
-
-  const newProps = getNewProps(tag)
-  tag.targetProps = newProps
-
-  return data
-}
-
-export const fadeInNewTags: TagOperationFunction = (data: TagOperationData) => {
+export const fadeInNewTag: TagOperationFunction = (data: TagOperationData) => {
   const { frame, tag } = data
   if (tag.state !== TagState.NewTag) { return data }
 
@@ -62,9 +37,9 @@ export const fadeInNewTags: TagOperationFunction = (data: TagOperationData) => {
   return data
 }
 
-export const moveNewRanks: TagOperationFunction = (data: TagOperationData) => {
+export const moveTagWithNewProps: TagOperationFunction = (data: TagOperationData) => {
   const { frame, tag } = data
-  if (tag.state !== TagState.NewRank) { return data }
+  if (tag.state !== TagState.NewProps) { return data }
   if (tag.targetProps === undefined) { return data }
 
   const id = `${TagState[tag.state]}-move`
@@ -91,9 +66,9 @@ export const moveNewRanks: TagOperationFunction = (data: TagOperationData) => {
   return data
 }
 
-export const resizeNewRanks: TagOperationFunction = (data: TagOperationData) => {
+export const resizeTagWithNewProps: TagOperationFunction = (data: TagOperationData) => {
   const { frame, tag } = data
-  if (tag.state !== TagState.NewRank) { return data }
+  if (tag.state !== TagState.NewProps) { return data }
   if (tag.targetProps === undefined) { return data }
 
   const id = `${TagState[tag.state]}-resize`
@@ -120,9 +95,9 @@ export const resizeNewRanks: TagOperationFunction = (data: TagOperationData) => 
   return data
 }
 
-export const rotateNewRanks: TagOperationFunction = (data: TagOperationData) => {
+export const rotateTagWithNewProps: TagOperationFunction = (data: TagOperationData) => {
   const { frame, tag } = data
-  if (tag.state !== TagState.NewRank) { return data }
+  if (tag.state !== TagState.NewProps) { return data }
   if (tag.targetProps === undefined) { return data }
 
   const id = `${TagState[tag.state]}-rotate`

@@ -38,8 +38,8 @@ export const resetParticleMap: ParticleOperationFunction = (value: MatrixValue<P
 type GenerateParticlesFunction = (value: MatrixValue<ParticleValue>, color: HSL, coordinate: MatrixCoordinate) => MatrixValue<ParticleValue>;
 const generateParticles: GenerateParticlesFunction = (value, color, coordinate) => {
   const { row, col } = coordinate
-  if (row >= value.length) { return value }
-  if (col >= value[row].length) { return value }
+  if (row < 0 || row >= value.length) { return value }
+  if (col < 0 || col >= value[row].length) { return value }
 
   value[row][col] = {
     color: deepCopy(color),

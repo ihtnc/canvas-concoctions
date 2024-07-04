@@ -7,7 +7,7 @@ type EngineData = {
 
 const data: EngineData = {
   BaseColor: { h: 20, s: 67, l: 94 },
-  FontSizes: [100, 80, 60, 50, 40, 30, 25, 20, 15, 10]
+  FontSizes: [100, 85, 70, 60, 50, 45, 40, 35, 30, 25]
 }
 
 export default data

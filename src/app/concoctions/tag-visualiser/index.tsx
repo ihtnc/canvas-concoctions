@@ -7,8 +7,8 @@ import { useRef } from "react"
 import {
   addTag, cleanUpTags, getNewColor, processTags, renderTags
 } from "./engine"
-import { renderDebugLayer } from "./debug"
-import { type Tags } from "./engine/types"
+import { renderDebugLayer, createSpaceAllocationLayerRenderer, createTagHistoryLayerRenderer } from "./debug"
+import { type Tags, type PackedSpace, type TagAllocations } from "./engine/types"
 import {
   TrashIcon,
   TagIcon,
@@ -39,6 +39,9 @@ const TagVisualiser = ({
   gridSize = DEFAULT_DATA.DefaultGridSize
 }: TagVisualiserProps) => {
   const tags = useRef<Tags>({})
+  const tagAllocations = useRef<TagAllocations>({ origin: { x: 0, y: 0 }, allocations: {} })
+  const tagHistory = useRef<Array<string>>([])
+  let space: PackedSpace<string> | undefined = undefined
 
   const existingHues: Array<number> = []
   let tagInput = ''
@@ -47,9 +50,12 @@ const TagVisualiser = ({
   else if (gridSize > DEFAULT_DATA.MaxGridSize) { gridSize = DEFAULT_DATA.MaxGridSize }
 
   const preDrawFn: PreDrawHandler = (canvas, data) => {
-    const current = tags.current
-    const newTags = processTags(canvas, gridSize, data.frame, current)
+    const currentTags = tags.current
+    const currentAllocations = tagAllocations.current
+    const { tags: newTags, space: newSpace, tagAllocations: newTagAllocations } = processTags(canvas, gridSize, data.frame, currentTags, currentAllocations)
     tags.current = newTags
+    space = newSpace
+    tagAllocations.current = newTagAllocations
   }
 
   const drawFn: DrawHandler = ({ context, frame }) => {
@@ -57,7 +63,10 @@ const TagVisualiser = ({
       context,
       tags.current,
       frame,
-      [],
+      [
+        createSpaceAllocationLayerRenderer(gridSize, space),
+        createTagHistoryLayerRenderer(tagHistory.current)
+      ],
       [renderDebugLayer]
     )
   }
@@ -77,11 +86,14 @@ const TagVisualiser = ({
     const color = getNewColor(existingHues)
     tags.current = addTag(tags.current, tagInput, color)
     existingHues.push(color.h)
+    tagHistory.current.push(tagInput)
     tagInput = ''
   }
 
   const resetConcoction = () => {
     tags.current = {}
+    tagHistory.current = []
+    tagAllocations.current = { origin: { x: 0, y: 0 }, allocations: {} }
   }
 
   const { Canvas, debug } = useAnimatedCanvas({
