@@ -1,5 +1,5 @@
-import { Mock, afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
-import ControlPanel, { ControlItem, OnClickHandler, OnInputHandler } from './index'
+import { type Mock, afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
+import ControlPanel, { type ControlItem, type OnClickHandler, type OnInputHandler, type OnKeyUpHandler } from './index'
 import { act, render } from '@testing-library/react'
 import { useState } from 'react'
 
@@ -13,6 +13,7 @@ describe('ControlPanel component', () => {
   let useStateMock: Mock
   let onClickHandler: OnClickHandler
   let onInputHandler: OnInputHandler
+  let onKeyUpHandler: OnKeyUpHandler
 
   beforeEach(() => {
     setLastRenderDate = vi.fn()
@@ -22,6 +23,7 @@ describe('ControlPanel component', () => {
 
     onClickHandler = vi.fn()
     onInputHandler = vi.fn()
+    onKeyUpHandler = vi.fn()
   })
 
   afterEach(() => {
@@ -52,7 +54,7 @@ describe('ControlPanel component', () => {
       expect(container).toMatchSnapshot()
     })
 
-    test('should render a button with optional string properties', () => {
+    test('should render a button with optional properties', () => {
       ctrl = {
         type: 'button',
         content: <span>this is a button</span>,
@@ -161,6 +163,75 @@ describe('ControlPanel component', () => {
 
       expect(onClickHandler).toHaveBeenCalled()
     })
+
+    test('should focus on control specified in controlToFocusOnClick when button is clicked', () => {
+      const input: ControlItem = {
+        type: 'text',
+        onInputHandler,
+        name: 'inputName'
+      }
+
+      ctrl = {
+        type: 'button',
+        content: <span>this is a button</span>,
+        onClickHandler,
+        controlToFocusOnClick: input.name
+      }
+
+      const { getByRole } = render(<ControlPanel controls={[ctrl, input]} />)
+
+      act(() => {
+        getByRole('button').click()
+      })
+
+      expect(document.activeElement).not.toBeNull()
+      expect(document.activeElement!.getAttribute('name')).toBe(input.name)
+    })
+
+    test('should not focus on any control when controlToFocusOnClick is undefined and button is clicked', () => {
+      const input: ControlItem = {
+        type: 'text',
+        onInputHandler,
+        name: 'inputName'
+      }
+
+      ctrl = {
+        type: 'button',
+        content: <span>this is a button</span>,
+        onClickHandler
+      }
+
+      const { getByRole } = render(<ControlPanel controls={[ctrl, input]} />)
+
+      act(() => {
+        getByRole('button').click()
+      })
+
+      expect(document.activeElement?.getAttribute('name')).not.toBe(input.name)
+    })
+
+    test('should not focus on any control when controlToFocusOnClick does not exist and button is clicked', () => {
+      const input: ControlItem = {
+        type: 'text',
+        onInputHandler,
+        name: 'inputName'
+      }
+
+      ctrl = {
+        type: 'button',
+        content: <span>this is a button</span>,
+        onClickHandler,
+        controlToFocusOnClick: 'nonExistentControl'
+      }
+
+      const { getByRole } = render(<ControlPanel controls={[ctrl, input]} />)
+
+      act(() => {
+        getByRole('button').click()
+      })
+
+      expect(document.activeElement?.getAttribute('name')).not.toBe(input.name)
+    })
   })
 
   describe('when providing a TextInputControlItem', () => {
@@ -173,6 +244,7 @@ describe('ControlPanel component', () => {
       ctrl = {
         type: 'text',
         onInputHandler,
+        onKeyUpHandler,
         name: 'inputName'
       }
     })
@@ -187,7 +259,7 @@ describe('ControlPanel component', () => {
       expect(container).toMatchSnapshot()
     })
 
-    test('should render a text input with optional string properties', () => {
+    test('should render a text input with optional properties', () => {
       ctrl = {
         type: 'text',
         onInputHandler,
@@ -196,7 +268,8 @@ describe('ControlPanel component', () => {
         value: 'initialValue',
         disabled: true,
         title: 'inputTitle',
-        className: 'inputClass'
+        className: 'inputClass',
+        autoFocus: true
       }
 
       const { container } = render(<ControlPanel controls={[ctrl]} />)
@@ -300,6 +373,39 @@ describe('ControlPanel component', () => {
       expect(input.className).toBe(expected)
     })
 
+    test('should call the function to get the autoFocus value if function is supplied', () => {
+      const fn: () => boolean = vi.fn(() => true)
+
+      ctrl = {
+        type: 'text',
+        onInputHandler,
+        name: 'inputName',
+        autoFocus: fn
+      }
+
+      render(<ControlPanel controls={[ctrl]} />)
+
+      expect(fn).toHaveBeenCalled()
+      expect(document.activeElement).not.toBeNull()
+      expect(document.activeElement!.getAttribute('name')).toBe(ctrl.name)
+    })
+
+    test.each([
+      { autoFocus: true, expected: 'inputName' },
+      { autoFocus: false, expected: null }
+    ])('should set focus on the input depending on autoFocus value ($autoFocus)', ({ autoFocus, expected }: { autoFocus: boolean, expected: string | null }) => {
+      ctrl = {
+        type: 'text',
+        onInputHandler,
+        name: 'inputName',
+        autoFocus
+      }
+
+      render(<ControlPanel controls={[ctrl]} />)
+
+      expect(document.activeElement?.getAttribute('name')).toBe(expected)
+    })
+
     test('should not render the input if hidden is true', () => {
       ctrl = {
         type: 'text',
@@ -339,6 +445,34 @@ describe('ControlPanel component', () => {
       })
 
       expect(onInputHandler).toHaveBeenCalled()
+    })
+
+    test('should call onKeyUpHandler when input keyup event is raised', () => {
+      const { getByRole } = render(<ControlPanel controls={[ctrl]} />)
+      const input = getByRole('textbox') as HTMLInputElement
+
+      act(() => {
+        input.value = 'newValue'
+        input.dispatchEvent(new Event('keyup', { bubbles: true }))
+      })
+
+      expect(onKeyUpHandler).toHaveBeenCalled()
+    })
+
+    test('should force a rerender when keyup event is raised', () => {
+      const now = new Date('2022-01-01T00:00:00.000Z')
+      vi.setSystemTime(now)
+
+      const { getByRole } = render(<ControlPanel controls={[ctrl]} />)
+      const input = getByRole('textbox') as HTMLInputElement
+
+      act(() => {
+        input.value = 'newValue'
+        input.dispatchEvent(new Event('keyup', { bubbles: true }))
+      })
+
+      expect(useState).toHaveBeenCalled()
+      expect(setLastRenderDate).toHaveBeenCalledWith(now)
     })
   })
 

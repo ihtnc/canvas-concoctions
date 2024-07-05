@@ -14,15 +14,18 @@ interface ButtonControlItem extends BaseControlItem {
   type: "button",
   onClickHandler: OnClickHandler,
   content: JSX.Element,
-  name?: string
+  name?: string,
+  controlToFocusOnClick?: string
 }
 
 interface TextInputControlItem extends BaseControlItem {
   type: "text"
   name: string,
   onInputHandler: OnInputHandler,
+  onKeyUpHandler?: OnKeyUpHandler,
   placeholder?: ControlPropValue<string>,
-  value?: ControlPropValue<string>
+  value?: ControlPropValue<string>,
+  autoFocus?: ControlPropValue<boolean>
 }
 
 interface LabelControlItem extends BaseControlItem {
@@ -31,8 +34,17 @@ interface LabelControlItem extends BaseControlItem {
   for?: string,
 }
 
+export type KeyboardData = {
+  key: string,
+  shiftKey: boolean,
+  ctrlKey: boolean,
+  altKey: boolean,
+  metaKey: boolean,
+  repeat: boolean
+}
 export type OnClickHandler = () => void;
 export type OnInputHandler = (value: string) => void;
+export type OnKeyUpHandler = (value: KeyboardData) => void;
 export type ControlItem = ButtonControlItem | TextInputControlItem | LabelControlItem;
 
 type ControlPanelProps = {
@@ -54,15 +66,26 @@ const ControlPanel = ({ className, controls }: ControlPanelProps) => {
     else return defaultValue
   }
 
+  const renderedControls: { [key: string]: HTMLElement } = {}
+
   const getControl = (c: ControlItem) => {
     if (getPropValue(c.hidden, false)) { return undefined }
 
     if (c.type === "button") {
       const btn = c as ButtonControlItem
-      return (<button key={btn.name ?? `button${controlCount++}`}
+      const btnKey = btn.name ?? `button${controlCount++}`
+      return (<button key={btnKey}
+        ref={(b) => { if (b !== null) { renderedControls[btnKey] = b } }}
         onClick={() => {
           forceRerender()
           btn.onClickHandler()
+          if (btn.controlToFocusOnClick !== undefined) {
+            const target = btn.controlToFocusOnClick
+            const control = renderedControls[target]
+            if (control !== undefined) {
+              control.focus()
+            }
+          }
         }}
         name={btn.name}
         title={getPropValue(btn.title)}
@@ -75,10 +98,18 @@ const ControlPanel = ({ className, controls }: ControlPanelProps) => {
     if (c.type === "text") {
       const txt = c as TextInputControlItem
       return (<input key={txt.name} type='text' name={txt.name}
+        ref={(t) => { if (t !== null) { renderedControls[txt.name] = t } }}
         value={getPropValue(txt.value, '')}
+        autoFocus={getPropValue(txt.autoFocus)}
         onInput={(e) => {
           txt.onInputHandler(e.currentTarget.value)
           forceRerender()
+        }}
+        onKeyUp={(e) => {
+          if (txt.onKeyUpHandler !== undefined) {
+            txt.onKeyUpHandler(e as KeyboardData)
+            forceRerender()
+          }
         }}
         title={getPropValue(txt.title)}
         placeholder={getPropValue(txt.placeholder)}
@@ -89,7 +120,9 @@ const ControlPanel = ({ className, controls }: ControlPanelProps) => {
 
     if (c.type === "label") {
       const lbl = c as LabelControlItem
-      return (<label key={`label${controlCount++}`}
+      const labelKey = `label${controlCount++}`
+      return (<label key={labelKey}
+        ref={(l) => { if (l !== null) { renderedControls[labelKey] = l } }}
         htmlFor={lbl.for}
         title={getPropValue(lbl.title)}
         className={`flex ${getPropValue(lbl.className, '')}`}>

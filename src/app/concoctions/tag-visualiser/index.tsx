@@ -2,7 +2,7 @@
 
 import { type PreDrawHandler, type DrawHandler, type PostDrawHandler } from "@/components/canvas/types"
 import useAnimatedCanvas from "@/components/canvas/use-animated-canvas"
-import ControlPanel, { type OnInputHandler, type ControlItem } from "@/components/control-panel"
+import ControlPanel, { type OnInputHandler, type ControlItem, type OnKeyUpHandler } from "@/components/control-panel"
 import { useRef } from "react"
 import { addTag, cleanUpTags, getNewColor, processTags, renderTags } from "./engine"
 import { type Tags, type TagAllocations } from "./engine/types"
@@ -70,6 +70,10 @@ const TagVisualiser = ({
     tagInput = value
   }
 
+  const keyUpHandler: OnKeyUpHandler = (value) => {
+    if (value.key === 'Enter') { addHandler() }
+  }
+
   const addHandler = () => {
     if (tagInput.trim().length === 0) { return }
     const color = getNewColor(existingHues)
@@ -98,20 +102,24 @@ const TagVisualiser = ({
   }, {
     type: "text",
     onInputHandler: inputHandler,
+    onKeyUpHandler: keyUpHandler,
     name: "tag",
     placeholder: "Enter tag",
-    value: () => tagInput
+    value: () => tagInput,
+    autoFocus: true
   }, {
     type: "button",
     onClickHandler: addHandler,
     content: (<PlusCircleIcon />),
-    title: "Add tag"
+    title: "Add tag",
+    controlToFocusOnClick: "tag"
   }, {
     type: "button",
     onClickHandler: resetConcoction,
     content: (<TrashIcon />),
     title: "Reset canvas",
-    className: "ml-auto"
+    className: "ml-auto",
+    controlToFocusOnClick: "tag"
   }]
 
   return <>

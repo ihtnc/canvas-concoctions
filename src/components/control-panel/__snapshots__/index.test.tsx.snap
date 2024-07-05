@@ -24,7 +24,7 @@ exports[`ControlPanel component > when providing a ButtonControlItem > should re
 </div>
 `;
 
-exports[`ControlPanel component > when providing a ButtonControlItem > should render a button with optional string properties 1`] = `
+exports[`ControlPanel component > when providing a ButtonControlItem > should render a button with optional properties 1`] = `
 <div>
   <div
     class="flex gap-4 "
@@ -104,7 +104,7 @@ exports[`ControlPanel component > when providing a TextInputControlItem > should
 </div>
 `;
 
-exports[`ControlPanel component > when providing a TextInputControlItem > should render a text input with optional string properties 1`] = `
+exports[`ControlPanel component > when providing a TextInputControlItem > should render a text input with optional properties 1`] = `
 <div>
   <div
     class="flex gap-4 "
