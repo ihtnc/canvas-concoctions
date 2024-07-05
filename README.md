@@ -7,6 +7,7 @@ See it [live](https://ihtnc.github.io/canvas-concoctions/)!
 This is a repository for various small, interactive applications / animations that served as a playground for ideas using the canvas HTML element.
 
 Icons provided by https://heroicons.com/.
+Tank Game SVGs provided by https://www.svgrepo.com/.
 
 ## Concoctions
 ### Sand Simulation
@@ -14,6 +15,12 @@ Icons provided by https://heroicons.com/.
 Simulates falling sand on the canvas.
 
 <img alt="Sand Simulation Preview" src="/public/previews/sand-sim.gif?raw=true" width="500px" />
+
+### Tag Visualiser
+
+Rank tags based on frequency and adds a visualisation of the distribution on the canvas.
+
+<img alt="Tag Visualiser Preview" src="/public/previews/tag-visualiser.gif?raw=true" width="500px" />
 
 ### Game of Life
 

@@ -6,6 +6,6 @@ describe("NavigationDetails Component", () => {
     expect(tagVisualiser.linkTitle).toBe('Tag Visualiser')
     expect(tagVisualiser.linkUrl).toBe('tag-visualiser')
     expect(tagVisualiser.title).toBe('Tag Visualiser')
-    expect(tagVisualiser.previewUrl).toBeUndefined()
+    expect(tagVisualiser.previewUrl).toBe('/previews/tag-visualiser.gif')
   })
 })
