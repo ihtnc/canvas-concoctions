@@ -1,21 +1,15 @@
 'use client'
 
-import { type PreDrawHandler, type DrawHandler, type PostDrawHandler, RenderLocation } from "@/components/canvas/types"
+import { type PreDrawHandler, type DrawHandler, type PostDrawHandler } from "@/components/canvas/types"
 import useAnimatedCanvas from "@/components/canvas/use-animated-canvas"
 import ControlPanel, { type OnInputHandler, type ControlItem } from "@/components/control-panel"
 import { useRef } from "react"
-import {
-  addTag, cleanUpTags, getNewColor, processTags, renderTags
-} from "./engine"
-import { renderDebugLayer, createSpaceAllocationLayerRenderer, createTagHistoryLayerRenderer } from "./debug"
-import { type Tags, type PackedSpace, type TagAllocations } from "./engine/types"
+import { addTag, cleanUpTags, getNewColor, processTags, renderTags } from "./engine"
+import { type Tags, type TagAllocations } from "./engine/types"
 import {
   TrashIcon,
   TagIcon,
-  PlusCircleIcon,
-  PlayIcon,
-  PauseIcon,
-  ForwardIcon
+  PlusCircleIcon
 } from "@/components/icons"
 
 type TagVisualiserProps = {
@@ -41,7 +35,6 @@ const TagVisualiser = ({
   const tags = useRef<Tags>({})
   const tagAllocations = useRef<TagAllocations>({ origin: { x: 0, y: 0 }, allocations: {} })
   const tagHistory = useRef<Array<string>>([])
-  let space: PackedSpace<string> | undefined = undefined
 
   const existingHues: Array<number> = []
   let tagInput = ''
@@ -52,9 +45,8 @@ const TagVisualiser = ({
   const preDrawFn: PreDrawHandler = (canvas, data) => {
     const currentTags = tags.current
     const currentAllocations = tagAllocations.current
-    const { tags: newTags, space: newSpace, tagAllocations: newTagAllocations } = processTags(canvas, gridSize, data.frame, currentTags, currentAllocations)
+    const { tags: newTags, tagAllocations: newTagAllocations } = processTags(canvas, gridSize, data.frame, currentTags, currentAllocations)
     tags.current = newTags
-    space = newSpace
     tagAllocations.current = newTagAllocations
   }
 
@@ -63,11 +55,8 @@ const TagVisualiser = ({
       context,
       tags.current,
       frame,
-      [
-        createSpaceAllocationLayerRenderer(gridSize, space),
-        createTagHistoryLayerRenderer(tagHistory.current)
-      ],
-      [renderDebugLayer]
+      [],
+      []
     )
   }
 
@@ -96,26 +85,11 @@ const TagVisualiser = ({
     tagAllocations.current = { origin: { x: 0, y: 0 }, allocations: {} }
   }
 
-  const { Canvas, debug } = useAnimatedCanvas({
+  const { Canvas } = useAnimatedCanvas({
     predraw: preDrawFn,
     draw: drawFn,
-    postdraw: postDrawFn,
-    options: { enableDebug: true },
-    renderEnvironmentLayerRenderer: RenderLocation.BottomCenter,
-    renderGridLayerRenderer: { size: gridSize, opacity: 0.5 },
+    postdraw: postDrawFn
   })
-
-  const play = () => {
-    debug.renderContinue()
-  }
-
-  const pause = () => {
-    debug.renderBreak()
-  }
-
-  const step = () => {
-    debug.renderStep()
-  }
 
   const controls: Array<ControlItem> = [{
     type: "label",
@@ -132,21 +106,6 @@ const TagVisualiser = ({
     onClickHandler: addHandler,
     content: (<PlusCircleIcon />),
     title: "Add tag"
-  }, {
-    type: "button",
-    onClickHandler: play,
-    content: (<PlayIcon />),
-    title: "Play"
-  }, {
-    type: "button",
-    onClickHandler: pause,
-    content: (<PauseIcon />),
-    title: "Pause"
-  }, {
-    type: "button",
-    onClickHandler: step,
-    content: (<ForwardIcon />),
-    title: "Play"
   }, {
     type: "button",
     onClickHandler: resetConcoction,
