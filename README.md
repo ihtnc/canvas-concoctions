@@ -1,4 +1,5 @@
-![github.io](https://github.com/ihtnc/canvas-concoctions/actions/workflows/nextjs.yml/badge.svg)
+[![deploy](https://img.shields.io/github/actions/workflow/status/ihtnc/canvas-concoctions/deploy.yml?label=deploy&logo=github+actions&logoColor=white)](https://github.com/ihtnc/canvas-concoctions/actions/workflows/deploy.yml)
+[![website](https://img.shields.io/badge/website-view-blue?logo=github)](https://ihtnc.github.io/canvas-concoctions)
 
 # Canvas Concoctions
 

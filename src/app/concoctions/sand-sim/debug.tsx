@@ -1,14 +1,12 @@
 import {
-  type MatrixValue
-} from "@/utilities/matrix-operations"
-import {
-  type ParticleValue,
-  type RenderPipelineData,
-  type ParticleOperationFunction,
-  type ParticleRenderFunction
+  type PageData
 } from "./engine/types"
+import { type AnimatedCanvasRenderFunction, type AnimatedCanvasTransformFunction } from "@ihtnc/use-animated-canvas"
 
-export const setMatrixValue: ParticleOperationFunction = (value: MatrixValue<ParticleValue>) => {
+export const setMatrixValue: AnimatedCanvasTransformFunction<PageData> = (data) => {
+  if (data.data === undefined) { return data }
+
+  const { map: value } = data.data
   for(let i = 0; i < value.length; i++) {
     for(let j = 0; j < value[i].length; j++) {
       if (i !== j) { continue }
@@ -16,11 +14,14 @@ export const setMatrixValue: ParticleOperationFunction = (value: MatrixValue<Par
     }
   }
 
-  return value
+  data.data.map = value
+  return data
 }
 
-export const renderDebugLayer: ParticleRenderFunction = (context: CanvasRenderingContext2D, data: RenderPipelineData) => {
-  const { map, width, height } = data
+export const renderDebugLayer: AnimatedCanvasRenderFunction<PageData> = (context, data) => {
+  if (data.data === undefined) { return data }
+
+  const { map, particleWidth: width, particleHeight: height } = data.data
   const rowCount = map.length
   const colCount = map[0].length
   const lastX = (colCount - 1) * width

@@ -116,7 +116,7 @@ const useAnimatedCanvas: (props: UseAnimatedCanvasProps) => UseAnimatedCanvasRes
         className={className}>
         <canvas
           ref={ref}
-          className="grow"
+          style={{ flexGrow: 1 }}
           {...rest}
         />
       </div>
