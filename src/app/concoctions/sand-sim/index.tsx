@@ -140,7 +140,14 @@ const SandSim = ({
       dropParticles
     ],
     render: renderParticleLayer,
-    postRenderTransform: increaseParticleValue,
+    postRenderTransform: [
+      increaseParticleValue,
+      (data) => {
+        resized = false
+        reset = false
+        return data
+      }
+    ],
     options: {
       protectData: false
     }

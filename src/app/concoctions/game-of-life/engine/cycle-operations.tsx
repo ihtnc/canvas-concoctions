@@ -25,3 +25,9 @@ export const isEndPhase = (cycleIndex: number): boolean => {
 export const getCycleProgress = (cycleIndex: number): number => {
   return normaliseCycleIndex(cycleIndex) / ENGINE_DATA.CycleLength
 }
+
+export const getNextCycle = (cycleIndex: number): number => {
+  if (isTransitionPhase(cycleIndex)) { return cycleIndex + 1 }
+
+  return isEndPhase(cycleIndex) ? 0 : cycleIndex + 1
+}

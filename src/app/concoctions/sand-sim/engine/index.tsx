@@ -15,7 +15,7 @@ import {
   peek
 } from "@/utilities/matrix-operations"
 import ENGINE_DATA from './data'
-import { type ParticleValue, PageData } from "./types"
+import { type ParticleValue, type PageData } from "./types"
 import type { AnimatedCanvasConditionalFunction, AnimatedCanvasRenderFunction, AnimatedCanvasTransformFunction } from "@ihtnc/use-animated-canvas"
 import { calculateDistance, getColorMap, getNextCoordinate, getNextValue, isValueEmpty, isValueUndefinedOrNotEmpty } from "./utilities"
 

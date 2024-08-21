@@ -1,5 +1,5 @@
-import { type HSL, type RenderFunction } from "@/utilities/drawing-operations"
-import { type MatrixOperationFunction, type MatrixValue } from "@/utilities/matrix-operations"
+import { type HSL } from "@/utilities/drawing-operations"
+import { type MatrixCoordinate, type MatrixValue } from "@/utilities/matrix-operations"
 
 export enum CycleState {
   Start,
@@ -14,22 +14,18 @@ export enum CellState {
 }
 export type CellValue = { state: CellState }
 
-export type CreateCellOperationFunction<T> = (cycleIndex: number, data?: T) => CellOperationFunction;
-
-export interface CellOperationFunction extends MatrixOperationFunction {
-  (value: MatrixValue<CellValue>): MatrixValue<CellValue>
-}
-
-export type RenderPipelineData = {
+export type PageData = {
   map: MatrixValue<CellValue>,
-  width: number,
-  height: number,
+
+  pointerCoordinate: MatrixCoordinate | null,
+  resizeMap: boolean,
+  resetMap: boolean,
+  clicked: boolean,
+
+  cellWidth: number,
+  cellHeight: number,
   aliveColor: HSL,
   dyingColor: HSL,
   growingColor: HSL,
   cycleIndex: number
-};
-
-export interface CellRenderFunction extends RenderFunction {
-  (context: CanvasRenderingContext2D, data: RenderPipelineData): void;
 }

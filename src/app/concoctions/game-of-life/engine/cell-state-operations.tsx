@@ -10,7 +10,7 @@ export const isCellTechnicallyAlive = (cell: CellValue): boolean => {
   return cell.state === CellState.Alive || cell.state === CellState.Dying
 }
 
-type GetCellStateFunction = (value: MatrixValue<CellValue>, coordinate: MatrixCoordinate, useTransitionState?: boolean) => CellValue;
+type GetCellStateFunction = (value: MatrixValue<CellValue>, coordinate: MatrixCoordinate, useTransitionState?: boolean) => CellValue
 export const getCellState: GetCellStateFunction = (value, coordinate, useTransitionState = true) => {
   const neighbors: Array<CellValue | undefined> = [
     peek(value, coordinate, PeekDirection.UpperLeft),
@@ -39,7 +39,7 @@ export const getCellState: GetCellStateFunction = (value, coordinate, useTransit
   return current
 }
 
-type GetCellMapStateFunction = (value: MatrixValue<CellValue>, useTransitionState?: boolean) => MatrixValue<CellValue>;
+type GetCellMapStateFunction = (value: MatrixValue<CellValue>, useTransitionState?: boolean) => MatrixValue<CellValue>
 export const getCellMapState: GetCellMapStateFunction  = (value, useTransitionState = true) => {
   const next = copy(value)
 

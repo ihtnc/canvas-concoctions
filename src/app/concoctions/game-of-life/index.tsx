@@ -1,24 +1,25 @@
 'use client'
 
-import {
-  type InitRenderHandler,
-  type DrawHandler,
-  type OnResizeHandler,
-  type PreDrawHandler,
-  type PostDrawHandler
-} from "@/components/canvas/types"
-import useAnimatedCanvas from "@/components/canvas/use-animated-canvas"
-import { type MatrixCoordinate, type MatrixValue } from "@/utilities/matrix-operations"
+import { type AnimatedCanvasConditionalFunction, type CanvasResizeHandler, type InitialiseDataHandler, not, use2dAnimatedCanvas, when } from "@ihtnc/use-animated-canvas"
+import { type MatrixCoordinate } from "@/utilities/matrix-operations"
 import { hexToHSL } from "@/utilities/drawing-operations"
-import { type PointerEventHandler, useRef } from "react"
+import { type PointerEventHandler } from "react"
 import {
   initialiseCellMap,
   resizeCellMap,
   resetCellMap,
-  processCellMap,
-  renderCellMap,
-  getNextCycle,
-  isFullCycle
+  renderCellLayer,
+  shouldResizeCellMap,
+  shouldResetCellMap,
+  getNextCellCycle,
+  generateNewCells,
+  isClicked,
+  isInDormantPhase,
+  isInCheckStatePhase,
+  setTransitionState,
+  isInEndPhase,
+  setFinalState,
+  resetCellCycle
 } from "./engine"
 import ControlPanel, { type ControlItem } from "@/components/control-panel"
 import {
@@ -27,7 +28,13 @@ import {
   ForwardIcon,
   TrashIcon
 } from "@/components/icons"
-import { type CellValue, CycleState } from "./engine/types"
+import { type PageData, CycleState } from "./engine/types"
+
+enum ButtonType {
+  Start,
+  Pause,
+  Step
+}
 
 type GameOfLifeProps = {
   className?: string,
@@ -36,7 +43,7 @@ type GameOfLifeProps = {
   aliveColor?: string,
   dyingColor?: string,
   growingColor?: string
-};
+}
 type DefaultData = {
   MinCellSize: number,
   MaxCellSize: number,
@@ -45,11 +52,6 @@ type DefaultData = {
   DefaultAliveColor: string,
   DefaultDyingColor: string,
   DefaultGrowingColor: string
-}
-enum ButtonType {
-  Start,
-  Pause,
-  Step
 }
 
 const DEFAULT_DATA: DefaultData = {
@@ -70,14 +72,13 @@ const GameOfLife = ({
   dyingColor=DEFAULT_DATA.DefaultDyingColor,
   growingColor=DEFAULT_DATA.DefaultGrowingColor
 }: GameOfLifeProps) => {
-  const cellMap = useRef<MatrixValue<CellValue> | null>(null)
-  const newCellCoordinate: MatrixCoordinate = { row: 0, col: 0 }
-
-  let canGenerateCell: boolean = false
-  let newCellInitiated: boolean = false
-
   let cycleState: CycleState = autoStart ? CycleState.Start : CycleState.Stop
   let lastButtonClicked: ButtonType = autoStart ? ButtonType.Start : ButtonType.Pause
+
+  let clicked: boolean = false
+  let resized: boolean = false
+  let reset: boolean = false
+  let pointerCoordinate: MatrixCoordinate | null = null
 
   if (cellSize < DEFAULT_DATA.MinCellSize) { cellSize = DEFAULT_DATA.MinCellSize }
   else if (cellSize > DEFAULT_DATA.MaxCellSize) { cellSize = DEFAULT_DATA.MaxCellSize }
@@ -97,44 +98,92 @@ const GameOfLife = ({
     ? hexToHSL(DEFAULT_DATA.DefaultGrowingColor)!
     : growingHSLProp!
 
-  let cycleIndex: number = 0
-
-  const initFn: InitRenderHandler = (canvas) => {
+  const initialiseData: InitialiseDataHandler<PageData> = (canvas, initData) => {
     const row = Math.floor(canvas.height / cellSize)
     const col = Math.floor(canvas.width / cellSize)
     const map = initialiseCellMap(row, col)
-    cellMap.current = map
+
+    return {
+      map,
+
+      cycleIndex: 0,
+
+      cellWidth: cellSize,
+      cellHeight: cellSize,
+      aliveColor: aliveHSL,
+      dyingColor: dyingHSL,
+      growingColor: growingHSL,
+
+      resizeMap: false,
+      resetMap: false,
+      pointerCoordinate: null,
+      clicked
+    }
   }
 
-  const onResizeFn: OnResizeHandler = (canvas, width, height) => {
-    if (cellMap?.current === null) { return }
+  const isClientStepMode: AnimatedCanvasConditionalFunction<PageData> = (data) => {
+    return lastButtonClicked === ButtonType.Step
+  }
 
-    const newRow = Math.floor(height / cellSize)
-    const newCol = Math.floor(width / cellSize)
+  const isClientCycleActive: AnimatedCanvasConditionalFunction<PageData> = (data) => {
+    return cycleState !== CycleState.Stop
+  }
 
-    const newSize = resizeCellMap(cellMap.current, newRow, newCol)
-    cellMap.current = newSize
+  const { Canvas } = use2dAnimatedCanvas({
+    initialiseData,
+    preRenderTransform: [
+      (data) => {
+        if (data.data === undefined) { return data }
+        data.data.clicked = clicked
+        data.data.pointerCoordinate = pointerCoordinate
+        data.data.resizeMap = resized
+        data.data.resetMap = reset
+        return data
+      },
+      when(shouldResetCellMap, resetCellMap),
+      when(shouldResizeCellMap, resizeCellMap),
+      when([isClicked, isInDormantPhase], generateNewCells),
+      when(isInCheckStatePhase, setTransitionState),
+      when(isInEndPhase, setFinalState)
+    ],
+    render: renderCellLayer,
+    postRenderTransform: [
+      when([isClientStepMode, isInEndPhase], (data) => {
+        cycleState = CycleState.Stop
+        return data
+      }),
+      when(not(isClientCycleActive), resetCellCycle),
+      when(isClientCycleActive, getNextCellCycle),
+      (data) => {
+        resized = false
+        reset = false
+        return data
+      }
+    ],
+    options: {
+      protectData: false
+    }
+  })
+
+  const onResizeFn: CanvasResizeHandler = (width, height) => {
+    resized = true
   }
 
   const startNewCells: PointerEventHandler<HTMLCanvasElement> = (event) => {
-    canGenerateCell = true
-    updateNewCellCoordinate(event)
+    clicked = true
 
     if (lastButtonClicked === ButtonType.Start) {
       cycleState = CycleState.Stop
     }
-
-    newCellInitiated = true
   }
 
   const stopNewCells: PointerEventHandler<HTMLCanvasElement> = (event) => {
-    canGenerateCell = false
-
-    if (newCellInitiated && lastButtonClicked === ButtonType.Start) {
+    if (clicked && lastButtonClicked === ButtonType.Start) {
       cycleState = CycleState.Start
     }
 
-    newCellInitiated = false
+    clicked = false
+    pointerCoordinate = null
   }
 
   const updateNewCellCoordinate: PointerEventHandler<HTMLCanvasElement> = (event) => {
@@ -145,39 +194,7 @@ const GameOfLife = ({
     const col = Math.floor(x / cellSize)
     const row = Math.floor(y / cellSize)
 
-    newCellCoordinate.row = row
-    newCellCoordinate.col = col
-  }
-
-  const predrawFn: PreDrawHandler = (canvas, data) => {
-    if (cellMap.current === null) { return }
-
-    const map = cellMap.current
-    const newMap = processCellMap(map, cycleIndex, canGenerateCell ? newCellCoordinate : undefined)
-    cellMap.current = newMap
-  }
-
-  const drawFn: DrawHandler = ({ context }) => {
-    if (cellMap?.current === null) { return }
-
-    renderCellMap(
-      context,
-      {
-        map: cellMap.current,
-        width: cellSize, height: cellSize,
-        aliveColor: aliveHSL, dyingColor: dyingHSL, growingColor: growingHSL,
-        cycleIndex
-      },
-      [],
-      []
-    )
-  }
-
-  const postDrawFn: PostDrawHandler = () => {
-    if (lastButtonClicked === ButtonType.Step && isFullCycle(cycleIndex)) {
-      cycleState = CycleState.Stop
-    }
-    cycleIndex = getNextCycle(cycleIndex, cycleState)
+    pointerCoordinate = { row, col }
   }
 
   const startCycle = () => {
@@ -196,19 +213,9 @@ const GameOfLife = ({
   }
 
   const resetConcoction = () => {
-    if (cellMap?.current === null) { return }
-
-    canGenerateCell = false
-    resetCellMap(cellMap.current)
+    reset = true
+    pointerCoordinate = null
   }
-
-  const { Canvas } = useAnimatedCanvas({
-    init: initFn,
-    predraw: predrawFn,
-    draw: drawFn,
-    postdraw: postDrawFn,
-    onResize: onResizeFn
-  })
 
   const hidePlayIcon = (): boolean => {
     return lastButtonClicked === ButtonType.Start
@@ -251,6 +258,7 @@ const GameOfLife = ({
       onPointerUp={stopNewCells}
       onPointerOut={stopNewCells}
       onPointerMove={updateNewCellCoordinate}
+      onCanvasResize={onResizeFn}
     />
     <ControlPanel controls={controls} />
   </>

@@ -1,14 +1,24 @@
-import { type MatrixValue, type MatrixCoordinate, PeekDirection, peek } from "@/utilities/matrix-operations"
-import { type CellValue, type CellRenderFunction, type RenderPipelineData, CellState } from "./types"
-import { type BorderRadii, type HSL } from "@/utilities/drawing-operations"
+import { type MatrixCoordinate, type MatrixValue, PeekDirection, peek } from "@/utilities/matrix-operations"
+import { isCellUndefinedOrTechnicallyAlive } from "./cell-state-operations"
+import { type CellValue, CellState } from "./types"
+import { type HSL, type BorderRadii } from "@/utilities/drawing-operations"
 import { deepCopy } from "@/utilities/misc-operations"
 import ENGINE_DATA from './data'
 import { getCycleProgress } from "./cycle-operations"
-import { isCellUndefinedOrTechnicallyAlive } from "./cell-state-operations"
 
-type CellStateMap = { state: CellState, cells: Array<MatrixCoordinate> };
-type GetStateMapFunction = (value: MatrixValue<CellValue>) => Array<CellStateMap>;
-const getStateMap: GetStateMapFunction = (value): Array<CellStateMap> => {
+type GenerateCellsFunction = (value: MatrixValue<CellValue>, coordinate: MatrixCoordinate) => MatrixValue<CellValue>
+export const generateCells: GenerateCellsFunction = (value, coordinate) => {
+  const { row, col } = coordinate
+  if (row >= value.length) { return value }
+  if (col >= value[row].length) { return value }
+
+  value[row][col] = deepCopy(ENGINE_DATA.AliveCell)
+  return value
+}
+
+type CellStateMap = { state: CellState, cells: Array<MatrixCoordinate> }
+type GetStateMapFunction = (value: MatrixValue<CellValue>) => Array<CellStateMap>
+export const getStateMap: GetStateMapFunction = (value): Array<CellStateMap> => {
   const sorted: Array<CellStateMap> = []
 
   for (let i = 0; i < value.length; i++) {
@@ -32,9 +42,9 @@ type CellDisplayMap = {
   opacity: number,
   width: number, height:
   number, cells: Array<MatrixCoordinate>
-};
-type GetDisplayMapFunction = (stateMap: Array<CellStateMap>, cycleIndex: number, width: number, height: number, aliveColor: HSL, dyingColor: HSL, growingColor: HSL) => Array<CellDisplayMap>;
-const getDisplayMap: GetDisplayMapFunction = (stateMap, cycleIndex, width: number, height: number, aliveColor, dyingColor, growingColor): Array<CellDisplayMap> => {
+}
+type GetDisplayMapFunction = (stateMap: Array<CellStateMap>, cycleIndex: number, width: number, height: number, aliveColor: HSL, dyingColor: HSL, growingColor: HSL) => Array<CellDisplayMap>
+export const getDisplayMap: GetDisplayMapFunction = (stateMap, cycleIndex, width: number, height: number, aliveColor, dyingColor, growingColor): Array<CellDisplayMap> => {
   const sorted: Array<CellDisplayMap> = []
   const cycleProgress = getCycleProgress(cycleIndex)
 
@@ -89,7 +99,7 @@ const getDisplayMap: GetDisplayMapFunction = (stateMap, cycleIndex, width: numbe
   return sorted
 }
 
-const getCellShape: (map: MatrixValue<CellValue>, coordinate: MatrixCoordinate, cycleIndex: number) => BorderRadii = (map, coordinate, cycleIndex) => {
+export const getCellShape: (map: MatrixValue<CellValue>, coordinate: MatrixCoordinate, cycleIndex: number) => BorderRadii = (map, coordinate, cycleIndex) => {
   const { row, col } = coordinate
   const shape = deepCopy(ENGINE_DATA.CellShape)
 
@@ -138,44 +148,4 @@ const getCellShape: (map: MatrixValue<CellValue>, coordinate: MatrixCoordinate, 
   }
 
   return shape
-}
-
-export const renderCellLayer: CellRenderFunction = (context: CanvasRenderingContext2D, data: RenderPipelineData) => {
-  const { map, width, height, cycleIndex, aliveColor, dyingColor, growingColor } = data
-
-  context.save()
-
-  const stateMap = getStateMap(map)
-  const displayMap = getDisplayMap(
-    stateMap,
-    cycleIndex,
-    width, height,
-    aliveColor, dyingColor, growingColor
-  )
-  for(let g = 0; g < displayMap.length; g++) {
-    const group = displayMap[g]
-
-    const { h, s, l } = group.color
-    const color = `HSLA(${h}, ${s}%, ${l}%, ${group.opacity})`
-
-    context.beginPath()
-    context.fillStyle = color
-    context.strokeStyle = color
-
-    for(let i = 0; i < group.cells.length; i++) {
-      const { row, col } = group.cells[i]
-      const cellShape = getCellShape(map, { row, col }, cycleIndex)
-      const cellRadius = [cellShape.tl, cellShape.tr, cellShape.br, cellShape.bl]
-      const xOffset = Math.floor((width - group.width) / 2)
-      const yOffset = Math.floor((height - group.height) / 2)
-      const x = (col * width) + xOffset
-      const y = (row * height) + yOffset
-      context.roundRect(x, y, width, height, cellRadius)
-    }
-
-    context.fill()
-    context.stroke()
-  }
-
-  context.restore()
 }
