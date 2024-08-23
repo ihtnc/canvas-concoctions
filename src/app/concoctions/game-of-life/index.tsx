@@ -140,8 +140,20 @@ const GameOfLife = ({
         data.data.resetMap = reset
         return data
       },
-      when(shouldResetCellMap, resetCellMap),
-      when(shouldResizeCellMap, resizeCellMap),
+      when(shouldResetCellMap, [
+        resetCellMap,
+        (data) => {
+          reset = false
+          return data
+        }
+      ]),
+      when(shouldResizeCellMap, [
+        resizeCellMap,
+        (data) => {
+          resized = false
+          return data
+        }
+      ]),
       when([isClicked, isInDormantPhase], generateNewCells),
       when(isInCheckStatePhase, setTransitionState),
       when(isInEndPhase, setFinalState)
@@ -153,12 +165,7 @@ const GameOfLife = ({
         return data
       }),
       when(not(isClientCycleActive), resetCellCycle),
-      when(isClientCycleActive, getNextCellCycle),
-      (data) => {
-        resized = false
-        reset = false
-        return data
-      }
+      when(isClientCycleActive, getNextCellCycle)
     ],
     options: {
       protectData: false

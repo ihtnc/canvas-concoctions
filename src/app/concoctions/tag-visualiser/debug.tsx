@@ -1,8 +1,11 @@
 import { type Coordinates } from "@/components/canvas/types"
-import { type PackedSpace, type RenderPipelineData, type TagsRenderFunction } from "./engine/types"
+import { type PageData, type PackedSpace } from "./engine/types"
+import { type AnimatedCanvasRenderFunction } from "@ihtnc/use-animated-canvas"
 
-export const renderDebugLayer: TagsRenderFunction = (context: CanvasRenderingContext2D, data: RenderPipelineData) => {
-  const { tags } = data
+export const renderDebugLayer: AnimatedCanvasRenderFunction<PageData> = (context, data) => {
+  if (data.data === undefined) { return }
+
+  const { tags } = data.data
   context.save()
 
   context.fillStyle = '#000000'
@@ -36,9 +39,12 @@ export const renderDebugLayer: TagsRenderFunction = (context: CanvasRenderingCon
   context.restore()
 }
 
-export const createSpaceAllocationLayerRenderer = (gridSize: number, space?: PackedSpace<string>): TagsRenderFunction => {
-  const renderer: TagsRenderFunction = (context: CanvasRenderingContext2D, data: RenderPipelineData) => {
+export const createSpaceAllocationLayerRenderer = (space?: PackedSpace<string>): AnimatedCanvasRenderFunction<PageData> => {
+  const renderer: AnimatedCanvasRenderFunction<PageData> = (context, data) => {
     if (space === undefined) { return }
+    if (data.data === undefined) { return }
+
+    const { gridSize } = data.data
 
     context.save()
     context.globalAlpha = 0.5
@@ -74,8 +80,8 @@ export const createSpaceAllocationLayerRenderer = (gridSize: number, space?: Pac
   return renderer
 }
 
-export const createTagHistoryLayerRenderer = (tagHistory: Array<string>): TagsRenderFunction => {
-  const renderer: TagsRenderFunction = (context: CanvasRenderingContext2D, data: RenderPipelineData) => {
+export const createTagHistoryLayerRenderer = (tagHistory: Array<string>): AnimatedCanvasRenderFunction<PageData> => {
+  const renderer: AnimatedCanvasRenderFunction<PageData> = (context, data) => {
     context.save()
     context.textAlign = 'right'
 

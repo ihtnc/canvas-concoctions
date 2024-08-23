@@ -1,5 +1,4 @@
-import { type RenderFunction, type Size } from "@/utilities/drawing-operations"
-import { type OperationFunction } from "@/utilities/misc-operations"
+import { type Size } from "@/utilities/drawing-operations"
 import { type Transition, type TransitionProps } from "@/utilities/transition-operations"
 import { type Coordinates } from "@/components/canvas/types"
 
@@ -31,22 +30,23 @@ export type TagAllocations = {
 
 export type Tags = { [tag: string]: TagValue };
 
-export type TagOperationData = {
-  frame: number,
-  tag: TagValue
-}
-export interface TagOperationFunction extends OperationFunction {
-  (value: TagOperationData): TagOperationData
-}
+export type PageData = {
+  tags: Tags,
 
-export type RenderPipelineData = {
-  frame: number,
-  tags: Tags
+  existingHues: Array<number>,
+  spaceAllocation: TagAllocations,
+
+  gridSize: number,
+  height: number,
+  width: number,
+
+  newTagValue: string,
+  addTag: boolean,
+  resetTags: boolean,
+  resize: boolean,
+
+  getTextSize: GetTextSizeFunction
 };
-
-export interface TagsRenderFunction extends RenderFunction {
-  (context: CanvasRenderingContext2D, data: RenderPipelineData): void;
-}
 
 export type PackedSpace<T> = {
   origin: Coordinates,
@@ -64,3 +64,5 @@ export interface AllocatedSpace<T> extends Space {
   horizontal: boolean,
   value: T
 }
+
+export type GetTextSizeFunction = (text: string, fontSize: number) => Size

@@ -1,32 +1,29 @@
-import { type HSL, type RenderFunction, type Size, runRenderPipeline, getTextSize } from "@/utilities/drawing-operations"
-import { renderTagsLayer } from "./render"
+import { type HSL, type Size } from "@/utilities/drawing-operations"
 import {
   type Tags,
-  type RenderPipelineData,
   type TagValue,
-  type TagOperationData,
   type AllocatedSpace,
   type PackedSpace,
   type TagAllocations,
+  type PageData,
   TagState
 } from "./types"
-import {
-  fadeInNewTag,
-  calculateProps,
-  finaliseCompletedTransitions,
-  resizeTagWithNewProps,
-  moveTagWithNewProps,
-  rotateTagWithNewProps,
-  normaliseState,
-  clearTargetProps
-} from "./operations"
 import { initialiseSpace, allocateSpace, areAllocatedSpaceEqual } from "./space-allocation"
-import { deepCopy, operationPipeline } from "@/utilities/misc-operations"
+import { deepCopy } from "@/utilities/misc-operations"
 import { chooseRandom } from "@/utilities/misc-operations"
 import ENGINE_DATA from './data'
-import { type TransitionProps } from "@/utilities/transition-operations"
+import {
+  type Transition,
+  type TransitionProps,
+  fadeIn,
+  minRotate,
+  move,
+  resizeFont,
+  runTransition
+} from "@/utilities/transition-operations"
 import { type Coordinates } from "@/components/canvas/types"
 import { areCoordinatesEqual } from "@/components/canvas/utilities"
+import { type AnimatedCanvasConditionalFunction, type AnimatedCanvasRenderFunction, type AnimatedCanvasTransformFunction } from "@ihtnc/use-animated-canvas"
 
 const NEW_TAG: TagValue = {
   value: '',
@@ -38,7 +35,36 @@ const NEW_TAG: TagValue = {
   transitions: []
 }
 
-export const getNewColor = (existingHues: Array<number>): HSL => {
+export const shouldResetTags: AnimatedCanvasConditionalFunction<PageData> = (data) => {
+  if (data.data === undefined) { return false }
+  return data.data.resetTags
+}
+
+export const resetTags: AnimatedCanvasTransformFunction<PageData> = (data) => {
+  if (data.data === undefined) { return data }
+
+  data.data.resetTags = false
+  data.data.tags = {}
+  data.data.spaceAllocation = { origin: { x: 0, y: 0 }, allocations: {} }
+  return data
+}
+
+export const shouldResize: AnimatedCanvasConditionalFunction<PageData> = (data) => {
+  if (data.data === undefined) { return false }
+  return data.data.resize
+}
+
+export const shouldAddTag: AnimatedCanvasConditionalFunction<PageData> = (data) => {
+  if (data.data === undefined) { return false }
+  return data.data.addTag
+}
+
+export const hasNewTag: AnimatedCanvasConditionalFunction<PageData> = (data) => {
+  if (data.data === undefined) { return false }
+  return data.data.newTagValue.trim().length > 0
+}
+
+const getNewColor = (existingHues: Array<number>): HSL => {
   const lastColor = existingHues.length > 0 ? existingHues[existingHues.length - 1] : chooseRandom(0, 359)
   let newHue = (lastColor + 35) % 360
   while (existingHues.findIndex(h => h === newHue) >= 0) {
@@ -48,20 +74,32 @@ export const getNewColor = (existingHues: Array<number>): HSL => {
   return { h: newHue, s: ENGINE_DATA.BaseColor.s, l: ENGINE_DATA.BaseColor.l }
 }
 
-export const addTag = (tags: Tags, tag: string, color: HSL): Tags => {
-  const tagKey = tag.toLowerCase()
+export const addNewTag: AnimatedCanvasTransformFunction<PageData> = (data) => {
+  if (data.data === undefined) { return data }
+
+  const { tags, newTagValue, existingHues } = data.data
+
+  const color = getNewColor(existingHues)
+  existingHues.push(color.h)
+
+  const tagKey = newTagValue.toLowerCase()
   if (!(tagKey in tags)) {
     const newTag = deepCopy(NEW_TAG)
-    newTag.value = tag
+    newTag.value = newTagValue
     newTag.props.color = color
 
     tags[tagKey] = newTag
   }
   tags[tagKey].count = tags[tagKey].count + 1
-  return tags
+  data.data.tags = tags
+  data.data.existingHues = existingHues
+  return data
 }
 
-const determineNewRanks = (tags: Tags): Tags => {
+export const determineNewRanks: AnimatedCanvasTransformFunction<PageData> = (data) => {
+  if (data.data === undefined) { return data }
+
+  const { tags } = data.data
   const list: Array<{ value: string, count: number }> = []
 
   for (let t in tags) {
@@ -83,31 +121,41 @@ const determineNewRanks = (tags: Tags): Tags => {
     sorted[tag.value] = tag
   }
 
-  return sorted
-}
-
-const getGridSize = (canvas: HTMLCanvasElement, gridSize: number): Size => {
-  const height = Math.floor(canvas.height / gridSize)
-  const width = Math.floor(canvas.width / gridSize)
-
-  return { width, height }
-}
-
-const getOccupiedSpace = (context: CanvasRenderingContext2D, fontSize: number, value: string, gridSize: number): Size => {
-  context.save()
-  context.font = `${fontSize}px sans-serif`
-  const { width, height } = getTextSize(context, value)
-  context.restore()
-
-  const row = Math.ceil(height / gridSize)
-  const col = Math.ceil(width / gridSize)
-  const size = { width: col, height: row }
-  return size
+  data.data.tags = sorted
+  return data
 }
 
 const getTargetFont = (rank: number): number => {
   const fontSize = ENGINE_DATA.FontSizes[Math.min(rank, ENGINE_DATA.FontSizes.length) - 1]
   return fontSize
+}
+
+export const determineTargetFonts: AnimatedCanvasTransformFunction<PageData> = (data) => {
+  if (data.data === undefined) { return data }
+
+  const { tags } = data.data
+
+  for (let t in tags) {
+    const tag = tags[t]
+    const props: TransitionProps = {}
+    props.fontSize = getTargetFont(tag.rank)
+
+    const newProps = Object.assign({}, tag.targetProps, props)
+    tag.targetProps = deepCopy(newProps)
+
+    tags[t] = tag
+  }
+
+  data.data.tags = tags
+  return data
+}
+
+const getOccupiedSpace = (textSize: Size, value: string, gridSize: number): Size => {
+  const { width, height } = textSize
+  const row = Math.ceil(height / gridSize)
+  const col = Math.ceil(width / gridSize)
+  const size = { width: col, height: row }
+  return size
 }
 
 const getTargetLocation = (origin: Coordinates, allocation: AllocatedSpace<string>, tagSpace: Size, gridSize: number): Coordinates => {
@@ -135,82 +183,6 @@ const getTargetRotation = (origin: Coordinates, allocation: AllocatedSpace<strin
   return 90
 }
 
-type ProcessTagsFunction = (canvas: HTMLCanvasElement, gridSize: number, frame: number, value: Tags, tagAllocations: TagAllocations) => { tags: Tags, space?: PackedSpace<string>, tagAllocations: TagAllocations };
-export const processTags: ProcessTagsFunction = (canvas, gridSize, frame, value, tagAllocations) => {
-  const currentOrigin = tagAllocations.origin
-  const context = canvas.getContext('2d')
-  if (context === null) { return { tags: value, tagAllocations: { origin: currentOrigin, allocations: {} } } }
-
-  const ranked = determineNewRanks(value)
-  const { width, height } = getGridSize(canvas, gridSize)
-  let space: PackedSpace<string> | undefined = undefined
-
-  const tags: TagAllocations = { origin: currentOrigin, allocations: {} }
-
-  for (let t in ranked) {
-    const tag = ranked[t]
-
-    const props: TransitionProps = {}
-    props.fontSize = getTargetFont(tag.rank)
-
-    const tagSpace = getOccupiedSpace(context, props.fontSize, tag.value, gridSize)
-    let allocation: AllocatedSpace<string> | undefined = undefined
-    if (space === undefined) {
-      const origin = getOffset(width, height, tagSpace)
-      space = initialiseSpace(origin, tagSpace, tag.value)
-      allocation = space!.allocations.length > 0 ? space!.allocations[0] : undefined
-    } else {
-      allocation = allocateSpace(space, tagSpace, tag.value)
-    }
-
-    if (allocation !== undefined) {
-      tags.allocations[t] = { tag, allocation }
-      tags.origin = deepCopy(space.origin)
-    }
-
-    const newProps = Object.assign({}, tag.targetProps, props)
-    tag.targetProps = deepCopy(newProps)
-  }
-
-  if (space === undefined) { return { tags: ranked, tagAllocations: { origin: currentOrigin, allocations: {} } } }
-
-  for (let t in tags.allocations) {
-    const { tag, allocation } = tags.allocations[t]
-    const data: TagOperationData = {
-      frame, tag
-    }
-
-    const props: TransitionProps = {}
-    props.location = getTargetLocation(space.origin, allocation, allocation.size, gridSize)
-    props.rotation = getTargetRotation(space.origin, allocation, width, height)
-
-    const newProps = Object.assign({}, tag.targetProps, props)
-    tag.targetProps = deepCopy(newProps)
-
-    if (tagAllocations.allocations[t] !== undefined) {
-      const { allocation: oldAllocation } = tagAllocations.allocations[t]
-
-      if (tag.state === TagState.Normal && areAllocatedSpaceEqual(oldAllocation, allocation) === false) {
-        tag.state = TagState.NewProps
-      } else if (tag.state === TagState.Normal && areCoordinatesEqual(currentOrigin, space.origin) === false) {
-        tag.state = TagState.NewProps
-      }
-    }
-
-    const result = operationPipeline([
-      fadeInNewTag,
-      moveTagWithNewProps,
-      resizeTagWithNewProps,
-      rotateTagWithNewProps,
-      calculateProps
-    ]).run(data)
-
-    ranked[t] = result.tag
-  }
-
-  return { tags: ranked, space, tagAllocations: tags }
-}
-
 const getOffset = (width: number, height: number, itemSize: Size): Coordinates => {
   const gridCenterY = Math.floor(height / 2)
   const gridCenterX = Math.floor(width / 2)
@@ -224,33 +196,348 @@ const getOffset = (width: number, height: number, itemSize: Size): Coordinates =
   return offset
 }
 
-type RenderTagsFunction = (context: CanvasRenderingContext2D, tags: Tags, frame: number, pre?: Array<RenderFunction>, post?: Array<RenderFunction>) => void;
-export const renderTags: RenderTagsFunction = (context, tags, frame, pre, post) => {
-  const data: RenderPipelineData = {
-    tags,
-    frame
-  }
+export const determineSpaceAllocations: AnimatedCanvasTransformFunction<PageData> = (data) => {
 
-  runRenderPipeline(context, data, renderTagsLayer, pre, post)
-}
+  if (data.data === undefined) { return data }
 
-type CleanUpTagsFunction = (frame: number, value: Tags) => Tags;
-export const cleanUpTags: CleanUpTagsFunction = (frame, value) => {
-  const tags = value
+  const { tags, spaceAllocation, gridSize, width, height, getTextSize } = data.data
+  const origin = spaceAllocation.origin
+  const newAllocations: TagAllocations = { origin, allocations: {} }
+
+  let space: PackedSpace<string> | undefined = undefined
+
+  // allocate space for tags
   for (let t in tags) {
     const tag = tags[t]
-    const data: TagOperationData = {
-      frame, tag
+
+    const textSize = getTextSize(tag.value, tag.targetProps.fontSize!)
+    const tagSpace = getOccupiedSpace(textSize, tag.value, gridSize)
+    let allocation: AllocatedSpace<string> | undefined = undefined
+    if (space === undefined) {
+      const origin = getOffset(width, height, tagSpace)
+      space = initialiseSpace(origin, tagSpace, tag.value)
+      allocation = space!.allocations.length > 0 ? space!.allocations[0] : undefined
+    } else {
+      allocation = allocateSpace(space, tagSpace, tag.value)
     }
 
-    const result = operationPipeline([
-      finaliseCompletedTransitions,
-      normaliseState,
-      clearTargetProps
-    ]).run(data)
-
-    tags[t] = result.tag
+    if (allocation !== undefined) {
+      newAllocations.allocations[t] = { tag, allocation }
+      newAllocations.origin = deepCopy(space.origin)
+    }
   }
 
-  return tags
+  if (space === undefined) {
+    data.data.spaceAllocation = { origin, allocations: {} }
+    return data
+  }
+
+  // adjust tag locations based on new allocations
+  for (let t in newAllocations.allocations) {
+    const { tag, allocation } = newAllocations.allocations[t]
+
+    const props: TransitionProps = {}
+    props.location = getTargetLocation(space.origin, allocation, allocation.size, gridSize)
+    props.rotation = getTargetRotation(space.origin, allocation, width, height)
+
+    const newProps = Object.assign({}, tag.targetProps, props)
+    tag.targetProps = deepCopy(newProps)
+
+    if (spaceAllocation.allocations[t] !== undefined) {
+      const { allocation: oldAllocation } = spaceAllocation.allocations[t]
+
+      if (tag.state === TagState.Normal && areAllocatedSpaceEqual(oldAllocation, allocation) === false) {
+        tag.state = TagState.NewProps
+      } else if (tag.state === TagState.Normal && areCoordinatesEqual(origin, space.origin) === false) {
+        tag.state = TagState.NewProps
+      }
+    }
+  }
+
+  data.data.spaceAllocation = newAllocations
+  return data
+}
+
+export const fadeInNewTags: AnimatedCanvasTransformFunction<PageData> = (data) => {
+  if (data.data === undefined) { return data }
+
+  const { tags } = data.data
+  const { frame } = data.drawData
+
+  for (let t in tags) {
+    const tag = tags[t]
+
+    if (tag.state !== TagState.NewTag) { continue }
+
+    const id = `${TagState[tag.state]}-fadeIn`
+    let transition = tag.transitions.find(t => t.id === id)
+    if (transition !== undefined) { continue }
+
+    const fadeInDuration = 60
+
+    transition = {
+      id: id,
+      startFrame: frame,
+      startProps: deepCopy(tag.props),
+      targetProps: { opacity: 1 },
+      duration: fadeInDuration,
+      operation: fadeIn
+    }
+
+    tag.transitions.push(transition)
+    tags[t] = tag
+  }
+
+  data.data.tags = tags
+  return data
+}
+
+export const moveTagsWithNewProps: AnimatedCanvasTransformFunction<PageData> = (data) => {
+  if (data.data === undefined) { return data }
+
+  const { tags } = data.data
+  const { frame } = data.drawData
+
+  for (let t in tags) {
+    const tag = tags[t]
+
+    if (tag.state !== TagState.NewProps) { continue }
+    if (tag.targetProps === undefined) { continue }
+
+    const id = `${TagState[tag.state]}-move`
+    const moveDuration = 90
+
+    let transition = tag.transitions.find(t => t.id === id)
+    if (transition === undefined) {
+      transition = {
+        id: id,
+        startFrame: frame,
+        startProps: {},
+        targetProps: {},
+        duration: moveDuration,
+        operation: move
+      }
+
+      tag.transitions.push(transition)
+    }
+
+    transition.startFrame = frame
+    transition.startProps = deepCopy(tag.props)
+    transition.targetProps = deepCopy(tag.targetProps)
+
+    tags[t] = tag
+  }
+
+  data.data.tags = tags
+  return data
+}
+
+export const resizeTagsWithNewProps: AnimatedCanvasTransformFunction<PageData> = (data) => {
+  if (data.data === undefined) { return data }
+
+  const { tags } = data.data
+  const { frame } = data.drawData
+
+  for (let t in tags) {
+    const tag = tags[t]
+
+    if (tag.state !== TagState.NewProps) { continue }
+    if (tag.targetProps === undefined) { continue }
+
+    const id = `${TagState[tag.state]}-resize`
+    const resizeDuration = 90
+
+    let transition = tag.transitions.find(t => t.id === id)
+    if (transition === undefined) {
+      transition = {
+        id: id,
+        startFrame: frame,
+        startProps: {},
+        targetProps: {},
+        duration: resizeDuration,
+        operation: resizeFont
+      }
+
+      tag.transitions.push(transition)
+    }
+
+    transition.startFrame = frame
+    transition.startProps = deepCopy(tag.props)
+    transition.targetProps = deepCopy(tag.targetProps)
+
+    tags[t] = tag
+  }
+
+  data.data.tags = tags
+  return data
+}
+
+export const rotateTagsWithNewProps: AnimatedCanvasTransformFunction<PageData> = (data) => {
+  if (data.data === undefined) { return data }
+
+  const { tags } = data.data
+  const { frame } = data.drawData
+
+  for (let t in tags) {
+    const tag = tags[t]
+
+    if (tag.state !== TagState.NewProps) { continue }
+    if (tag.targetProps === undefined) { continue }
+
+    const id = `${TagState[tag.state]}-rotate`
+    const rotateDuration = 90
+
+    let transition = tag.transitions.find(t => t.id === id)
+    if (transition === undefined) {
+      transition = {
+        id: id,
+        startFrame: frame,
+        startProps: {},
+        targetProps: {},
+        duration: rotateDuration,
+        operation: minRotate
+      }
+
+      tag.transitions.push(transition)
+    }
+
+    transition.startFrame = frame
+    transition.startProps = deepCopy(tag.props)
+    transition.targetProps = deepCopy(tag.targetProps)
+
+    tags[t] = tag
+  }
+
+  data.data.tags = tags
+  return data
+}
+
+export const calculateProps: AnimatedCanvasTransformFunction<PageData> = (data) => {
+  if (data.data === undefined) { return data }
+
+  const { tags } = data.data
+  const { frame } = data.drawData
+
+  for (let t in tags) {
+    const tag = tags[t]
+
+    let props: TransitionProps = {}
+    for (let i = 0; i < tag.transitions.length; i++) {
+      const transition = tag.transitions[i]
+      const result = runTransition(transition, frame)
+      props = Object.assign(props, result)
+    }
+
+    const newProps = Object.assign({}, tag.props, tag.targetProps, props)
+    tag.props = deepCopy(newProps)
+    tags[t] = tag
+  }
+
+  data.data.tags = tags
+  return data
+}
+
+export const renderTagsLayer: AnimatedCanvasRenderFunction<PageData> = (context, data) => {
+  if (data.data === undefined) { return }
+
+  const { tags } = data.data
+
+  context.textBaseline = "middle"
+  context.textAlign = "center"
+
+  for (let t in tags) {
+    context.save()
+
+    const tag = tags[t]
+    const props = tag.props
+
+    if (props.color !== undefined) {
+      const color = `HSLA(${props.color.h}, ${props.color.s}%, ${props.color.s}%, ${props.opacity ?? 1})`
+      context.fillStyle = color
+    }
+
+    if (props.fontSize !== undefined) {
+      context.font = `${props.fontSize}px sans-serif`
+    }
+
+    let location: Coordinates | undefined = undefined
+    if (props.location !== undefined) {
+       location = {
+        x: props.location.x,
+        y: props.location.y
+       }
+    }
+
+    let rotation = props.rotation !== undefined ? props.rotation % 360 : 0
+    rotation = rotation > 180 ? rotation - 360 : rotation
+    rotation = rotation < -180 ? rotation + 360 : rotation
+
+    if (location !== undefined) {
+      context.translate(location.x, location.y)
+      context.rotate(rotation * Math.PI / 180)
+      context.translate(0, 0)
+      context.fillText(tag.value, 0, 0)
+    }
+
+    context.restore()
+  }
+}
+
+export const finaliseCompletedTransitions: AnimatedCanvasTransformFunction<PageData> = (data) => {
+  if (data.data === undefined) { return data }
+
+  const { frame } = data.drawData
+  const { tags } = data.data
+
+  for (let t in tags) {
+    const tag = tags[t]
+
+    const active: Array<Transition> = []
+    for (let i = 0; i < tag.transitions.length; i++) {
+      const transition = tag.transitions[i]
+      const completeFrame = transition.startFrame + transition.duration
+      if (completeFrame > frame) {
+        active.push(transition)
+      }
+    }
+
+    tag.transitions = active
+
+    tags[t] = tag
+  }
+
+  data.data.tags = tags
+  return data
+}
+
+export const normaliseState: AnimatedCanvasTransformFunction<PageData> = (data) => {
+  if (data.data === undefined) { return data }
+
+  const { tags } = data.data
+
+  for (let t in tags) {
+    const tag = tags[t]
+    if (tag.state === TagState.Normal) { continue }
+
+    tag.state = TagState.Normal
+    tags[t] = tag
+  }
+
+  data.data.tags = tags
+  return data
+}
+
+export const clearTargetProps: AnimatedCanvasTransformFunction<PageData> = (data) => {
+  if (data.data === undefined) { return data }
+
+  const { tags } = data.data
+
+  for (let t in tags) {
+    const tag = tags[t]
+    tag.targetProps = {}
+    tags[t] = tag
+  }
+
+  data.data.tags = tags
+  return data
 }

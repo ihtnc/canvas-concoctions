@@ -1,16 +1,35 @@
 'use client'
 
-import { type PreDrawHandler, type DrawHandler, type PostDrawHandler } from "@/components/canvas/types"
-import useAnimatedCanvas from "@/components/canvas/use-animated-canvas"
+import { type CanvasResizeHandler, type InitialiseDataHandler, use2dAnimatedCanvas, when } from "@ihtnc/use-animated-canvas"
 import ControlPanel, { type OnInputHandler, type ControlItem, type OnKeyUpHandler } from "@/components/control-panel"
 import { useRef } from "react"
-import { addTag, cleanUpTags, getNewColor, processTags, renderTags } from "./engine"
-import { type Tags, type TagAllocations } from "./engine/types"
+import {
+  addNewTag,
+  shouldAddTag,
+  hasNewTag,
+  clearTargetProps,
+  finaliseCompletedTransitions,
+  normaliseState,
+  renderTagsLayer,
+  resetTags,
+  shouldResetTags,
+  determineNewRanks,
+  determineTargetFonts,
+  shouldResize,
+  determineSpaceAllocations,
+  fadeInNewTags,
+  moveTagsWithNewProps,
+  resizeTagsWithNewProps,
+  rotateTagsWithNewProps,
+  calculateProps
+} from "./engine"
+import { type GetTextSizeFunction, type PageData } from "./engine/types"
 import {
   TrashIcon,
   TagIcon,
   PlusCircleIcon
 } from "@/components/icons"
+import { getTextSize } from "@/utilities/drawing-operations"
 
 type TagVisualiserProps = {
   className?: string,
@@ -32,39 +51,109 @@ const TagVisualiser = ({
   className,
   gridSize = DEFAULT_DATA.DefaultGridSize
 }: TagVisualiserProps) => {
-  const tags = useRef<Tags>({})
-  const tagAllocations = useRef<TagAllocations>({ origin: { x: 0, y: 0 }, allocations: {} })
   const tagHistory = useRef<Array<string>>([])
 
-  const existingHues: Array<number> = []
   let tagInput = ''
+  let add = false
+  let addedInput = ''
+  let reset = false
+  let resize = false
 
   if (gridSize < DEFAULT_DATA.MinGridSize) { gridSize = DEFAULT_DATA.MinGridSize }
   else if (gridSize > DEFAULT_DATA.MaxGridSize) { gridSize = DEFAULT_DATA.MaxGridSize }
 
-  const preDrawFn: PreDrawHandler = (canvas, data) => {
-    const currentTags = tags.current
-    const currentAllocations = tagAllocations.current
-    const { tags: newTags, tagAllocations: newTagAllocations } = processTags(canvas, gridSize, data.frame, currentTags, currentAllocations)
-    tags.current = newTags
-    tagAllocations.current = newTagAllocations
+  const initialiseData: InitialiseDataHandler<PageData> = (canvas, initData) => {
+    const context = canvas.getContext('2d')!
+    const fn: GetTextSizeFunction = (text, fontSize) => {
+      context.save()
+      context.font = `${fontSize}px sans-serif`
+      const size = getTextSize(context, text)
+      context.restore()
+      return size
+    }
+
+    return {
+      tags: {},
+
+      existingHues: [],
+      spaceAllocation: {
+        origin: { x: 0, y: 0 },
+        allocations: {}
+      },
+
+      gridSize,
+      height: Math.floor(canvas.height / gridSize),
+      width: Math.floor(canvas.width / gridSize),
+
+      newTagValue: '',
+      addTag: false,
+      resetTags: false,
+      resize: false,
+
+      getTextSize: fn
+    }
   }
 
-  const drawFn: DrawHandler = ({ context, frame }) => {
-    renderTags(
-      context,
-      tags.current,
-      frame,
-      [],
-      []
-    )
-  }
+  const { Canvas } = use2dAnimatedCanvas<PageData>({
+    initialiseData,
+    preRenderTransform: [
+      (data) => {
+        if (data.data === undefined) { return data }
 
-  const postDrawFn: PostDrawHandler = (canvas, data) => {
-    const current = tags.current
-    const newTags = cleanUpTags(data.frame, current)
-    tags.current = newTags
-  }
+        data.data.addTag = add
+        data.data.newTagValue = addedInput
+        data.data.resetTags = reset
+        data.data.resize = resize
+        return data
+      },
+      when(shouldResetTags, [
+        resetTags,
+        (data) => {
+          reset = false
+          return data
+        }
+      ]),
+      when(
+        shouldResize,
+        (data) => {
+          resize = false
+
+          if (data.data === undefined) { return data }
+
+          const { gridSize } = data.data
+          data.data.height = Math.floor(data.drawData.height / gridSize)
+          data.data.width = Math.floor(data.drawData.width / gridSize)
+          return data
+        }
+      ),
+      when([
+        hasNewTag,
+        shouldAddTag
+      ], [
+        (data) => {
+          add = false
+          tagHistory.current.push(tagInput)
+          addedInput = ''
+          return data
+        },
+        addNewTag,
+      ]),
+      determineNewRanks,
+      determineTargetFonts,
+      determineSpaceAllocations,
+      fadeInNewTags,
+      moveTagsWithNewProps,
+      resizeTagsWithNewProps,
+      rotateTagsWithNewProps,
+      calculateProps
+    ],
+    render: renderTagsLayer,
+    postRenderTransform: [
+      finaliseCompletedTransitions,
+      normaliseState,
+      clearTargetProps
+    ]
+  })
 
   const inputHandler: OnInputHandler = (value) => {
     tagInput = value
@@ -75,25 +164,19 @@ const TagVisualiser = ({
   }
 
   const addHandler = () => {
-    if (tagInput.trim().length === 0) { return }
-    const color = getNewColor(existingHues)
-    tags.current = addTag(tags.current, tagInput, color)
-    existingHues.push(color.h)
-    tagHistory.current.push(tagInput)
+    add = true
+    addedInput = tagInput
     tagInput = ''
   }
 
   const resetConcoction = () => {
-    tags.current = {}
+    reset = true
     tagHistory.current = []
-    tagAllocations.current = { origin: { x: 0, y: 0 }, allocations: {} }
   }
 
-  const { Canvas } = useAnimatedCanvas({
-    predraw: preDrawFn,
-    draw: drawFn,
-    postdraw: postDrawFn
-  })
+  const resizeHandler: CanvasResizeHandler = (width, height) => {
+    resize = true
+  }
 
   const controls: Array<ControlItem> = [{
     type: "label",
@@ -123,7 +206,9 @@ const TagVisualiser = ({
   }]
 
   return <>
-    <Canvas className={className} />
+    <Canvas className={className}
+      onCanvasResize={resizeHandler}
+    />
     <ControlPanel controls={controls} />
   </>
 }

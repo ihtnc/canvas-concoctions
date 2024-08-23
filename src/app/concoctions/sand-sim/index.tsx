@@ -134,20 +134,25 @@ const SandSim = ({
         data.data.resetMap = reset
         return data
       },
-      when(shouldResetParticleMap, resetParticleMap),
-      when(shouldResizeParticleMap, resizeParticleMap),
+      when(shouldResetParticleMap, [
+        resetParticleMap,
+        (data) => {
+          reset = false
+          return data
+        }
+      ]),
+      when(shouldResizeParticleMap, [
+        resizeParticleMap,
+        (data) => {
+          resized = false
+          return data
+        }
+      ]),
       when(canGenerateParticle, generateParticles),
       dropParticles
     ],
     render: renderParticleLayer,
-    postRenderTransform: [
-      increaseParticleValue,
-      (data) => {
-        resized = false
-        reset = false
-        return data
-      }
-    ],
+    postRenderTransform: increaseParticleValue,
     options: {
       protectData: false
     }
