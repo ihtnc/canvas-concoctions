@@ -1,4 +1,4 @@
-import { Coordinates } from "@/components/canvas/types"
+import { Coordinates } from "@ihtnc/use-animated-canvas"
 
 export const chooseRandom: (min: number, max: number) => number = (min, max) => {
   const range = max - min + 1

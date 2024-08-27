@@ -1,4 +1,4 @@
-import { type Coordinates } from "@/components/canvas/types"
+import { type Coordinates } from "@ihtnc/use-animated-canvas"
 import { type Size, type RGB } from "@/utilities/drawing-operations"
 
 export type GameObject = {

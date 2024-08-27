@@ -1,6 +1,5 @@
-import { type Coordinates } from "@/components/canvas/types"
 import { type PageData, type PackedSpace } from "./engine/types"
-import { type AnimatedCanvasRenderFunction } from "@ihtnc/use-animated-canvas"
+import { type Coordinates, type AnimatedCanvasRenderFunction } from "@ihtnc/use-animated-canvas"
 
 export const renderDebugLayer: AnimatedCanvasRenderFunction<PageData> = (context, data) => {
   if (data.data === undefined) { return }

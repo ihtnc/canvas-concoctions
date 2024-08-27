@@ -1,9 +1,8 @@
 import { type GameOperationData, Command } from "./types"
-import { type RenderFilterFunction, getTextSize } from "@/utilities/drawing-operations"
-import { type Coordinates } from "@/components/canvas/types"
+import { getTextSize } from "@/utilities/drawing-operations"
 import { chooseRandom, degreesToRadians, radiansToDegrees } from "@/utilities/misc-operations"
 import { isBulletImageLoaded, isRankImageLoaded } from "./conditional-functions"
-import { type AnimatedCanvasRenderFilterFunction, type AnimatedCanvasRenderFunction, renderWhen } from "@ihtnc/use-animated-canvas"
+import { type AnimatedCanvasRenderFilterFunction, type AnimatedCanvasRenderFunction, type Coordinates, renderWhen } from "@ihtnc/use-animated-canvas"
 
 const renderHiScoreStat: AnimatedCanvasRenderFunction<GameOperationData> = (context, data) => {
   if (data.data === undefined) { return }

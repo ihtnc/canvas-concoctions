@@ -1,6 +1,6 @@
 import { type Size } from "@/utilities/drawing-operations"
 import { type Transition, type TransitionProps } from "@/utilities/transition-operations"
-import { type Coordinates } from "@/components/canvas/types"
+import { type Coordinates } from "@ihtnc/use-animated-canvas"
 
 export enum TagState {
   Normal,

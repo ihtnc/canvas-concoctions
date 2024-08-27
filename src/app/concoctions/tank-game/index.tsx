@@ -1,9 +1,6 @@
 'use client'
 
-import {
-  type Coordinates
-} from "@/components/canvas/types"
-import { type CanvasResizeHandler, type InitialiseDataHandler, use2dAnimatedCanvas, when } from "@ihtnc/use-animated-canvas"
+import { type Coordinates, type CanvasResizeHandler, type InitialiseDataHandler, use2dAnimatedCanvas, when } from "@ihtnc/use-animated-canvas"
 import {
   loadResources,
   updateGameObjects,

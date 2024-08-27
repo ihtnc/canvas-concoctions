@@ -1,4 +1,4 @@
-import { Coordinates } from "@/components/canvas/types"
+import { Coordinates } from "@ihtnc/use-animated-canvas"
 
 const getAxes = (shape: Array<Coordinates>): Array<Coordinates> => {
   const axes = []

@@ -2,8 +2,7 @@ import { type GameOperationData, type GameObject, type GameStateObject, Command,
 import config from './data'
 import { chooseOption, chooseRandom, degreesToRadians, getRotatedCoordinates, radiansToDegrees } from "@/utilities/misc-operations"
 import { checkOverlap } from "@/utilities/collision-detection"
-import { type Coordinates } from "@/components/canvas/types"
-import { type AnimatedCanvasData, type AnimatedCanvasTransformFunction } from "@ihtnc/use-animated-canvas"
+import { type Coordinates, type AnimatedCanvasData, type AnimatedCanvasTransformFunction } from "@ihtnc/use-animated-canvas"
 import { isGameOver } from "./conditional-functions"
 import { getLocalStorage, setLocalStorage } from "@/utilities/client-operations"
 

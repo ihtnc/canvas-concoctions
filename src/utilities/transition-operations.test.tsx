@@ -15,7 +15,7 @@ import {
 } from './transition-operations'
 import * as canvasUtilities from '@/components/canvas/utilities'
 import * as drawingOperations from './drawing-operations'
-import { type Coordinates } from "@/components/canvas/types"
+import { type Coordinates } from "@ihtnc/use-animated-canvas"
 
 describe('transition operations', () => {
 

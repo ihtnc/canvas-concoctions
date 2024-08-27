@@ -1,4 +1,4 @@
-import { type Coordinates } from "@/components/canvas/types"
+import { type Coordinates } from "@ihtnc/use-animated-canvas"
 import { areCoordinatesEqual } from "@/components/canvas/utilities"
 import { type AreEqualFunction, deepCopy } from "./misc-operations"
 import { type HSL, type Size, areHSLsEqual, areSizesEqual } from "./drawing-operations"

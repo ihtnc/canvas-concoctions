@@ -21,9 +21,8 @@ import {
   resizeFont,
   runTransition
 } from "@/utilities/transition-operations"
-import { type Coordinates } from "@/components/canvas/types"
 import { areCoordinatesEqual } from "@/components/canvas/utilities"
-import { type AnimatedCanvasConditionalFunction, type AnimatedCanvasRenderFunction, type AnimatedCanvasTransformFunction } from "@ihtnc/use-animated-canvas"
+import { type Coordinates, type AnimatedCanvasConditionalFunction, type AnimatedCanvasRenderFunction, type AnimatedCanvasTransformFunction } from "@ihtnc/use-animated-canvas"
 
 const NEW_TAG: TagValue = {
   value: '',
