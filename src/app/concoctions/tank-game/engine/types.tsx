@@ -1,6 +1,5 @@
 import { type Coordinates } from "@/components/canvas/types"
-import { type Size, type RenderFunction, type RGB } from "@/utilities/drawing-operations"
-import { type OperationFunction } from "@/utilities/misc-operations"
+import { type Size, type RGB } from "@/utilities/drawing-operations"
 
 export type GameObject = {
   tank: TankObject,
@@ -10,7 +9,8 @@ export type GameObject = {
   explosion: ExplosionObject,
   message: MessageObject,
   gameOver: GameOverObject,
-  controls: ControlsObject
+  controls: ControlsObject,
+  stats: StatsObject
 }
 
 type TankObject = {
@@ -88,7 +88,17 @@ type ControlObject = {
   location: Coordinates
 }
 
+type StatsObject = {
+  hiScoreLabel: string,
+  hiScoreLocation: Coordinates,
+  scoreLabel: string,
+  scoreLocation: Coordinates,
+  bulletsLocation: Coordinates,
+  rankLocation: Coordinates
+}
+
 export enum State {
+  Initialise,
   Ready,
   TurnComplete,
   GameOver
@@ -112,12 +122,10 @@ export enum Difficulty {
 }
 
 export type GameStateObject = {
-  frame: number,
   score: number,
   hiScore: number
   difficulty: number,
   totalHits: number,
-  size: Size,
   currentCommand?: Command,
   state: State
 }
@@ -250,22 +258,19 @@ export type ResourcesObject = {
   restartImage: HTMLImageElement
 }
 
-export type GameOperationData = {
-  game: GameObject,
-  state: GameStateObject
-}
-export interface GameOperationFunction extends OperationFunction {
-  (value: GameOperationData): GameOperationData
+export type ClientObject = {
+  resize: boolean,
+  input?: string,
+  pointerCoordinates?: Coordinates
 }
 
-export type RenderPipelineData = {
-  frame: number,
+export type GameOperationData = {
   game: GameObject,
   state: GameStateObject,
   config: GameConfig,
-  resources: ResourcesObject
+  resources: ResourcesObject | null,
+  client: ClientObject,
+  getTextSize: GetTextSizeFunction
 }
 
-export interface TankGameRenderFunction extends RenderFunction {
-  (context: CanvasRenderingContext2D, data: RenderPipelineData): void;
-}
+export type GetTextSizeFunction = (text: string, font: string) => Size

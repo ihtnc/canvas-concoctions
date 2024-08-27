@@ -13,9 +13,7 @@ import {
   isFireCommand,
   hasBullets,
   isBulletActive,
-  isBulletInactive,
   isTargetHit,
-  isTargetNotHit,
   isTargetMoving,
   difficultyAllowsRepositioningTarget,
   difficultyAllowsMovingTarget,
@@ -23,12 +21,10 @@ import {
   isGameTurnComplete,
   isGameOver,
   isGameOverScreenActive,
-  isGameOverScreenInactive,
   isExplosionActive,
   isExplosionAnimationComplete,
   isMessageActive,
   isMessageAnimationComplete,
-  isMessageAnimationInProgress,
   isBulletImageLoaded,
   isRankImageLoaded,
   isTankImageLoaded,
@@ -39,25 +35,39 @@ import {
   isExplosionImageLoaded,
   isRestartImageLoaded,
 } from "./conditional-functions"
-import { MockInstance, beforeEach, afterEach, describe, expect, test, vi } from "vitest"
+import { type MockInstance, beforeEach, afterEach, describe, expect, test, vi } from "vitest"
 import config from "./data"
+import { type DrawData } from "@ihtnc/use-animated-canvas"
 
 describe("Game Conditional Functions", () => {
+  let drawData: DrawData
+  let data: any
   let state: GameStateObject
   let game: GameObject
   let resources: ResourcesObject
   let getCompleteMock: MockInstance
 
   beforeEach(() => {
+    drawData = {
+      fps: 0,
+      width: 1,
+      height: 2,
+      clientWidth: 3,
+      clientHeight: 4,
+      offsetWidth: 5,
+      offsetHeight: 6,
+      pixelRatio: 7,
+      frame: 8,
+      isDarkMode: false
+    }
+
     state = {
       currentCommand: undefined,
       difficulty: Difficulty.Normal,
       state: State.Ready,
-      frame: 0,
       score: 0,
       hiScore: 0,
-      totalHits: 0,
-      size: { width: 0, height: 0 }
+      totalHits: 0
     }
 
     game = {
@@ -68,7 +78,8 @@ describe("Game Conditional Functions", () => {
       explosion: { active: false, startFrame: 0, location: { x: 0, y: 0 } },
       message: { active: false, startFrame: 0, hit: false },
       gameOver: { active: false, startFrame: 0, message: { text: "", location: { x: 0, y: 0 }, size: { width: 0, height: 0 } }, score: { text: "", location: { x: 0, y: 0 }, size: { width: 0, height: 0 } }, highScore: { text: "", location: { x: 0, y: 0 }, size: { width: 0, height: 0 } }, newHighScore: false },
-      controls: { powerUp: { location: { x: 0, y: 0 }}, powerDown: { location: { x: 0, y: 0 }}, angleUp: { location: { x: 0, y: 0 }}, angleDown: { location: { x: 0, y: 0 }}, gunBarrelFire: { location: { x: 0, y: 0 }}, fire: { location: { x: 0, y: 0 }}, restart: { location: { x: 0, y: 0 }}}
+      controls: { powerUp: { location: { x: 0, y: 0 }}, powerDown: { location: { x: 0, y: 0 }}, angleUp: { location: { x: 0, y: 0 }}, angleDown: { location: { x: 0, y: 0 }}, gunBarrelFire: { location: { x: 0, y: 0 }}, fire: { location: { x: 0, y: 0 }}, restart: { location: { x: 0, y: 0 }}},
+      stats: { bulletsLocation: { x: 0, y: 0 }, scoreLocation: { x: 0, y: 0 }, hiScoreLocation: { x: 0, y: 0 }, rankLocation: { x: 0, y: 0 }, scoreLabel: "", hiScoreLabel: "" }
     }
 
     const image = document.createElement('img')
@@ -85,6 +96,11 @@ describe("Game Conditional Functions", () => {
       shootImage: new Image(),
       explosionImage: new Image(),
       restartImage: new Image()
+    }
+
+    data = {
+      data: { state, game, resources },
+      drawData
     }
   })
 
@@ -104,7 +120,7 @@ describe("Game Conditional Functions", () => {
     ])("should return $expected if currentCommand is $title", ({ currentCommand, expected }: { currentCommand: Command | undefined, expected: boolean }) => {
       state.currentCommand = currentCommand
 
-      const result = isAimCommand({ state, game })
+      const result = isAimCommand(data)
 
       expect(result).toBe(expected)
     })
@@ -118,7 +134,7 @@ describe("Game Conditional Functions", () => {
     ])("should return $expected if currentCommand is $title", ({ currentCommand, expected }: { currentCommand: Command | undefined, expected: boolean }) => {
       state.currentCommand = currentCommand
 
-      const result = isRestartCommand({ state, game })
+      const result = isRestartCommand(data)
 
       expect(result).toBe(expected)
     })
@@ -132,7 +148,7 @@ describe("Game Conditional Functions", () => {
     ])("should return $expected if currentCommand is $title", ({ currentCommand, expected }: { currentCommand: Command | undefined, expected: boolean }) => {
       state.currentCommand = currentCommand
 
-      const result = isFireCommand({ state, game })
+      const result = isFireCommand(data)
 
       expect(result).toBe(expected)
     })
@@ -147,7 +163,7 @@ describe("Game Conditional Functions", () => {
     ])("should return $expected if bullet count is $bulletCount", ({ bulletCount, expected }: { bulletCount: number, expected: boolean }) => {
       game.tank.bullets = bulletCount
 
-      const result = hasBullets({ state, game })
+      const result = hasBullets(data)
 
       expect(result).toBe(expected)
     })
@@ -160,20 +176,7 @@ describe("Game Conditional Functions", () => {
     ])("should return $expected if bullet.active is $isActive", ({ isActive, expected }: { isActive: boolean, expected: boolean }) => {
       game.bullet.active = isActive
 
-      const result = isBulletActive({ state, game })
-
-      expect(result).toBe(expected)
-    })
-  })
-
-  describe("isBulletInactive function", () => {
-    test.each([
-      { isActive: false, expected: true },
-      { isActive: true, expected: false }
-    ])("should return $expected if bullet.active is $isActive", ({ isActive, expected }: { isActive: boolean, expected: boolean }) => {
-      game.bullet.active = isActive
-
-      const result = isBulletInactive({ state, game })
+      const result = isBulletActive(data)
 
       expect(result).toBe(expected)
     })
@@ -186,20 +189,7 @@ describe("Game Conditional Functions", () => {
     ])("should return $expected if target.isHit is $isHit", ({ isHit, expected }: { isHit: boolean, expected: boolean }) => {
       game.target.isHit = isHit
 
-      const result = isTargetHit({ state, game })
-
-      expect(result).toBe(expected)
-    })
-  })
-
-  describe("isTargetNotHit function", () => {
-    test.each([
-      { isHit: false, expected: true },
-      { isHit: true, expected: false }
-    ])("should return $expected if target.isHit is $isHit", ({ isHit, expected }: { isHit: boolean, expected: boolean }) => {
-      game.target.isHit = isHit
-
-      const result = isTargetNotHit({ state, game })
+      const result = isTargetHit(data)
 
       expect(result).toBe(expected)
     })
@@ -212,7 +202,7 @@ describe("Game Conditional Functions", () => {
     ])("should return $expected if target.currentDirection is $title", ({ currentDirection, expected }: { currentDirection: TargetDirection | undefined, expected: boolean }) => {
       game.target.currentDirection = currentDirection
 
-      const result = isTargetMoving({ state, game })
+      const result = isTargetMoving(data)
 
       expect(result).toBe(expected)
     })
@@ -226,7 +216,7 @@ describe("Game Conditional Functions", () => {
     ])("should return $expected if state.difficulty is $title", ({ difficulty, expected }: { difficulty: Difficulty, expected: boolean }) => {
       state.difficulty = difficulty
 
-      const result = difficultyAllowsRepositioningTarget({ state, game })
+      const result = difficultyAllowsRepositioningTarget(data)
 
       expect(result).toBe(expected)
     })
@@ -241,7 +231,7 @@ describe("Game Conditional Functions", () => {
     ])("should return $expected if state.difficulty is $title", ({ difficulty, expected }: { difficulty: Difficulty, expected: boolean }) => {
       state.difficulty = difficulty
 
-      const result = difficultyAllowsMovingTarget({ state, game })
+      const result = difficultyAllowsMovingTarget(data)
 
       expect(result).toBe(expected)
     })
@@ -255,7 +245,7 @@ describe("Game Conditional Functions", () => {
     ])("should return $expected if state.state is $title", ({ gameState, expected }: { gameState: State, expected: boolean }) => {
       state.state = gameState
 
-      const result = isGameReady({ state, game })
+      const result = isGameReady(data)
 
       expect(result).toBe(expected)
     })
@@ -269,7 +259,7 @@ describe("Game Conditional Functions", () => {
     ])("should return $expected if state.state is $title", ({ gameState, expected }: { gameState: State, expected: boolean }) => {
       state.state = gameState
 
-      const result = isGameTurnComplete({ state, game })
+      const result = isGameTurnComplete(data)
 
       expect(result).toBe(expected)
     })
@@ -283,7 +273,7 @@ describe("Game Conditional Functions", () => {
     ])("should return $expected if state.state is $title", ({ gameState, expected }: { gameState: State, expected: boolean }) => {
       state.state = gameState
 
-      const result = isGameOver({ state, game })
+      const result = isGameOver(data)
 
       expect(result).toBe(expected)
     })
@@ -296,20 +286,7 @@ describe("Game Conditional Functions", () => {
     ])("should return $expected if gameOver.active is $isActive", ({ isActive, expected }: { isActive: boolean, expected: boolean }) => {
       game.gameOver.active = isActive
 
-      const result = isGameOverScreenActive({ state, game })
-
-      expect(result).toBe(expected)
-    })
-  })
-
-  describe("isGameOverScreenInactive function", () => {
-    test.each([
-      { isActive: false, expected: true },
-      { isActive: true, expected: false }
-    ])("should return $expected if gameOver.active is $isActive", ({ isActive, expected }: { isActive: boolean, expected: boolean }) => {
-      game.gameOver.active = isActive
-
-      const result = isGameOverScreenInactive({ state, game })
+      const result = isGameOverScreenActive(data)
 
       expect(result).toBe(expected)
     })
@@ -322,7 +299,7 @@ describe("Game Conditional Functions", () => {
     ])("should return $expected if explosion.active is $isActive", ({ isActive, expected }: { isActive: boolean, expected: boolean }) => {
       game.explosion.active = isActive
 
-      const result = isExplosionActive({ state, game })
+      const result = isExplosionActive(data)
 
       expect(result).toBe(expected)
     })
@@ -342,10 +319,10 @@ describe("Game Conditional Functions", () => {
       { startFrame: 0, duration: 10, frame: 11, expected: true },
     ])("should return $expected if animation is current frame >= duration [$frame - $startFrame >= $duration]", ({ startFrame, duration, frame, expected }: { startFrame: number, duration: number, frame: number, expected: boolean }) => {
       game.explosion.startFrame = startFrame
-      state.frame = frame
+      drawData.frame = frame
       getDuration.mockReturnValue(duration)
 
-      const result = isExplosionAnimationComplete({ state, game })
+      const result = isExplosionAnimationComplete(data)
 
       expect(result).toBe(expected)
     })
@@ -358,7 +335,7 @@ describe("Game Conditional Functions", () => {
     ])("should return $expected if message.active is $isActive", ({ isActive, expected }: { isActive: boolean, expected: boolean }) => {
       game.message.active = isActive
 
-      const result = isMessageActive({ state, game })
+      const result = isMessageActive(data)
 
       expect(result).toBe(expected)
     })
@@ -378,37 +355,10 @@ describe("Game Conditional Functions", () => {
       { startFrame: 0, duration: 10, frame: 11, expected: true },
     ])("should return $expected if animation is current frame >= duration [$frame - $startFrame >= $duration]", ({ startFrame, duration, frame, expected }: { startFrame: number, duration: number, frame: number, expected: boolean }) => {
       game.message.startFrame = startFrame
-      state.frame = frame
+      drawData.frame = frame
       getDuration.mockReturnValue(duration)
 
-      const result = isMessageAnimationComplete({ state, game })
-
-      expect(result).toBe(expected)
-    })
-  })
-
-  describe("isMessageAnimationInProgress function", () => {
-    let getDuration: MockInstance
-
-    beforeEach(() => {
-      getDuration = vi.spyOn(config.message, 'duration', 'get')
-    })
-
-    afterEach(() => {
-      vi.resetAllMocks()
-    })
-
-    test.each([
-      { startFrame: 0, duration: 10, frame: 0, expected: true },
-      { startFrame: 0, duration: 10, frame: 9, expected: true },
-      { startFrame: 0, duration: 10, frame: 10, expected: false },
-      { startFrame: 0, duration: 10, frame: 11, expected: false },
-    ])("should return $expected if animation is current frame < duration [$frame < $startFrame + $duration]", ({ startFrame, duration, frame, expected }: { startFrame: number, duration: number, frame: number, expected: boolean }) => {
-      game.message.startFrame = startFrame
-      state.frame = frame
-      getDuration.mockReturnValue(duration)
-
-      const result = isMessageAnimationInProgress({ state, game })
+      const result = isMessageAnimationComplete(data)
 
       expect(result).toBe(expected)
     })
@@ -421,7 +371,7 @@ describe("Game Conditional Functions", () => {
     ])("should return $expected if bulletImage.complete is $isLoaded", ({ isLoaded, expected }: { isLoaded: boolean, expected: boolean }) => {
       getCompleteMock.mockReturnValue(isLoaded)
 
-      const result = isBulletImageLoaded({ state, game, resources })
+      const result = isBulletImageLoaded(data)
 
       expect(result).toBe(expected)
     })
@@ -434,7 +384,7 @@ describe("Game Conditional Functions", () => {
     ])("should return $expected if rankImage.complete is $isLoaded", ({ isLoaded, expected }: { isLoaded: boolean, expected: boolean }) => {
       getCompleteMock.mockReturnValue(isLoaded)
 
-      const result = isRankImageLoaded({ state, game, resources })
+      const result = isRankImageLoaded(data)
 
       expect(result).toBe(expected)
     })
@@ -447,7 +397,7 @@ describe("Game Conditional Functions", () => {
     ])("should return $expected if tankImage.complete is $isLoaded", ({ isLoaded, expected }: { isLoaded: boolean, expected: boolean }) => {
       getCompleteMock.mockReturnValue(isLoaded)
 
-      const result = isTankImageLoaded({ state, game, resources })
+      const result = isTankImageLoaded(data)
 
       expect(result).toBe(expected)
     })
@@ -460,7 +410,7 @@ describe("Game Conditional Functions", () => {
     ])("should return $expected if gunBarrelImage.complete is $isLoaded", ({ isLoaded, expected }: { isLoaded: boolean, expected: boolean }) => {
       getCompleteMock.mockReturnValue(isLoaded)
 
-      const result = isGunBarrelImageLoaded({ state, game, resources })
+      const result = isGunBarrelImageLoaded(data)
 
       expect(result).toBe(expected)
     })
@@ -473,7 +423,7 @@ describe("Game Conditional Functions", () => {
     ])("should return $expected if targetImage.complete is $isLoaded", ({ isLoaded, expected }: { isLoaded: boolean, expected: boolean }) => {
       getCompleteMock.mockReturnValue(isLoaded)
 
-      const result = isTargetImageLoaded({ state, game, resources })
+      const result = isTargetImageLoaded(data)
 
       expect(result).toBe(expected)
     })
@@ -486,7 +436,7 @@ describe("Game Conditional Functions", () => {
     ])("should return $expected if arrowImage.complete is $isLoaded", ({ isLoaded, expected }: { isLoaded: boolean, expected: boolean }) => {
       getCompleteMock.mockReturnValue(isLoaded)
 
-      const result = isArrowImageLoaded({ state, game, resources })
+      const result = isArrowImageLoaded(data)
 
       expect(result).toBe(expected)
     })
@@ -499,7 +449,7 @@ describe("Game Conditional Functions", () => {
     ])("should return $expected if shootImage.complete is $isLoaded", ({ isLoaded, expected }: { isLoaded: boolean, expected: boolean }) => {
       getCompleteMock.mockReturnValue(isLoaded)
 
-      const result = isShootImageLoaded({ state, game, resources })
+      const result = isShootImageLoaded(data)
 
       expect(result).toBe(expected)
     })
@@ -512,7 +462,7 @@ describe("Game Conditional Functions", () => {
     ])("should return $expected if explosionImage.complete is $isLoaded", ({ isLoaded, expected }: { isLoaded: boolean, expected: boolean }) => {
       getCompleteMock.mockReturnValue(isLoaded)
 
-      const result = isExplosionImageLoaded({ state, game, resources })
+      const result = isExplosionImageLoaded(data)
 
       expect(result).toBe(expected)
     })
@@ -525,7 +475,7 @@ describe("Game Conditional Functions", () => {
     ])("should return $expected if restartImage.complete is $isLoaded", ({ isLoaded, expected }: { isLoaded: boolean, expected: boolean }) => {
       getCompleteMock.mockReturnValue(isLoaded)
 
-      const result = isRestartImageLoaded({ state, game, resources })
+      const result = isRestartImageLoaded(data)
 
       expect(result).toBe(expected)
     })

@@ -1,121 +1,119 @@
-import { type TankGameRenderFunction, type RenderPipelineData, Command } from "./types"
-import { type RenderFilterFunction, getTextSize, renderPipeline, renderWhen } from "@/utilities/drawing-operations"
+import { type GameOperationData, Command } from "./types"
+import { type RenderFilterFunction, getTextSize } from "@/utilities/drawing-operations"
 import { type Coordinates } from "@/components/canvas/types"
 import { chooseRandom, degreesToRadians, radiansToDegrees } from "@/utilities/misc-operations"
 import { isBulletImageLoaded, isRankImageLoaded } from "./conditional-functions"
+import { type AnimatedCanvasRenderFilterFunction, type AnimatedCanvasRenderFunction, renderWhen } from "@ihtnc/use-animated-canvas"
 
-type CreateTextStatRenderFunction = (key: string, value: string, offset: Coordinates) => TankGameRenderFunction
-const createTextStatMessage: CreateTextStatRenderFunction = (key, value, offset) => {
-  const render: TankGameRenderFunction = (context: CanvasRenderingContext2D, data: RenderPipelineData) => {
-    const { stats } = data.config
+const renderHiScoreStat: AnimatedCanvasRenderFunction<GameOperationData> = (context, data) => {
+  if (data.data === undefined) { return }
 
-    const col1X = stats.location.x
-    const col1Y = stats.location.y + offset.y
-
-    const col2X = col1X + offset.x
-    const col2Y = col1Y
-
-    context.fillText(key, col1X, col1Y)
-    context.fillText(value, col2X, col2Y)
-  }
-
-  return render
-}
-
-type CreateImageStatRenderFunction = (location: Coordinates) => TankGameRenderFunction
-
-const createBulletImageStat: CreateImageStatRenderFunction = (location) => {
-  const render: TankGameRenderFunction = (context: CanvasRenderingContext2D, data: RenderPipelineData) => {
-    const { bulletImage } = data.resources
-
-    context.save()
-
-    const { x: statX, y: statY } = data.config.stats.location
-    const x = statX + location.x
-    const y = statY + location.y
-    const { tank } = data.game
-    const { bullet } = data.config
-    const { size } = bullet
-
-    //rotate image to portrait
-    context.translate(x, y)
-    context.rotate(degreesToRadians(-90))
-
-    const bulletSpacing = size.height + bullet.padding
-    for (let i = 0; i < tank.bullets; i++) {
-      context.drawImage(bulletImage, x - size.width, bulletSpacing * i, size.width, size.height)
-    }
-
-    context.restore()
-  }
-
-  return render
-}
-
-const createRankImageStat: CreateImageStatRenderFunction = (location) => {
-  const render: TankGameRenderFunction = (context: CanvasRenderingContext2D, data: RenderPipelineData) => {
-    const { rankImage } = data.resources
-
-    const { stats } = data.config
-    const { x: statX, y: statY } = stats.location
-    const x = statX + location.x
-    const y = statY + location.y
-    const { difficulty } = data.state
-    const { rank } = data.config
-    const { size, offset } = rank
-
-    for (let i = 0; i < difficulty; i++) {
-      context.drawImage(rankImage, x + size.width * i + offset.x, y + offset.y, size.width, size.height)
-    }
-  }
-
-  return render
-}
-
-export const renderGameStats: TankGameRenderFunction = (context: CanvasRenderingContext2D, data: RenderPipelineData) => {
   context.save()
 
-  const { stats } = data.config
-  const { score, hiScore: hiScoreValue } = data.state
-
+  const { hiScoreLabel, hiScoreLocation } = data.data.game.stats
+  const { hiScore } = data.data.state
+  const { stats } = data.data.config
   const { r, g, b } = stats.color
   const color = `RGB(${r}, ${g}, ${b})`
   context.fillStyle = color
   context.font = stats.font
 
-  const hiScoreMessage = "Hi Score: "
-  const hiScoreSize = getTextSize(context, hiScoreMessage)
-  const scoreMessage = "Score: "
-  const scoreSize = getTextSize(context, scoreMessage)
-  const longestMessage = Math.max(hiScoreSize.width, scoreSize.width)
+  const col1X = stats.location.x
+  const col1Y = stats.location.y + hiScoreLocation.y
 
-  const hiScoreFn = createTextStatMessage(hiScoreMessage, `${hiScoreValue}`, { x: longestMessage, y: 0 })
+  const col2X = col1X + hiScoreLocation.x
+  const col2Y = col1Y
 
-  const scoreOffset: Coordinates = { x: longestMessage, y: hiScoreSize.height + stats.padding }
-  const scoreValue = `${score}`
-  const scoreFn = createTextStatMessage(scoreMessage, scoreValue, scoreOffset)
-
-  const { size: bulletSize } = data.config.bullet
-  const bulletLocation: Coordinates = { x: 0, y: hiScoreSize.height + scoreSize.height + stats.padding }
-  const bulletFn = createBulletImageStat(bulletLocation)
-
-  const rankLocation: Coordinates = { x: 0, y: hiScoreSize.height + scoreSize.height + bulletSize.height + stats.padding }
-  const rankFn = createRankImageStat(rankLocation)
-
-  const renderFns = [
-    hiScoreFn,
-    scoreFn,
-    renderWhen<RenderPipelineData>(isBulletImageLoaded, bulletFn),
-    renderWhen<RenderPipelineData>(isRankImageLoaded, rankFn)
-  ]
-
-  renderPipeline(renderFns).run(context, data)
+  context.fillText(hiScoreLabel, col1X, col1Y)
+  context.fillText(`${hiScore}`, col2X, col2Y)
 
   context.restore()
 }
 
-export const renderTank: TankGameRenderFunction = (context: CanvasRenderingContext2D, data: RenderPipelineData) => {
-  const { tankImage } = data.resources
+const renderScoreStat: AnimatedCanvasRenderFunction<GameOperationData> = (context, data) => {
+  if (data.data === undefined) { return }
+
+  context.save()
+
+  const { scoreLabel, scoreLocation } = data.data.game.stats
+  const { score } = data.data.state
+  const { stats } = data.data.config
+  const { r, g, b } = stats.color
+  const color = `RGB(${r}, ${g}, ${b})`
+  context.fillStyle = color
+  context.font = stats.font
+
+  const col1X = stats.location.x
+  const col1Y = stats.location.y + scoreLocation.y
+
+  const col2X = col1X + scoreLocation.x
+  const col2Y = col1Y
+
+  context.fillText(scoreLabel, col1X, col1Y)
+  context.fillText(`${score}`, col2X, col2Y)
+
+  context.restore()
+}
+
+const renderBulletsStat: AnimatedCanvasRenderFunction<GameOperationData> = (context, data) => {
+  if (data.data === undefined) { return }
+  const { bulletImage } = data.data.resources!
+
+  context.save()
+
+  const { tank, stats } = data.data.game
+  const { x: statX, y: statY } = data.data.config.stats.location
+  const x = statX + stats.bulletsLocation.x
+  const y = statY + stats.bulletsLocation.y
+
+  const { bullet } = data.data.config
+  const { size } = bullet
+
+  //rotate image to portrait
+  context.translate(x, y)
+  context.rotate(degreesToRadians(-90))
+
+  const bulletSpacing = size.height + bullet.padding
+  for (let i = 0; i < tank.bullets; i++) {
+    context.drawImage(bulletImage, x - size.width, bulletSpacing * i, size.width, size.height)
+  }
+
+  context.restore()
+}
+
+const renderRankStat: AnimatedCanvasRenderFunction<GameOperationData> = (context, data) => {
+  if (data.data === undefined) { return }
+
+  const { rankImage } = data.data.resources!
+
+  const { rankLocation } = data.data.game.stats
+  const { stats } = data.data.config
+  const { x: statX, y: statY } = stats.location
+  const x = statX + rankLocation.x
+  const y = statY + rankLocation.y
+  const { difficulty } = data.data.state
+  const { rank } = data.data.config
+  const { size, offset } = rank
+
+  for (let i = 0; i < difficulty; i++) {
+    context.drawImage(rankImage, x + size.width * i + offset.x, y + offset.y, size.width, size.height)
+  }
+}
+
+export const renderGameStats = () => {
+  return [
+    renderHiScoreStat,
+    renderScoreStat,
+    renderWhen(isBulletImageLoaded, renderBulletsStat),
+    renderWhen(isRankImageLoaded, renderRankStat)
+  ]
+}
+
+export const renderTank: AnimatedCanvasRenderFunction<GameOperationData> = (context, renderData) => {
+  if (renderData.data === undefined) { return }
+
+  const { data } = renderData
+  const { tankImage } = data.resources!
 
   const { tank } = data.game
   const { size } = data.config.tank
@@ -124,8 +122,11 @@ export const renderTank: TankGameRenderFunction = (context: CanvasRenderingConte
   context.drawImage(tankImage, location.x, location.y, size.width, size.height)
 }
 
-export const renderGunBarrel: TankGameRenderFunction = (context: CanvasRenderingContext2D, data: RenderPipelineData) => {
-  const { gunBarrelImage } = data.resources
+export const renderGunBarrel: AnimatedCanvasRenderFunction<GameOperationData> = (context, renderData) => {
+  if (renderData.data === undefined) { return }
+
+  const { data } = renderData
+  const { gunBarrelImage } = data.resources!
 
   const { gunBarrel, tank } = data.game
   const { size, angleMultiplier } = data.config.gunBarrel
@@ -141,15 +142,21 @@ export const renderGunBarrel: TankGameRenderFunction = (context: CanvasRendering
   context.restore()
 }
 
-export const renderTarget: TankGameRenderFunction = (context: CanvasRenderingContext2D, data: RenderPipelineData) => {
-  const { targetImage } = data.resources
+export const renderTarget: AnimatedCanvasRenderFunction<GameOperationData> = (context, renderData) => {
+  if (renderData.data === undefined) { return }
+
+  const { data } = renderData
+  const { targetImage } = data.resources!
   const { location } = data.game.target
   const { size } = data.config.target
 
   context.drawImage(targetImage, location.x - size.width / 2, location.y - size.height / 2, size.width, size.height)
 }
 
-export const renderTrajectory: TankGameRenderFunction = (context: CanvasRenderingContext2D, data: RenderPipelineData) => {
+export const renderTrajectory: AnimatedCanvasRenderFunction<GameOperationData> = (context, renderData) => {
+  if (renderData.data === undefined) { return }
+
+  const { data } = renderData
   const { tank, gunBarrel } = data.game
   const { size } = data.config.gunBarrel
   const { environment, trajectory } = data.config
@@ -175,8 +182,11 @@ export const renderTrajectory: TankGameRenderFunction = (context: CanvasRenderin
   context.restore()
 }
 
-export const renderBullet: TankGameRenderFunction = (context: CanvasRenderingContext2D, data: RenderPipelineData) => {
-  const { bulletImage } = data.resources
+export const renderBullet: AnimatedCanvasRenderFunction<GameOperationData> = (context, renderData) => {
+  if (renderData.data === undefined) { return }
+
+  const { data } = renderData
+  const { bulletImage } = data.resources!
   const { location, velocity } = data.game.bullet
   const { size } = data.config.bullet
   const angle = radiansToDegrees(Math.atan2(velocity.y, velocity.x))
@@ -190,8 +200,11 @@ export const renderBullet: TankGameRenderFunction = (context: CanvasRenderingCon
   context.restore()
 }
 
-export const renderPowerDownControl: TankGameRenderFunction = (context: CanvasRenderingContext2D, data: RenderPipelineData) => {
-  const { arrowImage } = data.resources
+export const renderPowerDownControl: AnimatedCanvasRenderFunction<GameOperationData> = (context, renderData) => {
+  if (renderData.data === undefined) { return }
+
+  const { data } = renderData
+  const { arrowImage } = data.resources!
   const { currentCommand } = data.state
   const { powerDown } = data.game.controls
   const { powerDown: config, size, activeOpacity, inactiveOpacity } = data.config.controls
@@ -205,8 +218,11 @@ export const renderPowerDownControl: TankGameRenderFunction = (context: CanvasRe
   context.restore()
 }
 
-export const renderPowerUpControl: TankGameRenderFunction = (context: CanvasRenderingContext2D, data: RenderPipelineData) => {
-  const { arrowImage } = data.resources
+export const renderPowerUpControl: AnimatedCanvasRenderFunction<GameOperationData> = (context, renderData) => {
+  if (renderData.data === undefined) { return }
+
+  const { data } = renderData
+  const { arrowImage } = data.resources!
   const { currentCommand } = data.state
   const { powerUp } = data.game.controls
   const { powerUp: config, size, activeOpacity, inactiveOpacity } = data.config.controls
@@ -217,8 +233,11 @@ export const renderPowerUpControl: TankGameRenderFunction = (context: CanvasRend
   context.restore()
 }
 
-export const renderAngleDownControl: TankGameRenderFunction = (context: CanvasRenderingContext2D, data: RenderPipelineData) => {
-  const { arrowImage } = data.resources
+export const renderAngleDownControl: AnimatedCanvasRenderFunction<GameOperationData> = (context, renderData) => {
+  if (renderData.data === undefined) { return }
+
+  const { data } = renderData
+  const { arrowImage } = data.resources!
   const { currentCommand } = data.state
   const { angleDown } = data.game.controls
   const { angleDown: config, size, activeOpacity, inactiveOpacity } = data.config.controls
@@ -232,8 +251,11 @@ export const renderAngleDownControl: TankGameRenderFunction = (context: CanvasRe
   context.restore()
 }
 
-export const renderAngleUpControl: TankGameRenderFunction = (context: CanvasRenderingContext2D, data: RenderPipelineData) => {
-  const { arrowImage } = data.resources
+export const renderAngleUpControl: AnimatedCanvasRenderFunction<GameOperationData> = (context, renderData) => {
+  if (renderData.data === undefined) { return }
+
+  const { data } = renderData
+  const { arrowImage } = data.resources!
   const { currentCommand } = data.state
   const { angleUp } = data.game.controls
   const { angleUp: config, size, activeOpacity, inactiveOpacity } = data.config.controls
@@ -247,8 +269,11 @@ export const renderAngleUpControl: TankGameRenderFunction = (context: CanvasRend
   context.restore()
 }
 
-export const renderFireControl: TankGameRenderFunction = (context: CanvasRenderingContext2D, data: RenderPipelineData) => {
-  const { shootImage } = data.resources
+export const renderFireControl: AnimatedCanvasRenderFunction<GameOperationData> = (context, renderData) => {
+  if (renderData.data === undefined) { return }
+
+  const { data } = renderData
+  const { shootImage } = data.resources!
   const { currentCommand } = data.state
   const { fire } = data.game.controls
   const { fire: config, size, activeOpacity, inactiveOpacity } = data.config.controls
@@ -259,8 +284,11 @@ export const renderFireControl: TankGameRenderFunction = (context: CanvasRenderi
   context.restore()
 }
 
-export const renderGunBarrelFireControl: TankGameRenderFunction = (context: CanvasRenderingContext2D, data: RenderPipelineData) => {
-  const { shootImage } = data.resources
+export const renderGunBarrelFireControl: AnimatedCanvasRenderFunction<GameOperationData> = (context, renderData) => {
+  if (renderData.data === undefined) { return }
+
+  const { data } = renderData
+  const { shootImage } = data.resources!
   const { currentCommand } = data.state
   const { gunBarrelFire } = data.game.controls
   const { gunBarrelFire: config, size, activeOpacity, inactiveOpacity } = data.config.controls
@@ -271,8 +299,11 @@ export const renderGunBarrelFireControl: TankGameRenderFunction = (context: Canv
   context.restore()
 }
 
-export const renderRestartControl: TankGameRenderFunction = (context: CanvasRenderingContext2D, data: RenderPipelineData) => {
-  const { restartImage } = data.resources
+export const renderRestartControl: AnimatedCanvasRenderFunction<GameOperationData> = (context, renderData) => {
+  if (renderData.data === undefined) { return }
+
+  const { data } = renderData
+  const { restartImage } = data.resources!
   const { location } = data.game.controls.restart
   const { restart: config, size } = data.config.controls
 
@@ -284,14 +315,17 @@ export const renderRestartControl: TankGameRenderFunction = (context: CanvasRend
   context.restore()
 }
 
-export const renderExplosion: TankGameRenderFunction = (context: CanvasRenderingContext2D, data: RenderPipelineData) => {
-  const { explosionImage } = data.resources
+export const renderExplosion: AnimatedCanvasRenderFunction<GameOperationData> = (context, renderData) => {
+  if (renderData.data === undefined) { return }
+
+  const { data } = renderData
+  const { explosionImage } = data.resources!
   const { location, startFrame } = data.game.explosion
   const { size, duration } = data.config.explosion
 
   context.save()
 
-  const lifeTime = data.state.frame - startFrame
+  const lifeTime = renderData.drawData.frame - startFrame
   const offset: Coordinates = { x: chooseRandom(-3, 3), y: chooseRandom(-3, 3) }
 
   context.globalAlpha = 1.5 - 1.5 * lifeTime / duration
@@ -300,9 +334,13 @@ export const renderExplosion: TankGameRenderFunction = (context: CanvasRendering
   context.restore()
 }
 
-export const renderMessage: TankGameRenderFunction = (context: CanvasRenderingContext2D, data: RenderPipelineData) => {
+export const renderMessage: AnimatedCanvasRenderFunction<GameOperationData> = (context, renderData) => {
+  if (renderData.data === undefined) { return }
+
+  const { data, drawData } = renderData
   const { message } = data.game
-  const { size: gameSize, frame } = data.state
+  const gameSize = { width: drawData.offsetWidth, height: drawData.offsetHeight }
+  const { frame } = renderData.drawData
   const { message: messageConfig } = data.config
   const { hit, miss } = messageConfig
 
@@ -326,8 +364,11 @@ export const renderMessage: TankGameRenderFunction = (context: CanvasRenderingCo
   context.restore()
 }
 
-export const renderGameOver: TankGameRenderFunction = (context: CanvasRenderingContext2D, data: RenderPipelineData) => {
-  const { score, hiScore, frame } = data.state
+export const renderGameOver: AnimatedCanvasRenderFunction<GameOperationData> = (context, renderData) => {
+  if (renderData.data === undefined) { return }
+
+  const { data } = renderData
+  const { frame } = renderData.drawData
   const { startFrame, message: messageDetails, score: scoreDetails, highScore: highScoreDetails, newHighScore } = data.game.gameOver
   const {
     message: messageConfig,
@@ -362,6 +403,6 @@ export const renderGameOver: TankGameRenderFunction = (context: CanvasRenderingC
   context.restore()
 }
 
-export const gameOverFilter: RenderFilterFunction = (context: CanvasRenderingContext2D) => {
+export const gameOverFilter: AnimatedCanvasRenderFilterFunction = (context) => {
   context.globalAlpha = 0.35
 }

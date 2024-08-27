@@ -1,50 +1,126 @@
-import { type ConditionalFunction } from "@/utilities/misc-operations"
-import { type GameOperationData, type RenderPipelineData, Command, Difficulty, State } from "./types"
+import { type GameOperationData, Command, Difficulty, State } from "./types"
 import config from "./data"
+import { type AnimatedCanvasConditionalFunction } from "@ihtnc/use-animated-canvas"
 
-export interface GameConditionalFunction extends ConditionalFunction {
-  (data: GameOperationData): boolean
+export const isClientResize: AnimatedCanvasConditionalFunction<GameOperationData> = (data) => {
+  if (data.data === undefined) { return false }
+  return data.data.client.resize
 }
 
-export const isAimCommand: GameConditionalFunction = (data: GameOperationData) => data.state.currentCommand !== undefined && (data.state.currentCommand !== Command.Fire && data.state.currentCommand !== Command.Restart)
-export const isRestartCommand: GameConditionalFunction = (data: GameOperationData) => data.state.currentCommand !== undefined && data.state.currentCommand === Command.Restart
-export const isFireCommand: GameConditionalFunction = (data: GameOperationData) => data.state.currentCommand !== undefined && data.state.currentCommand === Command.Fire
-
-export const hasBullets: GameConditionalFunction = (data: GameOperationData) => data.game.tank.bullets > 0
-export const isBulletActive: GameConditionalFunction = (data: GameOperationData) => data.game.bullet.active
-export const isBulletInactive: GameConditionalFunction = (data: GameOperationData) => !isBulletActive(data)
-
-export const isTargetHit: GameConditionalFunction = (data: GameOperationData) => data.game.target.isHit
-export const isTargetNotHit: GameConditionalFunction = (data: GameOperationData) => !isTargetHit(data)
-export const isTargetMoving: GameConditionalFunction = (data: GameOperationData) => data.game.target.currentDirection !== undefined
-
-export const difficultyAllowsRepositioningTarget: GameConditionalFunction = (data: GameOperationData) => data.state.difficulty >= Difficulty.RepositionTarget
-export const difficultyAllowsMovingTarget: GameConditionalFunction = (data: GameOperationData) => data.state.difficulty > Difficulty.RepositionTarget
-
-export const isGameReady: GameConditionalFunction = (data: GameOperationData) => data.state.state === State.Ready
-export const isGameTurnComplete: GameConditionalFunction = (data: GameOperationData) => data.state.state === State.TurnComplete
-export const isGameOver: GameConditionalFunction = (data: GameOperationData) => data.state.state === State.GameOver
-
-export const isGameOverScreenActive: GameConditionalFunction = (data: GameOperationData) => data.game.gameOver.active
-export const isGameOverScreenInactive: GameConditionalFunction = (data: GameOperationData) => !isGameOverScreenActive(data)
-
-export const isExplosionActive: GameConditionalFunction = (data: GameOperationData) => data.game.explosion.active
-export const isExplosionAnimationComplete: GameConditionalFunction = (data: GameOperationData) => Math.max(data.state.frame - data.game.explosion.startFrame, 0) >= config.explosion.duration
-
-export const isMessageActive: GameConditionalFunction = (data: GameOperationData) => data.game.message.active
-export const isMessageAnimationComplete: GameConditionalFunction = (data: GameOperationData) => Math.max(data.state.frame - data.game.message.startFrame, 0) >= config.message.duration
-export const isMessageAnimationInProgress: GameConditionalFunction = (data: GameOperationData) => !isMessageAnimationComplete(data)
-
-export interface GameRenderConditionalFunction extends ConditionalFunction {
-  (data: RenderPipelineData): boolean
+export const isAimCommand: AnimatedCanvasConditionalFunction<GameOperationData> = (data) => {
+  if (data.data === undefined) { return false }
+  return data.data.state.currentCommand !== undefined
+    && (data.data.state.currentCommand !== Command.Fire && data.data.state.currentCommand !== Command.Restart)
+}
+export const isRestartCommand: AnimatedCanvasConditionalFunction<GameOperationData> = (data) => {
+  if (data.data === undefined) { return false }
+  return data.data.state.currentCommand !== undefined && data.data.state.currentCommand === Command.Restart
+}
+export const isFireCommand: AnimatedCanvasConditionalFunction<GameOperationData> = (data) => {
+  if (data.data === undefined) { return false }
+  return data.data.state.currentCommand !== undefined && data.data.state.currentCommand === Command.Fire
 }
 
-export const isBulletImageLoaded: GameRenderConditionalFunction = (data: RenderPipelineData) => data.resources.bulletImage.complete
-export const isRankImageLoaded: GameRenderConditionalFunction = (data: RenderPipelineData) => data.resources.rankImage.complete
-export const isTankImageLoaded: GameRenderConditionalFunction = (data: RenderPipelineData) => data.resources.tankImage.complete
-export const isGunBarrelImageLoaded: GameRenderConditionalFunction = (data: RenderPipelineData) => data.resources.gunBarrelImage.complete
-export const isTargetImageLoaded: GameRenderConditionalFunction = (data: RenderPipelineData) => data.resources.targetImage.complete
-export const isArrowImageLoaded: GameRenderConditionalFunction = (data: RenderPipelineData) => data.resources.arrowImage.complete
-export const isShootImageLoaded: GameRenderConditionalFunction = (data: RenderPipelineData) => data.resources.shootImage.complete
-export const isExplosionImageLoaded: GameRenderConditionalFunction = (data: RenderPipelineData) => data.resources.explosionImage.complete
-export const isRestartImageLoaded: GameRenderConditionalFunction = (data: RenderPipelineData) => data.resources.restartImage.complete
+export const hasBullets: AnimatedCanvasConditionalFunction<GameOperationData> = (data) => {
+  if (data.data === undefined) { return false }
+  return data.data.game.tank.bullets > 0
+}
+export const isBulletActive: AnimatedCanvasConditionalFunction<GameOperationData> = (data) => {
+  if (data.data === undefined) { return false }
+  return data.data.game.bullet.active
+}
+
+export const isTargetHit: AnimatedCanvasConditionalFunction<GameOperationData> = (data) => {
+  if (data.data === undefined) { return false }
+  return data.data.game.target.isHit
+}
+export const isTargetMoving: AnimatedCanvasConditionalFunction<GameOperationData> = (data) => {
+  if (data.data === undefined) { return false }
+  return data.data.game.target.currentDirection !== undefined
+}
+
+export const difficultyAllowsRepositioningTarget: AnimatedCanvasConditionalFunction<GameOperationData> = (data) => {
+  if (data.data === undefined) { return false }
+  return data.data.state.difficulty >= Difficulty.RepositionTarget
+}
+export const difficultyAllowsMovingTarget: AnimatedCanvasConditionalFunction<GameOperationData> = (data) => {
+  if (data.data === undefined) { return false }
+  return data.data.state.difficulty > Difficulty.RepositionTarget
+}
+
+export const isGameInitialising: AnimatedCanvasConditionalFunction<GameOperationData> = (data) => {
+  if (data.data === undefined) { return false }
+  return data.data.state.state === State.Initialise
+}
+export const isGameReady: AnimatedCanvasConditionalFunction<GameOperationData> = (data) => {
+  if (data.data === undefined) { return false }
+  return data.data.state.state === State.Ready
+}
+export const isGameTurnComplete: AnimatedCanvasConditionalFunction<GameOperationData> = (data) => {
+  if (data.data === undefined) { return false }
+  return data.data.state.state === State.TurnComplete
+}
+export const isGameOver: AnimatedCanvasConditionalFunction<GameOperationData> = (data) => {
+  if (data.data === undefined) { return false }
+  return data.data.state.state === State.GameOver
+}
+
+export const isGameOverScreenActive: AnimatedCanvasConditionalFunction<GameOperationData> = (data) => {
+  if (data.data === undefined) { return false }
+  return data.data.game.gameOver.active
+}
+
+export const isExplosionActive: AnimatedCanvasConditionalFunction<GameOperationData> = (data) => {
+  if (data.data === undefined) { return false }
+  return data.data.game.explosion.active
+}
+export const isExplosionAnimationComplete: AnimatedCanvasConditionalFunction<GameOperationData> = (data) => {
+  if (data.data === undefined) { return false }
+  return Math.max(data.drawData.frame - data.data.game.explosion.startFrame, 0) >= config.explosion.duration
+}
+
+export const isMessageActive: AnimatedCanvasConditionalFunction<GameOperationData> = (data) => {
+  if (data.data === undefined) { return false }
+  return data.data.game.message.active
+}
+export const isMessageAnimationComplete: AnimatedCanvasConditionalFunction<GameOperationData> = (data) => {
+  if (data.data === undefined) { return false }
+  return Math.max(data.drawData.frame - data.data.game.message.startFrame, 0) >= config.message.duration
+}
+
+export const isBulletImageLoaded: AnimatedCanvasConditionalFunction<GameOperationData> = (data) => {
+  if (data.data === undefined || data.data.resources === null) { return false }
+  return data.data.resources.bulletImage.complete
+}
+export const isRankImageLoaded: AnimatedCanvasConditionalFunction<GameOperationData> = (data) => {
+  if (data.data === undefined || data.data.resources === null) { return false }
+  return data.data.resources.rankImage.complete
+}
+export const isTankImageLoaded: AnimatedCanvasConditionalFunction<GameOperationData> = (data) => {
+  if (data.data === undefined || data.data.resources === null) { return false }
+  return data.data.resources.tankImage.complete
+}
+export const isGunBarrelImageLoaded: AnimatedCanvasConditionalFunction<GameOperationData> = (data) => {
+  if (data.data === undefined || data.data.resources === null) { return false }
+  return data.data.resources.gunBarrelImage.complete
+}
+export const isTargetImageLoaded: AnimatedCanvasConditionalFunction<GameOperationData> = (data) => {
+  if (data.data === undefined || data.data.resources === null) { return false }
+  return data.data.resources.targetImage.complete
+}
+export const isArrowImageLoaded: AnimatedCanvasConditionalFunction<GameOperationData> = (data) => {
+  if (data.data === undefined || data.data.resources === null) { return false }
+  return data.data.resources.arrowImage.complete
+}
+export const isShootImageLoaded: AnimatedCanvasConditionalFunction<GameOperationData> = (data) => {
+  if (data.data === undefined || data.data.resources === null) { return false }
+  return data.data.resources.shootImage.complete
+}
+export const isExplosionImageLoaded: AnimatedCanvasConditionalFunction<GameOperationData> = (data) => {
+  if (data.data === undefined || data.data.resources === null) { return false }
+  return data.data.resources.explosionImage.complete
+}
+export const isRestartImageLoaded: AnimatedCanvasConditionalFunction<GameOperationData> = (data) => {
+  if (data.data === undefined || data.data.resources === null) { return false }
+  return data.data.resources.restartImage.complete
+}
