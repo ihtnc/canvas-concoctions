@@ -189,7 +189,8 @@ const TagVisualiser = ({
     name: "tag",
     placeholder: "Enter tag",
     value: () => tagInput,
-    autoFocus: true
+    autoFocus: true,
+    className: () => "px-1 dark:bg-neutral-700"
   }, {
     type: "button",
     onClickHandler: addHandler,

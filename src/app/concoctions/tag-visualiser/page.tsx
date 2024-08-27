@@ -7,7 +7,7 @@ export const metadata: Metadata = {
 }
 
 const Page = () => {
-  return <TagVisualiser className="border border-black grow" />
+  return <TagVisualiser className="border border-black dark:border-gray-300 grow" />
 }
 
 export default Page

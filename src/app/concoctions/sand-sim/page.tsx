@@ -8,7 +8,7 @@ export const metadata: Metadata = {
 
 const Page = () => {
   return <SandSim
-    className="border border-black grow"
+    className="border border-black dark:border-gray-300 grow"
   />
 }
 
