@@ -261,7 +261,8 @@ export type ResourcesObject = {
 export type ClientObject = {
   resize: boolean,
   input?: string,
-  pointerCoordinates?: Coordinates
+  pointerCoordinates?: Coordinates,
+  click: boolean
 }
 
 export type GameOperationData = {

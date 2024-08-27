@@ -6,6 +6,10 @@ export const isClientResize: AnimatedCanvasConditionalFunction<GameOperationData
   if (data.data === undefined) { return false }
   return data.data.client.resize
 }
+export const isClientClick: AnimatedCanvasConditionalFunction<GameOperationData> = (data) => {
+  if (data.data === undefined) { return false }
+  return data.data.client.click
+}
 
 export const isAimCommand: AnimatedCanvasConditionalFunction<GameOperationData> = (data) => {
   if (data.data === undefined) { return false }

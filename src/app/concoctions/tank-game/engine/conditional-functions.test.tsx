@@ -2,6 +2,7 @@ import {
   type GameObject,
   type GameStateObject,
   type ResourcesObject,
+  type ClientObject,
   Command,
   Difficulty,
   State,
@@ -34,6 +35,8 @@ import {
   isShootImageLoaded,
   isExplosionImageLoaded,
   isRestartImageLoaded,
+  isClientResize,
+  isClientClick,
 } from "./conditional-functions"
 import { type MockInstance, beforeEach, afterEach, describe, expect, test, vi } from "vitest"
 import config from "./data"
@@ -45,6 +48,7 @@ describe("Game Conditional Functions", () => {
   let state: GameStateObject
   let game: GameObject
   let resources: ResourcesObject
+  let client: ClientObject
   let getCompleteMock: MockInstance
 
   beforeEach(() => {
@@ -98,14 +102,45 @@ describe("Game Conditional Functions", () => {
       restartImage: new Image()
     }
 
+    client = {
+      resize: false,
+      click: false
+    }
+
     data = {
-      data: { state, game, resources },
+      data: { state, game, resources, client },
       drawData
     }
   })
 
   afterEach(() => {
     vi.resetAllMocks()
+  })
+
+  describe("isClientResize function", () => {
+    test.each([
+      { isResize: true, expected: true },
+      { isResize: false, expected: false }
+    ])("should return $expected if client.resize is $isResize", ({ isResize, expected }: { isResize: boolean, expected: boolean }) => {
+      client.resize = isResize
+
+      const result = isClientResize(data)
+
+      expect(result).toBe(expected)
+    })
+  })
+
+  describe("isClientClick function", () => {
+    test.each([
+      { isClick: true, expected: true },
+      { isClick: false, expected: false }
+    ])("should return $expected if client.click is $isClick", ({ isClick, expected }: { isClick: boolean, expected: boolean }) => {
+      client.click = isClick
+
+      const result = isClientClick(data)
+
+      expect(result).toBe(expected)
+    })
   })
 
   describe("isAimCommand function", () => {

@@ -11,7 +11,7 @@ import {
 } from "./engine"
 import { type GameStateObject, type GameObject, type ResourcesObject, type GameOperationData, type GetTextSizeFunction, State, Difficulty } from "./engine/types"
 import { type PointerEventHandler, useRef } from "react"
-import { isClientResize, isGameInitialising, isGameOver } from "./engine/conditional-functions"
+import { isClientClick, isClientResize, isGameInitialising, isGameOver } from "./engine/conditional-functions"
 import {
   getCommandFromCoordinate,
   getCommandFromKeyCode,
@@ -34,6 +34,7 @@ const TankGame = ({ className }: TankGameProps) => {
   const resources = useRef<ResourcesObject | null>(null)
   let resize: boolean = false
   let input: string | undefined = undefined
+  let click: boolean = false
   let pointerCoordinates: Coordinates | undefined = undefined
 
   const initialiseData: InitialiseDataHandler<GameOperationData> = (canvas, initData) => {
@@ -155,7 +156,8 @@ const TankGame = ({ className }: TankGameProps) => {
       client: {
         resize: false,
         input: undefined,
-        pointerCoordinates: undefined
+        pointerCoordinates: undefined,
+        click: false
       },
       getTextSize: fn
     }
@@ -177,6 +179,7 @@ const TankGame = ({ className }: TankGameProps) => {
         data.data.client.resize = resize
         data.data.client.input = input
         data.data.client.pointerCoordinates = pointerCoordinates
+        data.data.client.click = click
 
         return data
       },
@@ -195,7 +198,7 @@ const TankGame = ({ className }: TankGameProps) => {
         ...positionStaticObjects()
       ]),
       getCommandFromKeyCode,
-      getCommandFromCoordinate,
+      when(isClientClick, getCommandFromCoordinate),
       when(isGameOver, updateGameOverObjects),
       ...updateGameObjects()
     ],
@@ -215,16 +218,22 @@ const TankGame = ({ className }: TankGameProps) => {
     event.preventDefault()
   }
 
-  const cancelPointerCommand = () => {
-    pointerCoordinates = undefined
-  }
-
   const keyCommand = (event: KeyboardEvent) => {
     input = event.code
     event.preventDefault()
   }
 
-  const pointerCommand: PointerEventHandler<HTMLCanvasElement> = (event) => {
+  const pointerUpHandler: PointerEventHandler<HTMLCanvasElement> = (event) => {
+    click = false
+    event.preventDefault()
+  }
+
+  const pointerDownHandler: PointerEventHandler<HTMLCanvasElement> = (event) => {
+    click = true
+    event.preventDefault()
+  }
+
+  const pointerMoveHandler: PointerEventHandler<HTMLCanvasElement> = (event) => {
     const rect = event.currentTarget.getBoundingClientRect()
     const x = event.clientX - rect.left
     const y = event.clientY - rect.top
@@ -240,12 +249,14 @@ const TankGame = ({ className }: TankGameProps) => {
     <Canvas
       className={className}
       onKeyUp={cancelKeyCommand}
-      onPointerUp={cancelPointerCommand}
-      onPointerEnter={cancelPointerCommand}
-      onPointerOut={cancelPointerCommand}
-      onPointerMove={cancelPointerCommand}
       onKeyDown={keyCommand}
-      onPointerDown={pointerCommand}
+
+      onPointerUp={pointerUpHandler}
+      onPointerDown={pointerDownHandler}
+      onPointerEnter={pointerMoveHandler}
+      onPointerOut={pointerUpHandler}
+      onPointerMove={pointerMoveHandler}
+
       onCanvasResize={resizeHandler}
     />
   </>
