@@ -38,6 +38,7 @@ const NavItem = ({ href, className, title, previewHref, isActive }: NavItemProps
           width='0' height='0'
           ref={refs.setFloating}
           style={floatingStyles}
+          unoptimized={true}
           { ...getFloatingProps()}
         />
       )}

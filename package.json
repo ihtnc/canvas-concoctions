@@ -13,9 +13,9 @@
   },
   "dependencies": {
     "@floating-ui/react": "^0.26.11",
-    "@ihtnc/use-animated-canvas": "^1.0.14",
+    "@ihtnc/use-animated-canvas": "^1.0.15",
     "@vitejs/plugin-react": "^4.2.1",
-    "next": "14.1.4",
+    "next": "^14.2.23",
     "react": "^18",
     "react-dom": "^18",
     "usehooks-ts": "^3.0.2"

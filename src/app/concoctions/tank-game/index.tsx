@@ -133,11 +133,11 @@ const TankGame = ({ className }: TankGameProps) => {
       }
     }
 
-    const hiScore = parseInt(getLocalStorage(config.localStorage.highScoreKey, "0"))
+    const hiScore = Number.parseInt(getLocalStorage(config.localStorage.highScoreKey, "0"))
 
     const state: GameStateObject = {
       difficulty: Difficulty.Normal,
-      hiScore: hiScore,
+      hiScore: Number.isNaN(hiScore) ? 0 : hiScore,
       score: 0,
       totalHits: 0,
       currentCommand: undefined,
@@ -219,18 +219,16 @@ const TankGame = ({ className }: TankGameProps) => {
   }
 
   const keyCommand = (event: KeyboardEvent) => {
-    input = event.code
+    input = event.key
     event.preventDefault()
   }
 
   const pointerUpHandler: PointerEventHandler<HTMLCanvasElement> = (event) => {
     click = false
-    event.preventDefault()
   }
 
   const pointerDownHandler: PointerEventHandler<HTMLCanvasElement> = (event) => {
     click = true
-    event.preventDefault()
   }
 
   const pointerMoveHandler: PointerEventHandler<HTMLCanvasElement> = (event) => {
@@ -248,6 +246,8 @@ const TankGame = ({ className }: TankGameProps) => {
   return <>
     <Canvas
       className={className}
+      style={{ outline: 'none' }}
+      autoFocus={true}
       onKeyUp={cancelKeyCommand}
       onKeyDown={keyCommand}
 
